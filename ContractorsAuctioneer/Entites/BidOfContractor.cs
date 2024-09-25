@@ -1,0 +1,28 @@
+﻿
+
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ContractorsAuctioneer.Entites
+{
+    public class BidOfContractor : BaseAuditableEntity
+    {
+        public int Id { get; set; }
+        public int? SuggestedFee { get; set; }
+        public int ContractorId { get; set; }
+        public Contractor? Contractor { get; set; }
+        public int RequestId { get; set; }
+        public Request? Request { get; set; }
+        public bool? IsAccepted { get; set; }
+        public bool? CanChangeBid { get; set; }
+        public ICollection<BidStatus>? BidStatuses { get; set; }
+        public Project? Project { get; set; }
+
+    }
+}
