@@ -35,7 +35,7 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var applicationUserId = await _authService.RegisterAsync(username, password , role);
-                if (applicationUserId == 0)
+                if (applicationUserId.Data.RegisteredUserId == 0)
                 {
                     return false;
                 }
@@ -49,7 +49,7 @@ namespace ContractorsAuctioneer.Services
                     IsDeleted = false,
                     DeletedBy = null,
                     DeletedAt = null,
-                    ApplicationUserId = applicationUserId,                   
+                    ApplicationUserId = applicationUserId.Data.RegisteredUserId,                   
                 }, cancellationToken);
                 if (clientId == 0 )
                 {

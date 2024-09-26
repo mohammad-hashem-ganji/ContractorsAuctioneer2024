@@ -1,5 +1,7 @@
 using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+// Authentication&Autherization
+builder.Services.AddScoped<IAuthService, AuthService>();
 #region EfConfiguration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -39,11 +43,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 #region Authentication
 
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]))
     };
 });
 builder.Services.AddAuthorization();
@@ -74,6 +74,8 @@ builder.Services.AddSwaggerGen(optins => {
     optins.OperationFilter<SecurityRequirementsOperationFilter>();
 
 });
+
+
 
 var app = builder.Build();
 

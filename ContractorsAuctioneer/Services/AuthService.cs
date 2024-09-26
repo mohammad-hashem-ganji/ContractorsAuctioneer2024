@@ -1,5 +1,9 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
+using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Results;
+using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,7 +12,7 @@ using System.Text;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
@@ -33,7 +37,7 @@ namespace ContractorsAuctioneer.Services
         //        Description = $"The role '{role}' is invalid."
         //    });
         //}
-        public async Task<int> RegisterAsync(string username, string password, string role)
+        public async Task<Result<RegisterResult>> RegisterAsync(string username, string password, string role)
         {
 
 
@@ -47,7 +51,12 @@ namespace ContractorsAuctioneer.Services
 
             if (!result.Succeeded)
             {
-                return 0;
+                RegisterResult registerResult = new RegisterResult
+                {
+                    IdentityResult = result,
+                    RegisteredUserId = 0
+                };
+                return new Result<RegisterResult>().WithValue(registerResult).Failure("کاربر ساخته نشد !");
             }
             else
             {
@@ -56,27 +65,38 @@ namespace ContractorsAuctioneer.Services
 
                 if (!addToRoleResult.Succeeded)
                 {
-                    return 0;
+                    RegisterResult registerResult = new RegisterResult
+                    {
+                        IdentityResult = result,
+                        RegisteredUserId = 0
+                    };
+                    return new Result<RegisterResult>().WithValue(registerResult).Failure($"  نقش  {role}یافت نشد  ");
                 }
                 else
                 {
                     role = role.ToUpper();
-                    switch (role)
+                    //switch (role)
+                    //{
+                    //    case "CLIENT":
+                    //        user.Client = new Client();
+                    //        break;
+
+                    //    case "CONTRACTOR":
+                    //        user.Contractor = new Contractor();
+                    //        break;
+
+                    //    default:
+                    //        return 0;
+                    //}
+                    //_context.Users.Add(user);
+                    //await _context.SaveChangesAsync();
+                    RegisterResult registerResult = new RegisterResult
                     {
-                        case "CLIENT":
-                            user.Client = new Client();
-                            break;
-
-                        case "CONTRACTOR":
-                            user.Contractor = new Contractor();
-                            break;
-
-                        default:
-                            return 0;
-                    }
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
-                    return user.Id;
+                        IdentityResult = IdentityResult.Success,
+                        RegisteredUserId = user.Id
+                    };
+                    return new Result<RegisterResult>().WithValue(registerResult).Success(SuccessMessages.UserRegistered);
+                    
 
                 }
             }
@@ -100,21 +120,22 @@ namespace ContractorsAuctioneer.Services
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
             var claims = new[]
-{
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime)
-        };
+            {
+               new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+               new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime)
+            };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: _configuration["Jwt:ValidIssuer"],
+                audience: _configuration["Jwt:ValidAudience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: creds);
+                signingCredentials: creds
+                );
 
             //return await Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
             return new JwtSecurityTokenHandler().WriteToken(token);
