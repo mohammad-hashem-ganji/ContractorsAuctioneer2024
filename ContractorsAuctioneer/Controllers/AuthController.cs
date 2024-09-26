@@ -80,7 +80,6 @@ namespace ContractorsAuctioneer.Controllers
         [HttpGet("AutherizeAuthenticatedUsers")]
         public async Task<IActionResult> AutherizeAuthenticatedUsers()
         {
-
             //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
             var user = User.Identity?.IsAuthenticated;
             var users = HttpContext.User.Identity;
