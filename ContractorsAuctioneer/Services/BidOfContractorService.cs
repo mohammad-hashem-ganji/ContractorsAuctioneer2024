@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class BidOfContractorService
+    public class BidOfContractorService : IBidOfContractorService
     {
         //Add bid
         private readonly ApplicationDbContext _context;

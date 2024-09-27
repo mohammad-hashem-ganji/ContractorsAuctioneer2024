@@ -24,6 +24,11 @@ builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 // Region
 builder.Services.AddScoped<IRegionService, RegionService>();
+// Contractor
+builder.Services.AddScoped<IContractorService, ContractorService>();
+// BidOfContractor
+builder.Services.AddScoped<IBidOfContractorService, BidOfContractorService>();
+
 
 #region EfConfiguration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
