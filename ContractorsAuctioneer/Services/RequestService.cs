@@ -23,10 +23,6 @@ namespace ContractorsAuctioneer.Services
             _regionService = regionService;
             _authService = authService;
         }
-
-
-
-
         public async Task<bool> AddAsync(AddRequestDto requestDto, CancellationToken cancellationToken)
         {
             string role = "Client";
@@ -38,8 +34,8 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var applicationUserId = await _authService.RegisterAsync(requestDto.Username, requestDto.Password, role);
-                if (applicationUserId.Data.RegisteredUserId == 0)
+                var applicationUserResult = await _authService.RegisterAsync(requestDto.Username, requestDto.Password, role);
+                if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
                     return false;
                 }
@@ -53,7 +49,7 @@ namespace ContractorsAuctioneer.Services
                     IsDeleted = false,
                     DeletedBy = null,
                     DeletedAt = null,
-                    ApplicationUserId = applicationUserId.Data.RegisteredUserId,                   
+                    ApplicationUserId = applicationUserResult.Data.RegisteredUserId,                   
                 }, cancellationToken);
                 if (clientId == 0 )
                 {
@@ -78,6 +74,7 @@ namespace ContractorsAuctioneer.Services
                 };
                 await _context.Requests.AddAsync(request, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
+                // Add fillAttachment ### here
                 return true;
             }
             catch (Exception)
@@ -156,20 +153,27 @@ namespace ContractorsAuctioneer.Services
                         UpdatedBy = f.UpdatedBy
                     }).ToList()
                 }).ToList();
+                if (requestDtos.Any())
+                {
+                    return new Result<List<RequestDto>>().WithValue(requestDtos).Success("درخواست ها یافت شدند .");
+                }
+                else
+                {
 
-                return new Result<List<RequestDto>>().WithValue(requestDtos);
+                return new Result<List<RequestDto>>().WithValue(requestDtos).Failure("درخواستی وجود ندارد");
+                }
             }
             catch (Exception ex)
             {
                 return new Result<List<RequestDto>>().WithValue(null).Failure(ex.Message);
             }
         }
-        public async Task<Result<RequestDto>> GetByIdAsync(int reqId, CancellationToken cancellationToken)
+        public async Task<Result<RequestDto>> GetByIdAsync(int requestId, CancellationToken cancellationToken)
         {
             try
             {
                 var request = await _context.Requests
-                   .Where(x => x.Id == reqId)
+                   .Where(x => x.Id == requestId)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)

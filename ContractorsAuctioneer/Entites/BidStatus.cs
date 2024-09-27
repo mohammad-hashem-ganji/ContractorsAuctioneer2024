@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ContractorsAuctioneer.Entites
 {
-    public class BidStatus
+    public class BidStatus : BaseAuditableEntity
     {
         public int Id { get; set; }
         public int ContractorBidId { get; set; }

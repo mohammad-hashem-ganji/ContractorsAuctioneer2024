@@ -7,5 +7,8 @@
         public const string RequestsFound = "درخواست یافت نشد";
         public const string RequestStatusAdded = "وضعیت جدید اضافه شد";
         public const string UserRegistered = "کاربر اضافه شد";
+        public const string OperationSuccessful = "پیشنهاد پیمانکار با موفقیت ثبت شد";
+        public const string ContractorAdded = "پیمانکار اضافه شد";
+        public const string CotractorFound = "پیمانکار یافت شد";
     }
 }

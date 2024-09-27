@@ -34,13 +34,14 @@ namespace ContractorsAuctioneer.Services
             }
             
         }
-        public async Task<Result<ClientDto>> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<Result<ClientDto>> GetByIdAsync(int clientId, CancellationToken cancellationToken)
         {
             try
             {
                 var client = await _context.Clients
-                  .Where(x => x.Id == id)
+                  .Where(x => x.Id == clientId)
                   .Include(x => x.Requests)
+                  .Include(x => x.ApplicationUser)
                   .FirstOrDefaultAsync(cancellationToken);
                 if (client is null)
                 {

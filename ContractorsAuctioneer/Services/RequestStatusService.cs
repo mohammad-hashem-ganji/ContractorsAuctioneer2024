@@ -47,11 +47,11 @@ namespace ContractorsAuctioneer.Services
             {
                 RequestStatus? requestStatus = await _context.RequestStatuses
                     .Where(x => x.Id == reqStatusId)
-                    .Include(s => s.Status)
+                    .Include(s => s.Request)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (requestStatus == null)
                 {
-                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.RequestStatusNotFound);
+                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
                 }
                 else
                 {

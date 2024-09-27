@@ -12,8 +12,8 @@ namespace ContractorsAuctioneer.Dtos
         public bool CanChangeOrder { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public ClientDto Client { get; set; }
-        public RegionDto Region { get; set; }
+        public AddClientDto Client { get; set; }
+        public AddRegionDto Region { get; set; }
 
 
     }
