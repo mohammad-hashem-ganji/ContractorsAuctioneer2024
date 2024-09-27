@@ -148,6 +148,34 @@ namespace ContractorsAuctioneer.Controllers
             }
 
         }
+        [HttpPost]
+        [Route(nameof(AcceptBidAsync))]
+        public async Task<IActionResult> AcceptBidAsync(int bidId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var entity = await _bidOfContractorService.GetByIdAsync(bidId, cancellationToken);
+                if (entity.IsSuccessful && entity.Data != null)
+                {
+                    entity.Data.IsAccepted = true;
+                    var result = await _bidOfContractorService.UpdateAsync(entity.Data, cancellationToken);
+                    return NoContent();
+                }
+                return NotFound(bidId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new
+                    {
+                        Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
+                        Details = ex.Message
+                    });
+            }
+        }
+
+
+
         [HttpGet]
         [Route(nameof(GetBidsOfContractorAsync))]
         public async Task<IActionResult> GetBidsOfContractorAsync(int contractorId, CancellationToken cancellationToken)
@@ -164,7 +192,7 @@ namespace ContractorsAuctioneer.Controllers
                     }
                     return NotFound("پیشنهادی یافت نشد .");
                 }
-                return BadRequest("دریافت اطلاعات پیمانکار با شکست مواجه شد");
+                return BadRequest(contracorDto);
             }
             catch (Exception ex)
             {
