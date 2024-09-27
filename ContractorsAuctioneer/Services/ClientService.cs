@@ -1,6 +1,7 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +9,12 @@ using System.Net.NetworkInformation;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class ClientService
+    public class ClientService : IClientService
     {
         private readonly ApplicationDbContext _context;
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public ClientService(ApplicationDbContext context, AuthService authService)
+        public ClientService(ApplicationDbContext context, IAuthService authService)
         {
             _context = context;
             _authService = authService;

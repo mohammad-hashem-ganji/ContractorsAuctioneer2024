@@ -18,6 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Authentication&Autherization
 builder.Services.AddScoped<IAuthService, AuthService>();
+// Request
+builder.Services.AddScoped<IRequestService, RequestService>();
+// Client
+builder.Services.AddScoped<IClientService, ClientService>();
+// Region
+builder.Services.AddScoped<IRegionService, RegionService>();
+
 #region EfConfiguration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

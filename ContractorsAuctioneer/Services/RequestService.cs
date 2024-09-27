@@ -1,6 +1,7 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
@@ -8,14 +9,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class RequestService
+    public class RequestService : IRequestService
     {
         private readonly ApplicationDbContext _context;
-        private readonly ClientService _clientService;
-        private readonly RegionService _regionService;
-        private readonly AuthService _authService;
+        private readonly IClientService _clientService;
+        private readonly IRegionService _regionService;
+        private readonly IAuthService _authService;
 
-        public RequestService(ApplicationDbContext context, ClientService clientService, RegionService regionService, AuthService authService)
+        public RequestService(ApplicationDbContext context, IClientService clientService, IRegionService regionService, IAuthService authService)
         {
             _context = context;
             _clientService = clientService;
@@ -23,9 +24,12 @@ namespace ContractorsAuctioneer.Services
             _authService = authService;
         }
 
+
+
+
         public async Task<bool> AddAsync(AddRequestDto requestDto, CancellationToken cancellationToken)
         {
-            string username = "" , password = "", role = "";
+            string role = "Client";
 
             if (requestDto == null)
             {
@@ -34,7 +38,7 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var applicationUserId = await _authService.RegisterAsync(username, password , role);
+                var applicationUserId = await _authService.RegisterAsync(requestDto.Username, requestDto.Password, role);
                 if (applicationUserId.Data.RegisteredUserId == 0)
                 {
                     return false;

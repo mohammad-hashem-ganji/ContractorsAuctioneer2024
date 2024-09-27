@@ -1,13 +1,14 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class RegionService
+    public class RegionService : IRegionService
     {
         private readonly ApplicationDbContext _context;
 
