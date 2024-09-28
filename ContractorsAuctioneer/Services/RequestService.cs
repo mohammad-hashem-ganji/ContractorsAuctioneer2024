@@ -251,7 +251,7 @@ namespace ContractorsAuctioneer.Services
                 return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        public async Task<Result<RequestDto>> GetRequestOfClient(int clientId, CancellationToken cancellationToken)
+        public async Task<Result<RequestDto>> GetRequestOfClientAsync(int clientId, CancellationToken cancellationToken)
         {
             try
             {
@@ -336,6 +336,41 @@ namespace ContractorsAuctioneer.Services
             {
                 return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
             }
+
+        }
+
+
+        public async Task<Result<RequestDto>> UpdateRequestAsync(RequestDto requestDto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Entites.Request? request = await _context.Requests
+                .Where(x => x.Id == requestDto.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+                if (request is null)
+                {
+                    return new Result<RequestDto>().WithValue(null).Failure(ErrorMessages.RequestNotFound);
+                }
+                request.Title = requestDto.Title;
+                request.RequestNumber = requestDto.RequestNumber;
+                request.RegistrationDate = requestDto.RegistrationDate;
+                request.ConfirmationDate = request.ConfirmationDate;
+                request.Description = requestDto.Description;
+                request.UpdatedAt = requestDto.UpdatedAt;
+                request.UpdatedBy = requestDto.UpdatedBy;
+                _context.Requests.Update(request);
+                await _context.SaveChangesAsync(cancellationToken);
+                return new Result<RequestDto>().WithValue(requestDto).Success("درخواست آپدیت شد");
+            }
+            catch (Exception ex)
+            {
+                return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
+            }
+            
+
+
+
+
 
         }
  

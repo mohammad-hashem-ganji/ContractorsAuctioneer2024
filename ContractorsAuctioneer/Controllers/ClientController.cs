@@ -2,6 +2,7 @@
 using ContractorsAuctioneer.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace ContractorsAuctioneer.Controllers
 {
@@ -11,11 +12,12 @@ namespace ContractorsAuctioneer.Controllers
     {
         private readonly IBidOfContractorService _bidOfContractorService;
         private readonly IProjectService _projectService;
-
-        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService)
+        private readonly IRequestService _requestService;
+        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService)
         {
             _bidOfContractorService = bidOfContractorService;
             _projectService = projectService;
+            _requestService = requestService;
         }
 
         [HttpPost]
@@ -34,6 +36,7 @@ namespace ContractorsAuctioneer.Controllers
                         ContractorBidId = result.Data.Id
                     };
                     var newProject = await _projectService.AddAsync(addProjectDto, cancellationToken);
+                    await _requestService.
                     return NoContent();
                 }
                 return NotFound(entity);
