@@ -59,6 +59,9 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500,ex.Message);
             }
         }
+        //[HttpGet]
+        //[Route(nameof(GetRequestOfClient))]
+
         [HttpGet]
         [Route(nameof(GetAllRequestsAsync))]
         public async Task<IActionResult> GetAllRequestsAsync(CancellationToken cancellationToken)

@@ -22,8 +22,8 @@ namespace ContractorsAuctioneer.Controllers
         }
 
         [HttpPost]
-        [Route(nameof(AddBidAsync))]
-        public async Task<IActionResult> AddBidAsync([FromBody] AddBidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
+        [Route(nameof(AddBid))]
+        public async Task<IActionResult> AddBid([FromBody] AddBidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -45,8 +45,8 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
         [HttpGet]
-        [Route(nameof(GetbidByIdAsync))]
-        public async Task<IActionResult> GetbidByIdAsync(int bidId, CancellationToken cancellationToken)
+        [Route(nameof(GetbidById))]
+        public async Task<IActionResult> GetbidById(int bidId, CancellationToken cancellationToken)
         {
             try
             {
@@ -69,8 +69,8 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
         [HttpGet]
-        [Route(nameof(GetAllBidsAsync))]
-        public async Task<IActionResult> GetAllBidsAsync(CancellationToken cancellationToken)
+        [Route(nameof(GetAllBids))]
+        public async Task<IActionResult> GetAllBids(CancellationToken cancellationToken)
         {
             try
             {
@@ -96,8 +96,8 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
         [HttpPost]
-        [Route(nameof(UpdateBidAsync))]
-        public async Task<IActionResult> UpdateBidAsync([FromBody] BidOfContractorDto bidDto, CancellationToken cancellationToken)
+        [Route(nameof(UpdateBid))]
+        public async Task<IActionResult> UpdateBid([FromBody] BidOfContractorDto bidDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -123,8 +123,8 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
         [HttpPost]
-        [Route(nameof(DeleteBidAsync))]
-        public async Task<IActionResult> DeleteBidAsync(int bidId, CancellationToken cancellationToken)
+        [Route(nameof(DeleteBid))]
+        public async Task<IActionResult> DeleteBid(int bidId, CancellationToken cancellationToken)
         {
             try
             {
@@ -135,7 +135,7 @@ namespace ContractorsAuctioneer.Controllers
                     var result = await _bidOfContractorService.UpdateAsync(entity.Data, cancellationToken);
                     return NoContent();
                 }
-                return NotFound(bidId);
+                return NotFound(entity);
             }
             catch (Exception ex)
             {
@@ -148,51 +148,24 @@ namespace ContractorsAuctioneer.Controllers
             }
 
         }
-        [HttpPost]
-        [Route(nameof(AcceptBidAsync))]
-        public async Task<IActionResult> AcceptBidAsync(int bidId, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var entity = await _bidOfContractorService.GetByIdAsync(bidId, cancellationToken);
-                if (entity.IsSuccessful && entity.Data != null)
-                {
-                    entity.Data.IsAccepted = true;
-                    var result = await _bidOfContractorService.UpdateAsync(entity.Data, cancellationToken);
-                    return NoContent();
-                }
-                return NotFound(bidId);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
-                    });
-            }
-        }
-
-
 
         [HttpGet]
-        [Route(nameof(GetBidsOfContractorAsync))]
-        public async Task<IActionResult> GetBidsOfContractorAsync(int contractorId, CancellationToken cancellationToken)
+        [Route(nameof(GetBidsOfContractor))]
+        public async Task<IActionResult> GetBidsOfContractor(int contractorId, CancellationToken cancellationToken)
         {
             try
             {
-                var contracorDto = await _contractorService.GetByIdAsync(contractorId, cancellationToken);
-                if (contracorDto.IsSuccessful)
+                var bidsOfContractor = await _bidOfContractorService.GetBidsOfContractorAsync(contractorId, cancellationToken);
+                if (bidsOfContractor.IsSuccessful)
                 {
-                    var bids = contracorDto.Data.BidOfContractors.ToList();
-                    if (bids.Any())
+                    //var bids = bidsOfContractor.Data;
+                    if (bidsOfContractor.Data.Any())
                     {
-                        return Ok(bids);
+                        return Ok(bidsOfContractor);
                     }
-                    return NotFound("پیشنهادی یافت نشد .");
+                    return NotFound(bidsOfContractor);
                 }
-                return BadRequest(contracorDto);
+                return NotFound(bidsOfContractor);
             }
             catch (Exception ex)
             {

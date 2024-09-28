@@ -95,7 +95,7 @@ namespace ContractorsAuctioneer.Services
                             IsDeleted = b.IsDeleted,
                             UpdatedAt = b.UpdatedAt,
                             UpdatedBy = b.UpdatedBy
-                        }).ToList()
+                        }).SingleOrDefault()
                     };
                     return new Result<BidOfContractorDto>().WithValue(bidOfContractorDto).Success("پیشنهاد پیدا شد");
                 }
@@ -138,7 +138,7 @@ namespace ContractorsAuctioneer.Services
                         IsDeleted = b.IsDeleted,
                         UpdatedAt = b.UpdatedAt,
                         UpdatedBy = b.UpdatedBy
-                    }).ToList()
+                    }).SingleOrDefault()
 
                 }).ToList();
                 if (bidsOfContractorDto.Any())
@@ -181,6 +181,54 @@ namespace ContractorsAuctioneer.Services
             {
                 return new Result<BidOfContractorDto>().WithValue(null).Failure(ex.Message);
             }
+        }
+        public async Task<Result<List<BidOfContractorDto>>> GetBidsOfContractorAsync(int contractorId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _context
+                .BidOfContractors
+                .Where(x => x.ContractorId == contractorId && x.IsDeleted == false)
+                .Select(x => new BidOfContractorDto
+                {
+                    ContractorId = x.ContractorId,
+                    Id = x.Id,
+                    CanChangeBid = x.CanChangeBid,
+                    IsAccepted = x.IsAccepted,
+                    SuggestedFee = x.SuggestedFee,
+                    IsDeleted = x.IsDeleted,
+                    RequestId = x.RequestId,
+                    UpdatedBy = x.UpdatedBy,
+                    UpdatedAt = x.UpdatedAt,
+                    CreatedAt = x.CreatedAt,
+                    CreatedBy = x.CreatedBy,
+                    BidStatuses = x.BidStatuses.Select(b => new BidStatus
+                    {
+                        Id = b.Id,
+                        Status = b.Status,
+                        CreatedAt = b.CreatedAt,
+                        CreatedBy = b.CreatedBy,
+                        DeletedAt = b.DeletedAt,
+                        DeletedBy = b.DeletedBy,
+                        IsDeleted = b.IsDeleted,
+                        UpdatedAt = b.UpdatedAt,
+                        UpdatedBy = b.UpdatedBy
+                    }).SingleOrDefault()
+                }).ToListAsync(cancellationToken);
+                if (result.Any())
+                {
+                    return new Result<List<BidOfContractorDto>>().WithValue(result).Success("پیشنهاد ها یافت شدند .");
+                }
+                else
+                {
+                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("پیشنهادی وجود ندارد");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(ex.Message);
+            }
+            
         }
     }
 }

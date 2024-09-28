@@ -20,6 +20,7 @@ namespace ContractorsAuctioneer.Entites
         public Client? Client { get; set; }
         public int RegionId { get; set; }
         public Region? Region { get; set; }
+        public bool IsTendrOver { get; set; }
         public ICollection<FileAttachment>? FileAttachments { get; set; }
         public ICollection<RequestStatus>? RequestStatuses { get; set; }
         public ICollection<BidOfContractor>? BidOfContractors { get; set; }

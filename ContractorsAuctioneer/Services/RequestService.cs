@@ -1,4 +1,5 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
+using Azure.Core;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
@@ -60,7 +61,7 @@ namespace ContractorsAuctioneer.Services
                     Title = requestDto.Region.Title,
                     ContractorSystemCode = requestDto.Region.ContractorSystemCode,
                 },cancellationToken);
-                var request = new Request
+                var request = new Entites.Request
                 {
                     Title = requestDto.Title,
                     Description = requestDto.Description,
@@ -123,7 +124,7 @@ namespace ContractorsAuctioneer.Services
                         IsDeleted = rs.IsDeleted,
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
-                    }).ToList(),
+                    }).FirstOrDefault(),
                     BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
                     {
                         Id = b.Id,
@@ -212,7 +213,7 @@ namespace ContractorsAuctioneer.Services
                         IsDeleted = rs.IsDeleted,
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
-                    }).ToList(),
+                    }).FirstOrDefault(),
                     BidOfContractors = request.BidOfContractors.Select(b => new BidOfContractorDto
                     {
                         Id = b.Id,
@@ -250,7 +251,93 @@ namespace ContractorsAuctioneer.Services
                 return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
             }
         }
+        public async Task<Result<RequestDto>> GetRequestOfClient(int clientId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _context.Requests
+                   .Where(x => x.ClientId == clientId && x.IsTendrOver == false && x.IsDeleted == false)
+                   .Include(x => x.Client)
+                   .Include(x => x.Region)
+                   .Include(x => x.RequestStatuses)
+                   .Include(x => x.FileAttachments)
+                   .Include(x => x.BidOfContractors)
+                   .Select(x => new RequestDto
+                   {
+                       Id = x.Id,
+                       Title = x.Title,
+                       Description = x.Description,
+                       RegistrationDate = x.RegistrationDate,
+                       ConfirmationDate = x.ConfirmationDate,
+                       CanChangeOrder = x.CanChangeOrder,
+                       ClientId = x.ClientId,
+                       RegionId = x.RegionId,
+                       RequestNumber = x.RequestNumber,
+                       CreatedAt = x.CreatedAt,
+                       CreatedBy = x.CreatedBy,
+                       DeletedAt = x.DeletedAt,
+                       DeletedBy = x.DeletedBy,
+                       IsDeleted = x.IsDeleted,
+                       UpdatedAt = x.UpdatedAt,
+                       UpdatedBy = x.UpdatedBy,
+                       RequestStatuses = x.RequestStatuses.Select(rs => new RequestStatusDto
+                       {
+                           Id = rs.Id,
+                           Status = rs.Status,
+                           CreatedAt = rs.CreatedAt,
+                           CreatedBy = rs.CreatedBy,
+                           DeletedAt = rs.DeletedAt,
+                           DeletedBy = rs.DeletedBy,
+                           IsDeleted = rs.IsDeleted,
+                           UpdatedAt = rs.UpdatedAt,
+                           UpdatedBy = rs.UpdatedBy
+                       }).FirstOrDefault(),
+                       BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
+                       {
+                           Id = b.Id,
+                           SuggestedFee = b.SuggestedFee,
+                           ContractorId = b.ContractorId,
+                           IsAccepted = b.IsAccepted,
+                           CanChangeBid = b.CanChangeBid,
+                           CreatedAt = b.CreatedAt,
+                           CreatedBy = b.CreatedBy,
+                           DeletedAt = b.DeletedAt,
+                           DeletedBy = b.DeletedBy,
+                           IsDeleted = b.IsDeleted,
+                           UpdatedAt = b.UpdatedAt,
+                           UpdatedBy = b.UpdatedBy
+                       }).ToList(),
+                       FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
+                       {
+                           Id = f.Id,
+                           FileName = f.FileName,
+                           FilePath = f.FilePath,
+                           CreatedAt = f.CreatedAt,
+                           CreatedBy = f.CreatedBy,
+                           DeletedAt = f.DeletedAt,
+                           DeletedBy = f.DeletedBy,
+                           IsDeleted = f.IsDeleted,
+                           UpdatedAt = f.UpdatedAt,
+                           UpdatedBy = f.UpdatedBy
+                       }).ToList()
+                   
+                   }).FirstOrDefaultAsync(cancellationToken);
+                if (result is not null)
+                {
+                    return new Result<RequestDto>().WithValue(result).Success("درخواست ها یافت شدند .");
+                }
+                else
+                {
 
+                    return new Result<RequestDto>().WithValue(result).Failure("درخواستی وجود ندارد");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
+            }
+
+        }
  
      
 

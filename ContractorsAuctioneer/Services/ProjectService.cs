@@ -1,13 +1,15 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class ProjectService
+    public class ProjectService : IProjectService
     {
         private readonly ApplicationDbContext _context;
 
@@ -23,7 +25,7 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var project = new Project
+                var project = new Entites.Project
                 {
                     ContractorBidId = addProjectDto.ContractorBidId,
                 };
@@ -36,11 +38,11 @@ namespace ContractorsAuctioneer.Services
                 return new Result<AddProjectDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        public async Task<Result<GetProjectDto>> GetByIdAsync(int projectId , CancellationToken cancellationToken)
+        public async Task<Result<GetProjectDto>> GetByIdAsync(int projectId, CancellationToken cancellationToken)
         {
             try
             {
-                Project? project = await _context.Projects
+                var project = await _context.Projects
                     .Where(x => x.Id == projectId)
                     .Include(x => x.ContractorBid)
                     .Include(x => x.ProjectStatuses)
@@ -67,7 +69,7 @@ namespace ContractorsAuctioneer.Services
                             UpdatedBy = p.UpdatedBy,
                             DeletedAt = p.DeletedAt,
                             DeletedBy = p.DeletedBy,
-                        }).ToList(),
+                        }).FirstOrDefault(),
 
                     };
                     return new Result<GetProjectDto>().WithValue(projectDto).Success("پروژه پیدا شد");
@@ -78,6 +80,94 @@ namespace ContractorsAuctioneer.Services
                 return new Result<GetProjectDto>().WithValue(null).Failure(ex.Message);
             }
         }
+        public async Task<Result<GetProjectDto>> GetProjectOfRequestAsync(int requestId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var bid = await _context.BidOfContractors
+                    .Where(x => x.RequestId == requestId && x.IsAccepted == true)
+                    .Include(b => b.Project)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (bid == null)
+                {
+                    return new Result<GetProjectDto>().WithValue(null).Failure(ErrorMessages.ProjectNotFound);
+                }
+                else
+                {
+                    var projectDto = new GetProjectDto
+                    {
+                        Id = bid.Project.Id,
+                        ContractorBidId = bid.Project.ContractorBidId,
+                        StartedAt = bid.Project.StartedAt,
+                        CompletedAt = bid.Project.CompletedAt,
+                        ProjectStatuses = bid.Project.ProjectStatuses.Select(p => new ProjectStatus
+                        {
+                            Id = p.Id,
+                            Status = p.Status,
+                            CreatedAt = p.CreatedAt,
+                            CreatedBy = p.CreatedBy,
+                            UpdatedAt = p.UpdatedAt,
+                            UpdatedBy = p.UpdatedBy,
+                            DeletedAt = p.DeletedAt,
+                            DeletedBy = p.DeletedBy,
+                        }).FirstOrDefault(),
+
+                    };
+                    return new Result<GetProjectDto>().WithValue(null).Success("پروژه پیدا شد");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Result<GetProjectDto>().WithValue(null).Failure(ex.Message);
+            }
+
+        }
+
+        public async Task<Result<GetProjectDto>> UpdateAsync(GetProjectDto projectDto , CancellationToken cancellationToken)
+        {
+            try
+            {
+                var project = await _context.Projects
+                    .Where(x => x.Id == projectDto.Id)
+                    .Include(x => x.ContractorBid)
+                    .Include(x => x.ProjectStatuses)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (project is null)
+                {
+                    return new Result<GetProjectDto>().WithValue(null).Failure(ErrorMessages.ProjectNotFound);
+                }
+                else
+                {
+                    var newProjectDto = new GetProjectDto
+                    {
+                        Id = project.Id,
+                        ContractorBidId = project.ContractorBidId,
+                        StartedAt = project.StartedAt,
+                        CompletedAt = project.CompletedAt,
+                        ProjectStatuses = project.ProjectStatuses.Select(p => new ProjectStatus
+                        {
+                            Id = p.Id,
+                            Status = p.Status,
+                            CreatedAt = p.CreatedAt,
+                            CreatedBy = p.CreatedBy,
+                            UpdatedAt = p.UpdatedAt,
+                            UpdatedBy = p.UpdatedBy,
+                            DeletedAt = p.DeletedAt,
+                            DeletedBy = p.DeletedBy,
+                        }).FirstOrDefault(),
+
+                    };
+                    return new Result<GetProjectDto>().WithValue(projectDto).Success("پروژه پیدا شد");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new Result<GetProjectDto>().WithValue(null).Failure(ex.Message);
+            }
+        }
+        
+
 
 
 

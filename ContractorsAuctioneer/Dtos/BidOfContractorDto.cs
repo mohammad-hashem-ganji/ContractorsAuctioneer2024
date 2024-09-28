@@ -10,7 +10,7 @@ namespace ContractorsAuctioneer.Dtos
         public int? RequestId { get; set; }
         public bool? IsAccepted { get; set; }
         public bool? CanChangeBid { get; set; }
-        public ICollection<BidStatus>? BidStatuses { get; set; }
+        public BidStatus? BidStatuses { get; set; }
 
     }
 }
