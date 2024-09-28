@@ -108,7 +108,7 @@ namespace ContractorsAuctioneer.Controllers
                 var result = await _bidOfContractorService.UpdateAsync(bidDto, cancellationToken);
                 if (result.IsSuccessful)
                 {
-                    return Ok(result);
+                    return NoContent();
                 }
                 return NotFound(result);
             }

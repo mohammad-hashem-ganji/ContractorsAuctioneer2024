@@ -10,10 +10,12 @@ namespace ContractorsAuctioneer.Controllers
     public class RequestController : ControllerBase
     {
         private readonly IRequestService _requestService;
+        private readonly IProjectService _projectService;
 
-        public RequestController(IRequestService requestService)
+        public RequestController(IRequestService requestService, IProjectService projectService)
         {
             _requestService = requestService;
+            _projectService = projectService;
         }
 
         [HttpPost]
@@ -59,9 +61,31 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500,ex.Message);
             }
         }
-        //[HttpGet]
-        //[Route(nameof(GetRequestOfClient))]
-
+        [HttpGet]
+        [Route(nameof(OverTender))]
+        public async Task<IActionResult> OverTender(int requestId, bool IsTenderOver, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _requestService.GetByIdAsync(requestId, cancellationToken);
+                if (!result.IsSuccessful)
+                {
+                    return NotFound(result);
+                }
+                result.Data.IsTenderOver = IsTenderOver;
+                var updateResult = await _requestService.UpdateAsync(result.Data, cancellationToken);
+                if (!updateResult.IsSuccessful)
+                {
+                    return BadRequest(updateResult);
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            
+        }
         [HttpGet]
         [Route(nameof(GetAllRequestsAsync))]
         public async Task<IActionResult> GetAllRequestsAsync(CancellationToken cancellationToken)

@@ -338,9 +338,7 @@ namespace ContractorsAuctioneer.Services
             }
 
         }
-
-
-        public async Task<Result<RequestDto>> UpdateRequestAsync(RequestDto requestDto, CancellationToken cancellationToken)
+        public async Task<Result<RequestDto>> UpdateAsync(RequestDto requestDto, CancellationToken cancellationToken)
         {
             try
             {

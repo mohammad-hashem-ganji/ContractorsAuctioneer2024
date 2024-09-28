@@ -72,7 +72,33 @@ namespace ContractorsAuctioneer.Services
                 return new Result<RequestStatusDto>().WithValue(null).Failure(ex.Message);
             }
         }
+        public async Task<Result<RequestStatusDto>> updateAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                RequestStatus? requestStatus = await _context.RequestStatuses
+                    .Where(x => x.Id == requestStatusDto.Id)
+                    .Include(s => s.Request)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (requestStatus == null)
+                {
+                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
+                }
+                requestStatus.IsDeleted = requestStatusDto.IsDeleted;
+                requestStatus.DeletedAt = requestStatus.DeletedAt;
+                requestStatus.DeletedBy = requestStatusDto.DeletedBy;
+                requestStatus.RequestId = requestStatusDto.RequestId;
+                requestStatus.Status = requestStatusDto.Status;
+                requestStatus.UpdatedAt = requestStatusDto.UpdatedAt;
+                requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
 
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
 
     }
 }

@@ -31,12 +31,31 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     entity.Data.IsAccepted = true;
                     var result = await _bidOfContractorService.UpdateAsync(entity.Data, cancellationToken);
+                    if (!result.IsSuccessful)
+                    {
+                        return BadRequest(result);
+                    }
                     var addProjectDto = new AddProjectDto
                     {
                         ContractorBidId = result.Data.Id
                     };
                     var newProject = await _projectService.AddAsync(addProjectDto, cancellationToken);
-                    await _requestService.
+                    if (!newProject.IsSuccessful)
+                    {
+                        return BadRequest(newProject);
+                    }
+
+                    var request = await _requestService.GetByIdAsync(result.Data.RequestId, cancellationToken);
+                    if (!request.IsSuccessful)
+                    {
+                        return BadRequest(request);
+                    }
+                    request.Data.IsTenderOver = true;
+                    var requestResult = await _requestService.UpdateAsync(request.Data, cancellationToken);
+                    if (!requestResult.IsSuccessful)
+                    {
+                        return BadRequest(requestResult);
+                    }
                     return NoContent();
                 }
                 return NotFound(entity);
@@ -51,5 +70,8 @@ namespace ContractorsAuctioneer.Controllers
                     });
             }
         }
+
+
+            
     }
 }

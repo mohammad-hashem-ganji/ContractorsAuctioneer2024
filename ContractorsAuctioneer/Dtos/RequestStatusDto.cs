@@ -7,7 +7,7 @@ namespace ContractorsAuctioneer.Dtos
         public int Id { get; set; }
         public int RequestId { get; set; }
         public RequestStatusEnum? Status { get; set; }
-        public ICollection<RequestStatusHistoryDto>? RequestStatusHistories { get; set; }
+        //public ICollection<RequestStatusHistoryDto>? RequestStatusHistories { get; set; }
 
     }
 }
