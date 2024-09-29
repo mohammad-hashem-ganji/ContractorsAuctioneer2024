@@ -54,8 +54,10 @@ namespace ContractorsAuctioneer.Services
                 RegisterResult registerResult = new RegisterResult
                 {
                     IdentityResult = result,
-                    RegisteredUserId = 0
+                    RegisteredUserId = 0,
+                    IdentityError = result.Errors.ToList()
                 };
+                var a = 0;
                 return new Result<RegisterResult>().WithValue(registerResult).Failure("کاربر ساخته نشد !");
             }
             else

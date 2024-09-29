@@ -48,23 +48,6 @@ namespace ContractorsAuctioneer.Services
                         Id = region.Id,
                         Title = region.Title,
                         ContractorSystemCode = region.ContractorSystemCode,
-                        Requests = region.Requests.Select(rs => new RequestDto
-                        {
-                            Id = rs.Id,
-                            Title = rs.Title,
-                            ConfirmationDate = rs.ConfirmationDate,
-                            RegistrationDate = rs.RegistrationDate,
-                            CreatedAt = rs.CreatedAt,
-                            CreatedBy = rs.CreatedBy,
-                            Description = rs.Description,
-                            IsDeleted = rs.IsDeleted,
-                            DeletedAt = rs.DeletedAt,
-                            DeletedBy = rs.DeletedBy,
-                            CanChangeOrder = rs.CanChangeOrder,
-                            UpdatedAt = rs.UpdatedAt,
-                            UpdatedBy = rs.UpdatedBy
-
-                        }).ToList(),
                     };
                     return new Result<RegionDto>().WithValue(regionDto).Success(SuccessMessages.Regionfound);
                 }

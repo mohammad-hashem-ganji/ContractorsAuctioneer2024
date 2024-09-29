@@ -10,5 +10,7 @@
         public const string OperationSuccessful = "پیشنهاد پیمانکار با موفقیت ثبت شد";
         public const string ContractorAdded = "پیمانکار اضافه شد";
         public const string CotractorFound = "پیمانکار یافت شد";
+        public const string VerificationCodeFound = "کد وریفای یافت شد .";
+        public const string CodeGeneratedAndSent = "کد شاخته و ارسال شد";
     }
 }

@@ -72,6 +72,8 @@ namespace ContractorsAuctioneer.Services
                     ClientId = clientId,
                     CreatedAt = requestDto.CreatedAt,
                     RequestNumber = requestDto.RequestNumber,
+                    IsTendrOver = false,
+                    IsDeleted = false
                 };
                 await _context.Requests.AddAsync(request, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -117,42 +119,37 @@ namespace ContractorsAuctioneer.Services
                     {
                         Id = rs.Id,
                         Status = rs.Status,
-                        CreatedAt = rs.CreatedAt,
-                        CreatedBy = rs.CreatedBy,
-                        DeletedAt = rs.DeletedAt,
-                        DeletedBy = rs.DeletedBy,
-                        IsDeleted = rs.IsDeleted,
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
                     }).FirstOrDefault(),
-                    BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
-                    {
-                        Id = b.Id,
-                        SuggestedFee = b.SuggestedFee,
-                        ContractorId = b.ContractorId,
-                        IsAccepted = b.IsAccepted,
-                        CanChangeBid = b.CanChangeBid,
-                        CreatedAt = b.CreatedAt,
-                        CreatedBy = b.CreatedBy,
-                        DeletedAt = b.DeletedAt,
-                        DeletedBy = b.DeletedBy,
-                        IsDeleted = b.IsDeleted,
-                        UpdatedAt = b.UpdatedAt,
-                        UpdatedBy = b.UpdatedBy
-                    }).ToList(),
-                    FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
-                    {
-                        Id = f.Id,
-                        FileName = f.FileName,
-                        FilePath = f.FilePath,
-                        CreatedAt = f.CreatedAt,
-                        CreatedBy = f.CreatedBy,
-                        DeletedAt = f.DeletedAt,
-                        DeletedBy = f.DeletedBy,
-                        IsDeleted = f.IsDeleted,
-                        UpdatedAt = f.UpdatedAt,
-                        UpdatedBy = f.UpdatedBy
-                    }).ToList()
+                    //BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
+                    //{
+                    //    Id = b.Id,
+                    //    SuggestedFee = b.SuggestedFee,
+                    //    ContractorId = b.ContractorId,
+                    //    IsAccepted = b.IsAccepted,
+                    //    CanChangeBid = b.CanChangeBid,
+                    //    CreatedAt = b.CreatedAt,
+                    //    CreatedBy = b.CreatedBy,
+                    //    DeletedAt = b.DeletedAt,
+                    //    DeletedBy = b.DeletedBy,
+                    //    IsDeleted = b.IsDeleted,
+                    //    UpdatedAt = b.UpdatedAt,
+                    //    UpdatedBy = b.UpdatedBy
+                    //}).ToList(),
+                    //FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
+                    //{
+                    //    Id = f.Id,
+                    //    FileName = f.FileName,
+                    //    FilePath = f.FilePath,
+                    //    CreatedAt = f.CreatedAt,
+                    //    CreatedBy = f.CreatedBy,
+                    //    DeletedAt = f.DeletedAt,
+                    //    DeletedBy = f.DeletedBy,
+                    //    IsDeleted = f.IsDeleted,
+                    //    UpdatedAt = f.UpdatedAt,
+                    //    UpdatedBy = f.UpdatedBy
+                    //}).ToList()
                 }).ToList();
                 if (requestDtos.Any())
                 {
@@ -206,29 +203,24 @@ namespace ContractorsAuctioneer.Services
                     {
                         Id = rs.Id,
                         Status = rs.Status,
-                        CreatedAt = rs.CreatedAt,
-                        CreatedBy = rs.CreatedBy,
-                        DeletedAt = rs.DeletedAt,
-                        DeletedBy = rs.DeletedBy,
-                        IsDeleted = rs.IsDeleted,
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
                     }).FirstOrDefault(),
-                    BidOfContractors = request.BidOfContractors.Select(b => new BidOfContractorDto
-                    {
-                        Id = b.Id,
-                        SuggestedFee = b.SuggestedFee,
-                        ContractorId = b.ContractorId,
-                        IsAccepted = b.IsAccepted,
-                        CanChangeBid = b.CanChangeBid,
-                        CreatedAt = b.CreatedAt,
-                        CreatedBy = b.CreatedBy,
-                        DeletedAt = b.DeletedAt,
-                        DeletedBy = b.DeletedBy,
-                        IsDeleted = b.IsDeleted,
-                        UpdatedAt = b.UpdatedAt,
-                        UpdatedBy = b.UpdatedBy
-                    }).ToList(),
+                    //BidOfContractors = request.BidOfContractors.Select(b => new BidOfContractorDto
+                    //{
+                    //    Id = b.Id,
+                    //    SuggestedFee = b.SuggestedFee,
+                    //    ContractorId = b.ContractorId,
+                    //    IsAccepted = b.IsAccepted,
+                    //    CanChangeBid = b.CanChangeBid,
+                    //    CreatedAt = b.CreatedAt,
+                    //    CreatedBy = b.CreatedBy,
+                    //    DeletedAt = b.DeletedAt,
+                    //    DeletedBy = b.DeletedBy,
+                    //    IsDeleted = b.IsDeleted,
+                    //    UpdatedAt = b.UpdatedAt,
+                    //    UpdatedBy = b.UpdatedBy
+                    //}).ToList(),
                     FileAttachments = request.FileAttachments.Select(f => new FileAttachmentDto
                     {
                         Id = f.Id,
@@ -284,11 +276,6 @@ namespace ContractorsAuctioneer.Services
                        {
                            Id = rs.Id,
                            Status = rs.Status,
-                           CreatedAt = rs.CreatedAt,
-                           CreatedBy = rs.CreatedBy,
-                           DeletedAt = rs.DeletedAt,
-                           DeletedBy = rs.DeletedBy,
-                           IsDeleted = rs.IsDeleted,
                            UpdatedAt = rs.UpdatedAt,
                            UpdatedBy = rs.UpdatedBy
                        }).FirstOrDefault(),
@@ -298,29 +285,16 @@ namespace ContractorsAuctioneer.Services
                            SuggestedFee = b.SuggestedFee,
                            ContractorId = b.ContractorId,
                            IsAccepted = b.IsAccepted,
-                           CanChangeBid = b.CanChangeBid,
                            CreatedAt = b.CreatedAt,
-                           CreatedBy = b.CreatedBy,
-                           DeletedAt = b.DeletedAt,
-                           DeletedBy = b.DeletedBy,
-                           IsDeleted = b.IsDeleted,
-                           UpdatedAt = b.UpdatedAt,
-                           UpdatedBy = b.UpdatedBy
                        }).ToList(),
                        FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
                        {
                            Id = f.Id,
                            FileName = f.FileName,
                            FilePath = f.FilePath,
-                           CreatedAt = f.CreatedAt,
-                           CreatedBy = f.CreatedBy,
-                           DeletedAt = f.DeletedAt,
-                           DeletedBy = f.DeletedBy,
                            IsDeleted = f.IsDeleted,
-                           UpdatedAt = f.UpdatedAt,
-                           UpdatedBy = f.UpdatedBy
                        }).ToList()
-                   
+
                    }).FirstOrDefaultAsync(cancellationToken);
                 if (result is not null)
                 {

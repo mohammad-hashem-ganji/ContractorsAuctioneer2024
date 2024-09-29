@@ -69,6 +69,7 @@ namespace ContractorsAuctioneer.Controllers
                     UserName = user.UserName,
                     Email = user.Email
                 };
+
                 return Ok(new { Token = token, Result = userProfileDto});
             }
             else
@@ -76,6 +77,7 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "User update failed.");
             }
         }
+        
         [Authorize]
         [HttpGet("AutherizeAuthenticatedUsers")]
         public async Task<IActionResult> AutherizeAuthenticatedUsers()

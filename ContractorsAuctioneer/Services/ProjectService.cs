@@ -63,12 +63,8 @@ namespace ContractorsAuctioneer.Services
                         {
                             Id = p.Id,
                             Status = p.Status,
-                            CreatedAt = p.CreatedAt,
-                            CreatedBy = p.CreatedBy,
                             UpdatedAt = p.UpdatedAt,
                             UpdatedBy = p.UpdatedBy,
-                            DeletedAt = p.DeletedAt,
-                            DeletedBy = p.DeletedBy,
                         }).FirstOrDefault(),
 
                     };
@@ -104,12 +100,8 @@ namespace ContractorsAuctioneer.Services
                         {
                             Id = p.Id,
                             Status = p.Status,
-                            CreatedAt = p.CreatedAt,
-                            CreatedBy = p.CreatedBy,
                             UpdatedAt = p.UpdatedAt,
                             UpdatedBy = p.UpdatedBy,
-                            DeletedAt = p.DeletedAt,
-                            DeletedBy = p.DeletedBy,
                         }).FirstOrDefault(),
 
                     };
@@ -128,7 +120,7 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var project = await _context.Projects
-                    .Where(x => x.Id == projectDto.Id)
+                    .Where(x => x.Id == projectDto.Id && x.IsDeleted == false)
                     .Include(x => x.ContractorBid)
                     .Include(x => x.ProjectStatuses)
                     .FirstOrDefaultAsync(cancellationToken);
@@ -138,26 +130,16 @@ namespace ContractorsAuctioneer.Services
                 }
                 else
                 {
-                    var newProjectDto = new GetProjectDto
-                    {
-                        Id = project.Id,
-                        ContractorBidId = project.ContractorBidId,
-                        StartedAt = project.StartedAt,
-                        CompletedAt = project.CompletedAt,
-                        ProjectStatuses = project.ProjectStatuses.Select(p => new ProjectStatus
-                        {
-                            Id = p.Id,
-                            Status = p.Status,
-                            CreatedAt = p.CreatedAt,
-                            CreatedBy = p.CreatedBy,
-                            UpdatedAt = p.UpdatedAt,
-                            UpdatedBy = p.UpdatedBy,
-                            DeletedAt = p.DeletedAt,
-                            DeletedBy = p.DeletedBy,
-                        }).FirstOrDefault(),
-
-                    };
-                    return new Result<GetProjectDto>().WithValue(projectDto).Success("پروژه پیدا شد");
+                    project.CompletedAt = projectDto.CompletedAt;
+                    project.StartedAt = project.StartedAt;
+                    project.IsDeleted = projectDto.IsDeleted;
+                    project.DeletedBy = projectDto.DeletedBy;
+                    project.DeletedAt = DateTime.Now;
+                    project.UpdatedAt = DateTime.Now;
+                    project.UpdatedBy = projectDto.UpdatedBy;
+                    _context.Projects.Update(project);
+                    await _context.SaveChangesAsync();
+                    return new Result<GetProjectDto>().WithValue(projectDto).Success("پروژه آپدیت شد.");
                 }
 
             }

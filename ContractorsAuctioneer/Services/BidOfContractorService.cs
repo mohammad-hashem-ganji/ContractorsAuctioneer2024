@@ -88,11 +88,6 @@ namespace ContractorsAuctioneer.Services
                         {
                             Id = b.Id,
                             Status = b.Status,
-                            CreatedAt = b.CreatedAt,
-                            CreatedBy = b.CreatedBy,
-                            DeletedAt = b.DeletedAt,
-                            DeletedBy = b.DeletedBy,
-                            IsDeleted = b.IsDeleted,
                             UpdatedAt = b.UpdatedAt,
                             UpdatedBy = b.UpdatedBy
                         }).SingleOrDefault()
@@ -131,11 +126,6 @@ namespace ContractorsAuctioneer.Services
                     {
                         Id = b.Id,
                         Status = b.Status,
-                        CreatedAt = b.CreatedAt,
-                        CreatedBy = b.CreatedBy,
-                        DeletedAt = b.DeletedAt,
-                        DeletedBy = b.DeletedBy,
-                        IsDeleted = b.IsDeleted,
                         UpdatedAt = b.UpdatedAt,
                         UpdatedBy = b.UpdatedBy
                     }).SingleOrDefault()
@@ -161,7 +151,7 @@ namespace ContractorsAuctioneer.Services
             {
 
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
-                  .Where(x => x.Id == bidOfContractorDto.Id)
+                  .Where(x => x.Id == bidOfContractorDto.Id && x.IsDeleted == false)
                   .FirstOrDefaultAsync(cancellationToken);
                 if (bidOfContractor is null)
                 {

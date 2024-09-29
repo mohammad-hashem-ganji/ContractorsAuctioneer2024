@@ -30,6 +30,7 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
             modelBuilder.ApplyConfiguration(new ContractorConfiguration());
             modelBuilder.ApplyConfiguration(new ClientConfiguration());
             modelBuilder.ApplyConfiguration(new FileAttachmentConfiguration());
+            modelBuilder.ApplyConfiguration(new VerificationCodeConfiguration());
             base.OnModelCreating(modelBuilder);
             List<IdentityRole<int>> roles = new List<IdentityRole<int>>
             {
@@ -68,6 +69,7 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         public DbSet<ProjectStatus> ProjectStatuses { get; set; }
         public DbSet<ProjectStatusHistory> ProjectStatusHistories { get; set; }
         public DbSet<FileAttachment> FileAttachments { get; set; }
+        public DbSet<VerificationCode> VerificationCodes { get; set; }
     }
 
 }

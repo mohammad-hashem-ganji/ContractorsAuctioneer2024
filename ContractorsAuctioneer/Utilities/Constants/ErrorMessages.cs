@@ -9,6 +9,7 @@
         public const string BidOfContractorNotFound = "پیشنهاد پیمانکار یافت نشد";
         public const string BidIsDeleted = "پینهاد قبلا حذف شده است";
         public const string ProjectNotFound = "پروژه ای یافت نشد";
+        public const string VerificationCodeNotFound = "کد وریفای یافت نشد";
 
     }
 }

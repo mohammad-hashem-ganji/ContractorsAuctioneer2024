@@ -51,7 +51,9 @@ namespace ContractorsAuctioneer.Services
                     .FirstOrDefaultAsync(cancellationToken);
                 if (requestStatus == null)
                 {
-                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
+                    return new Result<RequestStatusDto>()
+                        .WithValue(null)
+                        .Failure(ErrorMessages.EntityIsNull);
                 }
                 else
                 {
@@ -60,19 +62,22 @@ namespace ContractorsAuctioneer.Services
                         Id = requestStatus.Id,
                         Status = requestStatus.Status,
                         RequestId = requestStatus.RequestId,
-                        CreatedAt = requestStatus.CreatedAt,
-                        CreatedBy = requestStatus.CreatedBy,
-
+                        UpdatedBy = requestStatus.UpdatedBy,
+                        UpdatedAt = requestStatus.UpdatedAt
                     };
-                    return new Result<RequestStatusDto>().WithValue(requestStatusDto);
-                }
+                    return new Result<RequestStatusDto>()
+                        .WithValue(requestStatusDto)
+                        .Success("وضعیت تغییر یافت.");
+                }   
             }
             catch (Exception ex)
             {
-                return new Result<RequestStatusDto>().WithValue(null).Failure(ex.Message);
+                return new Result<RequestStatusDto>()
+                    .WithValue(null)
+                    .Failure(ex.Message);
             }
         }
-        public async Task<Result<RequestStatusDto>> updateAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken)
+        public async Task<Result<RequestStatusDto>> UpdateAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken)
         {
             try
             {
@@ -84,19 +89,17 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
                 }
-                requestStatus.IsDeleted = requestStatusDto.IsDeleted;
-                requestStatus.DeletedAt = requestStatus.DeletedAt;
-                requestStatus.DeletedBy = requestStatusDto.DeletedBy;
                 requestStatus.RequestId = requestStatusDto.RequestId;
                 requestStatus.Status = requestStatusDto.Status;
                 requestStatus.UpdatedAt = requestStatusDto.UpdatedAt;
                 requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
-
+                return new Result<RequestStatusDto>()
+                    .WithValue(requestStatusDto)
+                    .Success($"وضعیت تغییر به {requestStatusDto.Status}تغییر پیدا کرد.");
             }
             catch (Exception ex)
             {
-
-                throw;
+                return new Result<RequestStatusDto>().WithValue(null).Failure(ex.Message);
             }
         }
 

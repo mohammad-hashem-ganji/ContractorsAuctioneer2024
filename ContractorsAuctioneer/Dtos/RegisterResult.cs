@@ -6,5 +6,6 @@ namespace ContractorsAuctioneer.Dtos
     {
         public int RegisteredUserId { get; set; }
         public IdentityResult  IdentityResult { get; set; }
+        public List<IdentityError> IdentityError { get; set; }
     }
 }
