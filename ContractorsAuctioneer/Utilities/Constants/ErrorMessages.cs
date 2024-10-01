@@ -12,6 +12,7 @@
         public const string VerificationCodeNotFound = "کد وریفای یافت نشد";
         public const string InvalidUserNameOrPassword = "نام کاربری یا رمز عبور اشتباه است.";
         public const string LoginFaild = "ورود لغو شد!";
+        public const string LoginHistoryNotFound = "سابقه ورود یافت نشد.";
 
     }
 }

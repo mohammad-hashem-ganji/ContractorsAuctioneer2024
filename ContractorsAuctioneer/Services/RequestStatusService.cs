@@ -33,7 +33,7 @@ namespace ContractorsAuctioneer.Services
                     CreatedAt = requestStatusDto.CreatedAt,
                 };
                 await _context.RequestStatuses.AddAsync(requestStatus, cancellationToken);
-                var trackeNum = await _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 return new Result<RequestStatusDto>().WithValue(requestStatusDto).Success(SuccessMessages.RequestStatusAdded);
             }
             catch (Exception ex)

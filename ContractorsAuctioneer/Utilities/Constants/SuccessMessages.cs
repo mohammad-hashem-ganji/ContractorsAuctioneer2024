@@ -13,5 +13,7 @@
         public const string VerificationCodeFound = "کد وریفای یافت شد .";
         public const string CodeGeneratedAndSent = "کد شاخته و ارسال شد";
         public const string UserLogedin = "کاربر وارد شد.";
+        public const string LoginHistoryAdded = "تاریخچه ورود مرحله اول اضافه شد.";
+        public const string LoginHistoryUpdated = "تاریخچه ورود به‌روزرسانی شد.";
     }
 }
