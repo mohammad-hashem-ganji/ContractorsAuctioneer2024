@@ -8,5 +8,6 @@ namespace ContractorsAuctioneer.Entites
         public Contractor? Contractor { get; set; }
         public Client? Client { get; set; }
         public List<VerificationCode>? VerificationCodes { get; set; }
+        public DateTime? LastLoginTime { get; set; }
     }
 }

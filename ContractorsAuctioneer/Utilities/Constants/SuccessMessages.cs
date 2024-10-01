@@ -12,5 +12,6 @@
         public const string CotractorFound = "پیمانکار یافت شد";
         public const string VerificationCodeFound = "کد وریفای یافت شد .";
         public const string CodeGeneratedAndSent = "کد شاخته و ارسال شد";
+        public const string UserLogedin = "کاربر وارد شد.";
     }
 }

@@ -32,6 +32,9 @@ builder.Services.AddScoped<IBidOfContractorService, BidOfContractorService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 // FileAttachment
 builder.Services.AddScoped<IFileAttachmentService, FileAttachmentService>();
+// (2Fa) VerificationService
+builder.Services.AddTransient<IVerificationService, VerificationService>();
+
 
 
 

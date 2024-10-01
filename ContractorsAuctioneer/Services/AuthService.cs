@@ -4,6 +4,7 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,15 +29,7 @@ namespace ContractorsAuctioneer.Services
             _configuration = configuration;
         }
 
-        //var roleExists = await _roleManager.RoleExistsAsync(role);
-        //if (!roleExists)
-        //{
-        //    return IdentityResult.Failed(new IdentityError
-        //    {
-        //        Code = "InvalidRole",
-        //        Description = $"The role '{role}' is invalid."
-        //    });
-        //}
+    
         public async Task<Result<RegisterResult>> RegisterAsync(string username, string password, string role)
         {
 
@@ -57,8 +50,9 @@ namespace ContractorsAuctioneer.Services
                     RegisteredUserId = 0,
                     IdentityError = result.Errors.ToList()
                 };
-                var a = 0;
-                return new Result<RegisterResult>().WithValue(registerResult).Failure("کاربر ساخته نشد !");
+                return new Result<RegisterResult>()
+                    .WithValue(registerResult)
+                    .Failure("کاربر ساخته نشد !");
             }
             else
             {
@@ -72,62 +66,58 @@ namespace ContractorsAuctioneer.Services
                         IdentityResult = result,
                         RegisteredUserId = 0
                     };
-                    return new Result<RegisterResult>().WithValue(registerResult).Failure($"  نقش  {role}یافت نشد  ");
+                    return new Result<RegisterResult>()
+                        .WithValue(registerResult)
+                        .Failure($"  نقش  {role}یافت نشد  ");
                 }
                 else
                 {
-                    role = role.ToUpper();
-                    //switch (role)
-                    //{
-                    //    case "CLIENT":
-                    //        user.Client = new Client();
-                    //        break;
-
-                    //    case "CONTRACTOR":
-                    //        user.Contractor = new Contractor();
-                    //        break;
-
-                    //    default:
-                    //        return 0;
-                    //}
-                    //_context.Users.Add(user);
-                    //await _context.SaveChangesAsync();
                     RegisterResult registerResult = new RegisterResult
                     {
                         IdentityResult = IdentityResult.Success,
                         RegisteredUserId = user.Id
                     };
-                    return new Result<RegisterResult>().WithValue(registerResult).Success(SuccessMessages.UserRegistered);
-                    
-
+                    return new Result<RegisterResult>()
+                        .WithValue(registerResult)
+                        .Success(SuccessMessages.UserRegistered);
                 }
             }
         }
 
-        public async Task<ApplicationUser> AuthenticateAsync(string username, string password)
+        public async Task<Result<ApplicationUser>> AuthenticateAsync(string username, string password)
         {
             var user = await _userManager.FindByNameAsync(username);
             if (user == null || !await _userManager.CheckPasswordAsync(user, password))
             {
-                return null;
+                return new Result<ApplicationUser>()
+                    .WithValue(null)
+                    .Failure(ErrorMessages.InvalidUserNameOrPassword);
             }
             var login = await _signInManger.PasswordSignInAsync(user.UserName, password, true, false);
-            if (login.Succeeded)
+            if (!login.Succeeded)
             {
-                return user;
+                return new Result<ApplicationUser>()
+                    .WithValue(null)
+                    .Failure(ErrorMessages.LoginFaild);
             }
-            else return null;
+            return new Result<ApplicationUser>()
+                .WithValue(user)
+                .Success(SuccessMessages.UserLogedin);
         }
 
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
-            var claims = new[]
+            var roles = await _userManager.GetRolesAsync(user);
+            var claims = new List<Claim>
             {
                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime)
             };
-
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -138,8 +128,6 @@ namespace ContractorsAuctioneer.Services
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds
                 );
-
-            //return await Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

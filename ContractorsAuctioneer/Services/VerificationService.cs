@@ -1,20 +1,23 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class VerificationService
+    public class VerificationService : IVerificationService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
         private readonly Random _random = new Random();
 
-        public VerificationService(ApplicationDbContext context)
+        public VerificationService(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<Result<GetVerificationCodeDto>> GetLatestCode(int applicationUserId, CancellationToken cancellationToken)
@@ -27,7 +30,9 @@ namespace ContractorsAuctioneer.Services
                            .FirstOrDefaultAsync(cancellationToken);
                 if (verificationCode == null)
                 {
-                    return new Result<GetVerificationCodeDto>().WithValue(null).Failure(ErrorMessages.VerificationCodeNotFound);
+                    return new Result<GetVerificationCodeDto>()
+                        .WithValue(null)
+                        .Failure(ErrorMessages.VerificationCodeNotFound);
                 }
                 var verificationCodeDto = new GetVerificationCodeDto
                 {
@@ -35,11 +40,15 @@ namespace ContractorsAuctioneer.Services
                     ExpiredTime = verificationCode.ExpiredTime,
                     ApplicationUserId = verificationCode.ApplicationUserId
                 };
-                return new Result<GetVerificationCodeDto>().WithValue(verificationCodeDto).Success(SuccessMessages.VerificationCodeFound);
+                return new Result<GetVerificationCodeDto>()
+                    .WithValue(verificationCodeDto)
+                    .Success(SuccessMessages.VerificationCodeFound);
             }
             catch (Exception ex)
             {
-                return new Result<GetVerificationCodeDto>().WithValue(null).Failure(ex.Message);
+                return new Result<GetVerificationCodeDto>()
+                    .WithValue(null)
+                    .Failure(ex.Message);
             }
         }
 
@@ -54,9 +63,11 @@ namespace ContractorsAuctioneer.Services
             };
             await SaveVerificationCodeToDatabase(verificationCode, cancellationToken);
             await SendSmsAsync(phoneNumber, $"Your verification code is {code}");
-            return new Result<string>().WithValue(code).Success(SuccessMessages.CodeGeneratedAndSent);
+            return new Result<string>()
+                .WithValue(code)
+                .Success(SuccessMessages.CodeGeneratedAndSent);
         }
-
+        // generate it as result ###
         private async Task<bool> SaveVerificationCodeToDatabase(AddVerificationCodeDto verificationCode, CancellationToken cancellationToken)
         {
             var newVerificationCode = new VerificationCode
@@ -70,16 +81,25 @@ namespace ContractorsAuctioneer.Services
             await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
-
+        // generate it as result ###
         private async Task SendSmsAsync(string phoneNumber, string message)
         {
-            using (var client = new HttpClient())
+            try
             {
-
-                var content = new StringContent($"{{\"to\":\"{phoneNumber}\",\"message\":\"{message}\"}}"
-                    , System.Text.Encoding.UTF8, "application/json");
-                await client.PostAsync("https://your-sms-api.com/send", content);
+                var sender = _configuration["Kavenegar:Sender"];
+                var apiKey = _configuration["Kavenegar:ApiKey"];
+                var api = new Kavenegar.KavenegarApi(apiKey);
+                api.Send(sender, phoneNumber, message);
+            }
+            catch (Kavenegar.Exceptions.ApiException ex)
+            {
+                throw new InvalidOperationException($"Kavenegar API error: {ex.Message}");
+            }
+            catch (Kavenegar.Exceptions.HttpException ex)
+            {
+                throw new InvalidOperationException($"Kavenegar HTTP error: {ex.Message}");
             }
         }
+
     }
 }
