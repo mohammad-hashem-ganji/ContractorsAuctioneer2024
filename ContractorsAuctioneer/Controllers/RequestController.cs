@@ -35,7 +35,7 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     return Ok();
                 }
-                    return StatusCode(500, "An error occurred while processing your request.");
+                return StatusCode(500, "An error occurred while processing your request.");
             }
             catch (Exception ex)
             {
@@ -54,15 +54,15 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     return Ok(result);
                 }
-                return NotFound(result);        
+                return NotFound(result);
             }
             catch (Exception ex)
             {
                 // Log 
-                return StatusCode(500,ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(OverTender))]
         public async Task<IActionResult> OverTender(int requestId, bool IsTenderOver, CancellationToken cancellationToken)
         {
@@ -85,7 +85,7 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-            
+
         }
         [HttpGet]
         [Route(nameof(GetAllRequestsAsync))]
@@ -115,31 +115,7 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
 
-        [HttpPost]
-        [Route(nameof(RejectingRequest))]
-        public async Task<IActionResult> RejectingRequest(int requestId, bool isAccepted, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var request = await _requestService.GetByIdAsync(requestId, cancellationToken);
-                if (!request.IsSuccessful)
-                {
-                    return NotFound(request);
-                }
-                request.Data.IsAcceptedByClient = false;
-                var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
-                if (!updateRequest.IsSuccessful)
-                {
-                    return BadRequest(updateRequest);
-                }
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-        }
+        
     }
 }

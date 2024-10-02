@@ -93,8 +93,8 @@ namespace ContractorsAuctioneer.Controllers
             return Ok(new { RequiresTwoFactor = true, Message = "2FA code sent to your phone." });
         }
 
-        [HttpPost("VerifyTwoFactorCodeAsync")]
-        public async Task<IActionResult> VerifyTwoFactorCodeAsync(int userId, string code, CancellationToken cancellationToken)
+        [HttpPost("VerifyTwoFactorCode")]
+        public async Task<IActionResult> VerifyTwoFactorCode(int userId, string code, CancellationToken cancellationToken)
         {
             var result = await _verificationService.GetLatestCode(userId, CancellationToken.None);
             if (!result.IsSuccessful || result.Data.ExpiredTime < DateTime.Now)

@@ -16,5 +16,6 @@
         public const string LoginHistoryAdded = "تاریخچه ورود مرحله اول اضافه شد.";
         public const string LoginHistoryUpdated = "تاریخچه ورود به‌روزرسانی شد.";
         public const string FileDetailsUpdated = "فایل آپدیت شد.";
+        public const string RejectedrequestAdded = "درخواست رد شده اضافه شد";
     }
 }

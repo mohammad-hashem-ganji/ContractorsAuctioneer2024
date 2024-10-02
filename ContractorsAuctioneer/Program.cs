@@ -36,6 +36,8 @@ builder.Services.AddScoped<IFileAttachmentService, FileAttachmentService>();
 builder.Services.AddTransient<IVerificationService, VerificationService>();
 // LoginHistory
 builder.Services.AddTransient<ILastLoginHistoryService, LastLoginHistoryService>();
+// RejectedRequest
+builder.Services.AddTransient<IRejectedRequestService, RejectedRequestService>();
 
 
 
