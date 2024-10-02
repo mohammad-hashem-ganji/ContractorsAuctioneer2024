@@ -1,5 +1,6 @@
 ﻿using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,7 +62,7 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500,ex.Message);
             }
         }
-        [HttpGet]
+        [HttpPost]
         [Route(nameof(OverTender))]
         public async Task<IActionResult> OverTender(int requestId, bool IsTenderOver, CancellationToken cancellationToken)
         {
@@ -114,5 +115,31 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
 
+        [HttpPost]
+        [Route(nameof(RejectingRequest))]
+        public async Task<IActionResult> RejectingRequest(int requestId, bool isAccepted, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var request = await _requestService.GetByIdAsync(requestId, cancellationToken);
+                if (!request.IsSuccessful)
+                {
+                    return NotFound(request);
+                }
+                request.Data.IsAcceptedByClient = false;
+                var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
+                if (!updateRequest.IsSuccessful)
+                {
+                    return BadRequest(updateRequest);
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }

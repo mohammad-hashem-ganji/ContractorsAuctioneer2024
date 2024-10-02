@@ -77,7 +77,6 @@ namespace ContractorsAuctioneer.Services
                             IsDeleted = rs.IsDeleted,
                             DeletedAt = rs.DeletedAt,
                             DeletedBy = rs.DeletedBy,
-                            CanChangeOrder = rs.CanChangeOrder,
                             UpdatedAt = rs.UpdatedAt,
                             UpdatedBy = rs.UpdatedBy
 

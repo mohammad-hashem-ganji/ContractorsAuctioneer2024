@@ -99,14 +99,13 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var file = await _context.FileAttachments
-                    .Where(f => f.Id == fileAttachmentDto.Id && f.IsDeleted == false && f.IsAcceptedByClient == false)
+                    .Where(f => f.Id == fileAttachmentDto.Id && f.IsDeleted == false )
                     .Include(f => f.Request)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (file == null)
                 {
                     return new Result<UpdateFileAttachmentDto>().WithValue(null).Failure(ErrorMessages.FileNotFound);
                 }
-                file.IsAcceptedByClient = fileAttachmentDto.IsAcceptedByClient;
                 file.IsDeleted = fileAttachmentDto.IsDeleted;
                 file.UpdatedBy = fileAttachmentDto.UpdatedBy;
                 file.DeletedAt = fileAttachmentDto.DeletedAt;

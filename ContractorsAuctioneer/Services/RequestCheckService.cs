@@ -38,6 +38,7 @@ namespace ContractorsAuctioneer.Services
                     foreach (var request in requests)
                     {
                         request.IsActive = false;
+                        request.IsTenderOver = true;
                     }
 
                     await dbContext.SaveChangesAsync(stoppingToken);
