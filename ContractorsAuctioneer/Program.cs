@@ -45,6 +45,7 @@ builder.Services.AddTransient<ILastLoginHistoryService, LastLoginHistoryService>
 #region EfConfiguration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHostedService<RequestCheckService>();
 #endregion
 
 #region IdentityConfiguration

@@ -16,13 +16,14 @@ namespace ContractorsAuctioneer.Services
         private readonly IClientService _clientService;
         private readonly IRegionService _regionService;
         private readonly IAuthService _authService;
-
-        public RequestService(ApplicationDbContext context, IClientService clientService, IRegionService regionService, IAuthService authService)
+        private readonly IFileAttachmentService _fileAttachmentService;
+        public RequestService(ApplicationDbContext context, IClientService clientService, IRegionService regionService, IAuthService authService, IFileAttachmentService fileAttachmentService)
         {
             _context = context;
             _clientService = clientService;
             _regionService = regionService;
             _authService = authService;
+            _fileAttachmentService = fileAttachmentService;
         }
         public async Task<bool> AddAsync(AddRequestDto requestDto, CancellationToken cancellationToken)
         {
@@ -67,17 +68,27 @@ namespace ContractorsAuctioneer.Services
                     Description = requestDto.Description,
                     RegistrationDate = requestDto.RegistrationDate,
                     ConfirmationDate = requestDto.ConfirmationDate,
-                    CanChangeOrder = requestDto.CanChangeOrder,
+                    IsFileCheckedByClient = false,
+                    IsActive = true,
+                    ExpireAt = DateTime.Now.AddDays(3),
                     RegionId = regionId,
                     ClientId = clientId,
                     CreatedAt = requestDto.CreatedAt,
                     RequestNumber = requestDto.RequestNumber,
-                    IsTendrOver = false,
+                    IsTenderOver = false,
                     IsDeleted = false
                 };
+
+
                 await _context.Requests.AddAsync(request, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 // Add fillAttachment ### here
+                await _fileAttachmentService.AddAsync(new FileUploadDto
+                {
+                    File = requestDto.FileUploadDto.File,
+                    FileAttachmentType = requestDto.FileUploadDto.FileAttachmentType,
+                    RequestId = request.Id,
+                },cancellationToken);
                 return true;
             }
             catch (Exception)
@@ -105,7 +116,6 @@ namespace ContractorsAuctioneer.Services
                     Description = x.Description,
                     RegistrationDate = x.RegistrationDate,
                     ConfirmationDate = x.ConfirmationDate,
-                    CanChangeOrder = x.CanChangeOrder,
                     ClientId = x.ClientId,
                     RegionId = x.RegionId,
                     CreatedAt = x.CreatedAt,
@@ -171,7 +181,8 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var request = await _context.Requests
-                   .Where(x => x.Id == requestId)
+                   .Where(x =>
+                   x.Id == requestId && x.IsTenderOver == false  && x.IsActive == true && x.IsAcceptedByClient == false)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -189,7 +200,6 @@ namespace ContractorsAuctioneer.Services
                     Description = request.Description,
                     RegistrationDate = request.RegistrationDate,
                     ConfirmationDate = request.ConfirmationDate,
-                    CanChangeOrder = request.CanChangeOrder,
                     ClientId = request.ClientId,
                     RegionId = request.RegionId,
                     CreatedAt = request.CreatedAt,
@@ -206,21 +216,6 @@ namespace ContractorsAuctioneer.Services
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
                     }).FirstOrDefault(),
-                    //BidOfContractors = request.BidOfContractors.Select(b => new BidOfContractorDto
-                    //{
-                    //    Id = b.Id,
-                    //    SuggestedFee = b.SuggestedFee,
-                    //    ContractorId = b.ContractorId,
-                    //    IsAccepted = b.IsAccepted,
-                    //    CanChangeBid = b.CanChangeBid,
-                    //    CreatedAt = b.CreatedAt,
-                    //    CreatedBy = b.CreatedBy,
-                    //    DeletedAt = b.DeletedAt,
-                    //    DeletedBy = b.DeletedBy,
-                    //    IsDeleted = b.IsDeleted,
-                    //    UpdatedAt = b.UpdatedAt,
-                    //    UpdatedBy = b.UpdatedBy
-                    //}).ToList(),
                     FileAttachments = request.FileAttachments.Select(f => new FileAttachmentDto
                     {
                         Id = f.Id,
@@ -248,7 +243,8 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var result = await _context.Requests
-                   .Where(x => x.ClientId == clientId && x.IsTendrOver == false && x.IsDeleted == false)
+                   .Where(x => 
+                   x.ClientId == clientId && x.IsTenderOver == false  && x.IsActive == true && x.IsAcceptedByClient == false)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -261,7 +257,10 @@ namespace ContractorsAuctioneer.Services
                        Description = x.Description,
                        RegistrationDate = x.RegistrationDate,
                        ConfirmationDate = x.ConfirmationDate,
-                       CanChangeOrder = x.CanChangeOrder,
+                       IsActive = x.IsActive,
+                       ExpireAt = x.ExpireAt,
+                       IsAcceptedByClient = x.IsAcceptedByClient,
+                       IsTenderOver = x.IsTenderOver,
                        ClientId = x.ClientId,
                        RegionId = x.RegionId,
                        RequestNumber = x.RequestNumber,
@@ -317,7 +316,8 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 Entites.Request? request = await _context.Requests
-                .Where(x => x.Id == requestDto.Id)
+                .Where(x => 
+                x.Id == requestDto.Id && x.IsActive == true && x.IsTenderOver ==false)
                 .FirstOrDefaultAsync(cancellationToken);
                 if (request is null)
                 {
@@ -328,6 +328,9 @@ namespace ContractorsAuctioneer.Services
                 request.RegistrationDate = requestDto.RegistrationDate;
                 request.ConfirmationDate = request.ConfirmationDate;
                 request.Description = requestDto.Description;
+                request.IsAcceptedByClient = requestDto.IsAcceptedByClient;
+                request.IsTenderOver = requestDto.IsTenderOver;
+                request.IsActive = requestDto.IsActive;
                 request.UpdatedAt = requestDto.UpdatedAt;
                 request.UpdatedBy = requestDto.UpdatedBy;
                 _context.Requests.Update(request);
@@ -345,8 +348,7 @@ namespace ContractorsAuctioneer.Services
 
 
         }
- 
-     
+
 
     }
 }

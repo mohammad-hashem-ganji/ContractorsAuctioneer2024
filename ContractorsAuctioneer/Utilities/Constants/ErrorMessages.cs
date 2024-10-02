@@ -13,6 +13,8 @@
         public const string InvalidUserNameOrPassword = "نام کاربری یا رمز عبور اشتباه است.";
         public const string LoginFaild = "ورود لغو شد!";
         public const string LoginHistoryNotFound = "سابقه ورود یافت نشد.";
+        public const string FileNotFound = "فایل مورد نظر پیدا نشد";
+        public const string RequestIsDeleted = "درخواست قبلا حذف شده است.";
 
     }
 }

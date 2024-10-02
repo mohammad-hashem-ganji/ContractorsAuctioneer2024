@@ -148,11 +148,5 @@ namespace ContractorsAuctioneer.Services
                 return new Result<GetProjectDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        
-
-
-
-
-
     }
 }

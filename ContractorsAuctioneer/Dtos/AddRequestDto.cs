@@ -14,6 +14,7 @@ namespace ContractorsAuctioneer.Dtos
         public string Password { get; set; }
         public AddClientDto Client { get; set; }
         public AddRegionDto Region { get; set; }
+        public FileUploadDto FileUploadDto { get; set; }
 
 
     }

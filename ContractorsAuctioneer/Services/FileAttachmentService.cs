@@ -4,6 +4,8 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace ContractorsAuctioneer.Services
 {
@@ -51,7 +53,7 @@ namespace ContractorsAuctioneer.Services
                 }
                 if (model.FileAttachmentType == FileAttachmentType.Other)
                 {
-                    path = Path.Combine(_environment.WebRootPath, "FileAttachments","Others");
+                    path = Path.Combine(_environment.WebRootPath, "FileAttachments", "Others");
                     if (!Directory.Exists(path))
                     {
                         Directory.CreateDirectory(path);
@@ -68,9 +70,11 @@ namespace ContractorsAuctioneer.Services
                 {
                     FileName = model.File.FileName,
                     FilePath = filePath,
-                    RequestId = model.RequestId
+                    RequestId = model.RequestId,
+                    CreatedAt = DateTime.Now,
+                    IsDeleted = false,                   
                 };
-                _context.FileAttachments.Add(fileAttachment);
+                await _context.FileAttachments.AddAsync(fileAttachment, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
 
                 // Return the result
@@ -90,6 +94,32 @@ namespace ContractorsAuctioneer.Services
         }
 
 
+        public async Task<Result<UpdateFileAttachmentDto>> UpdateAsync(UpdateFileAttachmentDto fileAttachmentDto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var file = await _context.FileAttachments
+                    .Where(f => f.Id == fileAttachmentDto.Id && f.IsDeleted == false && f.IsAcceptedByClient == false)
+                    .Include(f => f.Request)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (file == null)
+                {
+                    return new Result<UpdateFileAttachmentDto>().WithValue(null).Failure(ErrorMessages.FileNotFound);
+                }
+                file.IsAcceptedByClient = fileAttachmentDto.IsAcceptedByClient;
+                file.IsDeleted = fileAttachmentDto.IsDeleted;
+                file.UpdatedBy = fileAttachmentDto.UpdatedBy;
+                file.DeletedAt = fileAttachmentDto.DeletedAt;
+                file.DeletedBy = fileAttachmentDto.DeletedBy;
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return new Result<UpdateFileAttachmentDto>().WithValue(fileAttachmentDto).Success(SuccessMessages.FileDetailsUpdated);
+            }
+            catch (Exception ex)
+            {
+                return new Result<UpdateFileAttachmentDto>().WithValue(null).Failure(ex.Message);
+            }
+        }
 
 
 
