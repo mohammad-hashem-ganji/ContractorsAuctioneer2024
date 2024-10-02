@@ -15,6 +15,8 @@
         public const string LoginHistoryNotFound = "سابقه ورود یافت نشد.";
         public const string FileNotFound = "فایل مورد نظر پیدا نشد";
         public const string RequestIsDeleted = "درخواست قبلا حذف شده است.";
+        public const string RequestStatusNotFound = "وضعیت درخواست یافت نشد";
+        public const string ErroWhileRetrievingRequestStatus = "هنگام بازیابی وضعیت درخواست خطایی رخ داد";
 
     }
 }

@@ -8,6 +8,12 @@ namespace ContractorsAuctioneer.Entites
 {
     public enum RequestStatusEnum
     {
-
+        Pending = 0,        // The request is pending and has not been processed yet
+        Approved = 1,       // The request has been approved
+        Rejected = 2,       // The request has been rejected
+        InProgress = 3,     // The request is currently being processed
+        Completed = 4,      // The request has been completed
+        Cancelled = 5,      // The request has been cancelled
+        OnHold = 6         // The request is on hold
     }
 }

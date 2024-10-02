@@ -20,6 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Request
 builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddScoped<IRequestStatusService, RequestStatusService>();
 // Client
 builder.Services.AddScoped<IClientService, ClientService>();
 // Region

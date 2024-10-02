@@ -17,5 +17,6 @@
         public const string LoginHistoryUpdated = "تاریخچه ورود به‌روزرسانی شد.";
         public const string FileDetailsUpdated = "فایل آپدیت شد.";
         public const string RejectedrequestAdded = "درخواست رد شده اضافه شد";
+        public const string RequestStatusFound = "وضعیت درخواست یافت شد";
     }
 }

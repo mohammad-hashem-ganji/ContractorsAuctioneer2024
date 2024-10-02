@@ -15,12 +15,14 @@ namespace ContractorsAuctioneer.Controllers
         private readonly IProjectService _projectService;
         private readonly IRequestService _requestService;
         private readonly IRejectedRequestService _rejectedRequestService;
-        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRejectedRequestService rejectedRequestService)
+        private readonly IRequestStatusService _requestStatusService;
+        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRejectedRequestService rejectedRequestService, IRequestStatusService requestStatusService)
         {
             _bidOfContractorService = bidOfContractorService;
             _projectService = projectService;
             _requestService = requestService;
             _rejectedRequestService = rejectedRequestService;
+            _requestStatusService = requestStatusService;
         }
 
         [HttpPut]
@@ -76,7 +78,24 @@ namespace ContractorsAuctioneer.Controllers
                 var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
                 if (!updateRequest.IsSuccessful) return BadRequest(updateRequest);
                 // update Status of request , The user approved the request
-                return NoContent();
+                //first check if request staus exist or not . then make a choice . in heavy posibility you may 
+                // have to create a new service package
+                // handle if it was two or more recored of the RequestStatus ###
+                var requestStatus = await _requestStatusService.GetRequestStatusByRequestId(requestDto.RequestId, cancellationToken);
+                if (!requestStatus.IsSuccessful)
+                {
+                    var newStatus = new RequestStatusDto
+                    {
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = requestDto.CreatedBy,
+                        RequestId = requestDto.RequestId,
+                        Status = Entites.RequestStatusEnum.Approved
+                    };
+                    var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
+                    if (!newRequestStatus.IsSuccessful) return BadRequest(newRequestStatus);
+                    else return Ok();
+                }
+                return Ok();
             }
             catch (Exception ex)
             {

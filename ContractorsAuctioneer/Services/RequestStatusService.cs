@@ -1,6 +1,7 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
+using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using System.Threading;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class RequestStatusService
+    public class RequestStatusService : IRequestStatusService
     {
         private readonly ApplicationDbContext _context;
 
@@ -102,6 +103,36 @@ namespace ContractorsAuctioneer.Services
                 return new Result<RequestStatusDto>().WithValue(null).Failure(ex.Message);
             }
         }
-
+        public async Task<Result<RequestStatusDto>> GetRequestStatusByRequestId(int requesId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _context.RequestStatuses
+                    .Where(x =>
+                    x.RequestId == requesId && x.IsDeleted == false)
+                    .Include(s => s.Request)
+                    .Include(s => s.RequestStatusHistories)
+                    .Select(r => new RequestStatusDto
+                    {
+                        CreatedAt = r.CreatedAt,
+                        UpdatedAt = r.UpdatedAt,
+                        UpdatedBy = r.UpdatedBy,
+                        RequestId = r.RequestId,
+                        Status = r.Status,
+                    }).FirstOrDefaultAsync(cancellationToken);
+                if (result is null) return new Result<RequestStatusDto>()
+                        .WithValue(null)
+                        .Failure(ErrorMessages.RequestStatusNotFound);
+                else return new Result<RequestStatusDto>()
+                        .WithValue(result)
+                        .Success(SuccessMessages.RequestStatusFound);
+            }
+            catch (Exception)
+            {
+                return new Result<RequestStatusDto>()
+                    .WithValue(null)
+                    .Failure(ErrorMessages.ErroWhileRetrievingRequestStatus);
+            }
+        }
     }
 }
