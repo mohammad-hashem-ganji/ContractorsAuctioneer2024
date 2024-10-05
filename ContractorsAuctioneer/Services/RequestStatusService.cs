@@ -13,10 +13,12 @@ namespace ContractorsAuctioneer.Services
     public class RequestStatusService : IRequestStatusService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IRequestStatusHistoryService _requestStatusHistoryService;
 
-        public RequestStatusService(ApplicationDbContext context)
+        public RequestStatusService(ApplicationDbContext context, IRequestStatusHistoryService requestStatusHistoryService)
         {
             _context = context;
+            _requestStatusHistoryService = requestStatusHistoryService;
         }
         public async Task<Result<RequestStatusDto>> AddAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken)
         {
@@ -35,11 +37,23 @@ namespace ContractorsAuctioneer.Services
                 };
                 await _context.RequestStatuses.AddAsync(requestStatus, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
+                var addRequestStatusHistoryDto = new AddRequestStatusHistoryDto
+                {
+                    Status = requestStatusDto.Status,
+                    RequetStatusId = requestStatus.Id,
+                    CreatedAt = requestStatusDto.CreatedAt,
+                    CreatedBy = requestStatus.CreatedBy
+                };
+             var result = await _requestStatusHistoryService.AddAsync(addRequestStatusHistoryDto, cancellationToken);
+                if (!result.IsSuccessful)
+                {
+                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);
+                }
                 return new Result<RequestStatusDto>().WithValue(requestStatusDto).Success(SuccessMessages.RequestStatusAdded);
             }
             catch (Exception ex)
             {
-                return new Result<RequestStatusDto>().WithValue(null).Failure(ex.Message);
+                return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);         
             }
         }
         public async Task<Result<RequestStatusDto>> GetByIdAsync(int reqStatusId, CancellationToken cancellationToken)
@@ -94,13 +108,17 @@ namespace ContractorsAuctioneer.Services
                 requestStatus.Status = requestStatusDto.Status;
                 requestStatus.UpdatedAt = requestStatusDto.UpdatedAt;
                 requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
+                _context.RequestStatuses.Update(requestStatus);
+                await _context.SaveChangesAsync();
+
                 return new Result<RequestStatusDto>()
                     .WithValue(requestStatusDto)
                     .Success($"وضعیت تغییر به {requestStatusDto.Status}تغییر پیدا کرد.");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return new Result<RequestStatusDto>().WithValue(null).Failure(ex.Message);
+                return new Result<RequestStatusDto>()
+                    .WithValue(null).Failure(ErrorMessages.AnErrorWhileUpdatingStatus);
             }
         }
         public async Task<Result<RequestStatusDto>> GetRequestStatusByRequestId(int requesId, CancellationToken cancellationToken)
@@ -136,3 +154,6 @@ namespace ContractorsAuctioneer.Services
         }
     }
 }
+
+
+

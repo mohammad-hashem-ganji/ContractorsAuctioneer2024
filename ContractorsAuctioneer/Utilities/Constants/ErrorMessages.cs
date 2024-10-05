@@ -17,6 +17,8 @@
         public const string RequestIsDeleted = "درخواست قبلا حذف شده است.";
         public const string RequestStatusNotFound = "وضعیت درخواست یافت نشد";
         public const string ErroWhileRetrievingRequestStatus = "هنگام بازیابی وضعیت درخواست خطایی رخ داد";
-
+        public const string AnErrorWhileUpdatingStatus = "خطایی در هنگام به‌روزرسانی وضعیت رخ داده است!";
+        public const string ErrorWhileAddingRequestStatuHistory = "خطا در هنگام اضافه کردن تاریخچه وضعیت درخواست";
+        public const string ErrorWhileAddingRequestStatus = "خطا در هنگام اضافه کردن وضعیت درخواست!";
     }
 }
