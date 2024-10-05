@@ -30,7 +30,6 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
             modelBuilder.ApplyConfiguration(new ContractorConfiguration());
             modelBuilder.ApplyConfiguration(new ClientConfiguration());
             modelBuilder.ApplyConfiguration(new FileAttachmentConfiguration());
-            modelBuilder.ApplyConfiguration(new VerificationCodeConfiguration());
             modelBuilder.ApplyConfiguration(new LastLoginHistoryConfiguration());
             modelBuilder.ApplyConfiguration(new RejectedRequestConfiguration());
             base.OnModelCreating(modelBuilder);
@@ -71,7 +70,6 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         public DbSet<ProjectStatus> ProjectStatuses { get; set; }
         public DbSet<ProjectStatusHistory> ProjectStatusHistories { get; set; }
         public DbSet<FileAttachment> FileAttachments { get; set; }
-        public DbSet<VerificationCode> VerificationCodes { get; set; }
         public DbSet<LastLoginHistory> LastLoginHistories{ get; set; }
         public DbSet<RejectedRequest> RejectedRequests{ get; set; }
     }

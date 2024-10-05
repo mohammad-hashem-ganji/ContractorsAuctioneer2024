@@ -6,7 +6,6 @@ namespace ContractorsAuctioneer.Entites
     {
         public int Id { get; set; }
         public DateTime? LastLoginTime { get; set; }
-        public DateTime? Last2FaAuthentication { get; set; }
         public int ApplicationUserId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
     }

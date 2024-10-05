@@ -8,6 +8,7 @@ namespace ContractorsAuctioneer.Dtos
         public string Comment { get; set; }
         [Required]
         public int RequestId { get; set; }
+        [Required]
         public bool IsAccepted { get; set; }
     }
 }

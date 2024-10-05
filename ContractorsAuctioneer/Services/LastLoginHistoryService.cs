@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractorsAuctioneer.Services
 {
-    public class LastLoginHistoryService: ILastLoginHistoryService
+    public class LastLoginHistoryService : ILastLoginHistoryService
     {
         private readonly ApplicationDbContext _context;
         public LastLoginHistoryService(ApplicationDbContext context)
@@ -55,7 +55,6 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<UpdateLastLoginHistoryDto>().WithValue(null).Failure(ErrorMessages.LoginHistoryNotFound);
                 }
-                lastLogin.Last2FaAuthentication = lastLoginHistoryDto.Last2FaAuthentication;
                 lastLogin.UpdatedAt = lastLoginHistoryDto.UpdatedAt;
                 lastLogin.UpdatedBy = lastLoginHistoryDto.UpdatedBy;
 

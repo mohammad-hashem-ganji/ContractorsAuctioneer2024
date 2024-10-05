@@ -3,6 +3,7 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -63,8 +64,7 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return Unauthorized();
             }
-            user.Data.LastLoginTime = DateTime.UtcNow;
-            IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user.Data ?? throw new ArgumentNullException(nameof(user.Data)));
+            IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user.Data);
             if (!userUpdateResult.Succeeded)
             {
                 return BadRequest(userUpdateResult.Errors); 
@@ -90,38 +90,18 @@ namespace ContractorsAuctioneer.Controllers
                 LastLoginTime = DateTime.Now
             };
             await _lastLoginHistoryService.AddAsync(lastLogin,cancellationToken);
-            return Ok(new { RequiresTwoFactor = true, Message = "2FA code sent to your phone." });
+            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}" });
         }
 
         [HttpPost("VerifyTwoFactorCode")]
         public async Task<IActionResult> VerifyTwoFactorCode(int userId, string code, CancellationToken cancellationToken)
-        {
-            var result = await _verificationService.GetLatestCode(userId, CancellationToken.None);
-            if (!result.IsSuccessful || result.Data.ExpiredTime < DateTime.Now)
-            {
-                return BadRequest("The code is either invalid or expired.");
-            }
-            if (result.Data.Code != code)
-            {
-                return BadRequest("Invalid verification code.");
-            }
-            var user = await _usermanager.FindByIdAsync(userId.ToString()); // or  parameter result.Data.ApplicationUserId
-            var token = await _authService.GenerateJwtTokenAsync(user ?? throw new ArgumentNullException(nameof(user)));
-            user.Last2FaAuthentication = DateTime.UtcNow;
-            IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user ?? throw new ArgumentNullException(nameof(user)));
-            if (!userUpdateResult.Succeeded)
-            {
-                return BadRequest(userUpdateResult.Errors);
-            }
-            // Update LastLoginHistory
-            UpdateLastLoginHistoryDto lastLogin = new UpdateLastLoginHistoryDto
-            {
-                ApplicationUserId = user.Id,
-                Last2FaAuthentication = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-                UpdatedBy = user.Id
-            };
-            await _lastLoginHistoryService.UpdateAsync(lastLogin, cancellationToken);
+        {          
+            var user = await _usermanager.FindByIdAsync(userId.ToString()); 
+            if (user is null) return BadRequest("کاربر یافت نشد!");
+            var token = await _authService.GenerateJwtTokenAsync(user);
+            if (token is null) return BadRequest("هنگام اجرا مشکلی پیش آمد!");
+            IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user);
+            if (!userUpdateResult.Succeeded) return BadRequest("هنگام اجرا مشکلی پیش آمد!");//(userUpdateResult.Errors);
             var userProfileDto = new UserProfileDto
             {
                 Id = user.Id,

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -52,7 +53,6 @@ builder.Services.AddHostedService<RequestCheckService>();
 #endregion
 
 #region IdentityConfiguration
-
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -64,7 +64,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 })
 .AddRoles<IdentityRole<int>>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddTokenProvider<PhoneNumberTokenProvider<ApplicationUser>>(TokenOptions.DefaultPhoneProvider);
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromMinutes(2);
+});
+
+
 
 #endregion
 
@@ -90,7 +98,8 @@ builder.Services.AddAuthorization();
 #endregion
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(optins => {
+builder.Services.AddSwaggerGen(optins =>
+{
     optins.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Please enter token",

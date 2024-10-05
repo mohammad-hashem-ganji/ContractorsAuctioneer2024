@@ -74,7 +74,7 @@ namespace ContractorsAuctioneer.Controllers
             {
                 var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
                 if (!request.IsSuccessful || request.Data == null) return NotFound(request);
-                request.Data.IsAcceptedByClient = true;
+                if (requestDto.IsAccepted == true) request.Data.IsAcceptedByClient = true;
                 var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
                 if (!updateRequest.IsSuccessful) return BadRequest(updateRequest);
                 // update Status of request , The user approved the request
@@ -86,7 +86,7 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     var newStatus = new RequestStatusDto
                     {
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = DateTime.Now,
                         CreatedBy = requestDto.CreatedBy,
                         RequestId = requestDto.RequestId,
                         Status = Entites.RequestStatusEnum.Approved
@@ -94,6 +94,15 @@ namespace ContractorsAuctioneer.Controllers
                     var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
                     if (!newRequestStatus.IsSuccessful) return BadRequest(newRequestStatus);
                     else return Ok();
+                }
+                else
+                {
+                    requestStatus.Data.UpdatedAt = DateTime.Now;
+                    requestStatus.Data.Status = Entites.RequestStatusEnum.Approved;
+                    var result = await _requestStatusService.UpdateAsync(requestStatus.Data, cancellationToken);
+                    if (!result.IsSuccessful) return BadRequest(result);
+                    else return Ok();
+
                 }
                 return Ok();
             }
