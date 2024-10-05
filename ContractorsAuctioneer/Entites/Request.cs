@@ -28,6 +28,7 @@ namespace ContractorsAuctioneer.Entites
         public ICollection<RequestStatus>? RequestStatuses { get; set; }
         public ICollection<BidOfContractor>? BidOfContractors { get; set; }
         public ICollection<RejectedRequest>? RejectedRequests { get; set; }
+        public ICollection<RequestRejectedByContractor> RequestNotAcceptedByContractors { get; set; }
 
     }
 }

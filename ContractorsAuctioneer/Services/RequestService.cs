@@ -348,7 +348,7 @@ namespace ContractorsAuctioneer.Services
 
 
         }
-
+        
 
     }
 }

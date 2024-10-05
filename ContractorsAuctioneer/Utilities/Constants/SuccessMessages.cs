@@ -19,5 +19,6 @@
         public const string RejectedrequestAdded = "درخواست رد شده اضافه شد";
         public const string RequestStatusFound = "وضعیت درخواست یافت شد";
         public const string RequestStatusHistoryAdded = "تاریخچه وضعیت درخواست اضافه شد";
+        public const string RequestSuccessfullyRejectedByContracotr = "درخواست با موفقیت توسط پیمانکار رد شد";
     }
 }

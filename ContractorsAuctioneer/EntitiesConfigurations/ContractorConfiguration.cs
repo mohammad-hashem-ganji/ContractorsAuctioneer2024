@@ -21,6 +21,10 @@ namespace ContractorsAuctioneer.EntitiesConfigurations
             .WithOne(c => c.Contractor)
             .HasForeignKey<Contractor>(x => x.ApplicationUserId)
             .OnDelete(DeleteBehavior.NoAction);
+            builder.HasMany(c => c.RequestNotAcceptedByContractors)
+                .WithOne(r => r.Contractor)
+                .HasForeignKey(c => c.ContractorId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

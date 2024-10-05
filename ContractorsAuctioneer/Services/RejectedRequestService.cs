@@ -32,6 +32,7 @@ namespace ContractorsAuctioneer.Services
                 };
                 await _context.RejectedRequests.AddAsync(rejectedRequest, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
+                //از اینجا به بعد باید به سامانه مهندسی ارجا داده بشه.
                 return new Result<UpdateRejectedRequestDto>().WithValue(requestDto).Success(SuccessMessages.RejectedrequestAdded);
             }
             catch (Exception ex)

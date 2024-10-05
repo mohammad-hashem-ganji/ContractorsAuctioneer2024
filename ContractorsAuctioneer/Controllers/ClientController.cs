@@ -77,17 +77,13 @@ namespace ContractorsAuctioneer.Controllers
                 if (requestDto.IsAccepted == true) request.Data.IsAcceptedByClient = true;
                 var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
                 if (!updateRequest.IsSuccessful) return BadRequest(updateRequest);
-                // update Status of request , The user approved the request
-                //first check if request staus exist or not . then make a choice . in heavy posibility you may 
-                // have to create a new service package
-                // handle if it was two or more recored of the RequestStatus ###
                 var requestStatus = await _requestStatusService.GetRequestStatusByRequestId(requestDto.RequestId, cancellationToken);
                 if (!requestStatus.IsSuccessful)
                 {
                     var newStatus = new RequestStatusDto
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = requestDto.CreatedBy,
+                        CreatedBy = requestDto.UpdatedBy,
                         RequestId = requestDto.RequestId,
                         Status = Entites.RequestStatusEnum.Approved
                     };
@@ -98,13 +94,12 @@ namespace ContractorsAuctioneer.Controllers
                 else
                 {
                     requestStatus.Data.UpdatedAt = DateTime.Now;
+                    requestStatus.Data.UpdatedBy = requestDto.UpdatedBy;
                     requestStatus.Data.Status = Entites.RequestStatusEnum.Approved;
                     var result = await _requestStatusService.UpdateAsync(requestStatus.Data, cancellationToken);
                     if (!result.IsSuccessful) return BadRequest(result);
                     else return Ok();
-
                 }
-                return Ok();
             }
             catch (Exception ex)
             {
@@ -116,8 +111,6 @@ namespace ContractorsAuctioneer.Controllers
                });
             }
         }
-
-
 
         [HttpPut]
         [Route(nameof(RejectingRequest))]

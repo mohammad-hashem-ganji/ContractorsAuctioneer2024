@@ -20,5 +20,6 @@
         public const string AnErrorWhileUpdatingStatus = "خطایی در هنگام به‌روزرسانی وضعیت رخ داده است!";
         public const string ErrorWhileAddingRequestStatuHistory = "خطا در هنگام اضافه کردن تاریخچه وضعیت درخواست";
         public const string ErrorWhileAddingRequestStatus = "خطا در هنگام اضافه کردن وضعیت درخواست!";
+        public const string ErrorWhileRejectingRequest = "خطا در هنگام رد کردن درخواست";
     }
 }

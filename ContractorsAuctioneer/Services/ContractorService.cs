@@ -13,10 +13,12 @@ namespace ContractorsAuctioneer.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IAuthService _authService;
-        public ContractorService(ApplicationDbContext context, IAuthService authService)
+        
+        public ContractorService(ApplicationDbContext context, IAuthService authService, IRequestRejecteByContractorService requestRejecteByContractorService)
         {
             _context = context;
             _authService = authService;
+            _requestRejecteByContractorService = requestRejecteByContractorService;
         }
         public async Task<Result<AddContractorDto>> AddAsync(AddContractorDto contractorDto, CancellationToken cancellationToken)
         {
@@ -102,6 +104,10 @@ namespace ContractorsAuctioneer.Services
                 return new Result<ContractorDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        
+        public async Task<Result<AddRejectedRequestDto>> RejectRequest(AddRejectedRequestDto rejectedRequestDto, CancellationToken cancellationToken)
+        {
+
+
+        }
     }
 }

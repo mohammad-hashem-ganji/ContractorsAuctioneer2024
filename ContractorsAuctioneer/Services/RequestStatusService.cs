@@ -110,7 +110,18 @@ namespace ContractorsAuctioneer.Services
                 requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
                 _context.RequestStatuses.Update(requestStatus);
                 await _context.SaveChangesAsync();
-
+                var addRequestStatusHistoryDto = new AddRequestStatusHistoryDto
+                {
+                    Status = requestStatusDto.Status,
+                    RequetStatusId = requestStatus.Id,
+                    CreatedAt = requestStatusDto.CreatedAt,
+                    CreatedBy = requestStatus.CreatedBy
+                };
+                var result = await _requestStatusHistoryService.AddAsync(addRequestStatusHistoryDto, cancellationToken);
+                if (!result.IsSuccessful)
+                {
+                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);
+                }
                 return new Result<RequestStatusDto>()
                     .WithValue(requestStatusDto)
                     .Success($"وضعیت تغییر به {requestStatusDto.Status}تغییر پیدا کرد.");

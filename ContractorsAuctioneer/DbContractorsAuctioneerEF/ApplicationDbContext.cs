@@ -72,6 +72,7 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         public DbSet<FileAttachment> FileAttachments { get; set; }
         public DbSet<LastLoginHistory> LastLoginHistories{ get; set; }
         public DbSet<RejectedRequest> RejectedRequests{ get; set; }
+        public DbSet<RequestRejectedByContractor> RequestRejectedByContractors{ get; set; }
     }
 
 }
