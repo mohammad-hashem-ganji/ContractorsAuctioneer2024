@@ -7,6 +7,7 @@
         public const string RequestNotFound = "درخواست مورد نظر یافت نشد";
         public const string EntityIsNull = "موجودیت خالی است";
         public const string BidOfContractorNotFound = "پیشنهاد پیمانکار یافت نشد";
+        public const string ErrorWileAddingBidOfContractor = "خطا در هنگام اضافه کردن پیشنهاد پیمانکار";
         public const string BidIsDeleted = "پینهاد قبلا حذف شده است";
         public const string ProjectNotFound = "پروژه ای یافت نشد";
         public const string VerificationCodeNotFound = "کد وریفای یافت نشد";
@@ -21,5 +22,6 @@
         public const string ErrorWhileAddingRequestStatuHistory = "خطا در هنگام اضافه کردن تاریخچه وضعیت درخواست";
         public const string ErrorWhileAddingRequestStatus = "خطا در هنگام اضافه کردن وضعیت درخواست!";
         public const string ErrorWhileRejectingRequest = "خطا در هنگام رد کردن درخواست";
+        public const string ErrorWhileRetrievingStatus = "خطا در یافتن وضعیت. لطفاً دوباره تلاش کنید";
     }
 }

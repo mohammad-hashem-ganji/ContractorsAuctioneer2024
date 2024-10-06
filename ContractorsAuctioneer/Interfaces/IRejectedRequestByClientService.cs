@@ -3,7 +3,7 @@ using ContractorsAuctioneer.Results;
 
 namespace ContractorsAuctioneer.Interfaces
 {
-    public interface IRejectedRequestService
+    public interface IRejectedRequestByClientService
     {
         Task<Result<UpdateRejectedRequestDto>> AddAsync(UpdateRejectedRequestDto requestDto, CancellationToken cancellationToken);
     }

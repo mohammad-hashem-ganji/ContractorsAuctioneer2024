@@ -16,7 +16,7 @@ namespace ContractorsAuctioneer.Dtos
         public bool IsTenderOver { get; set; }
         public bool IsActive { get; set; }
         public bool IsAcceptedByClient { get; set; }
-        public RequestStatusDto? RequestStatuses { get; set; }
+        public ICollection<RequestStatusDto>? RequestStatuses { get; set; }
         public ICollection<BidOfContractorDto>? BidOfContractors { get; set; }
         public ICollection<FileAttachmentDto>? FileAttachments { get; set; }
 

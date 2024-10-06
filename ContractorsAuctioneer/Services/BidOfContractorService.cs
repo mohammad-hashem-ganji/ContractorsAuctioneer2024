@@ -43,13 +43,8 @@ namespace ContractorsAuctioneer.Services
             }
             catch (Exception ex)
             {
-                return new Result<AddBidOfContractorDto>().WithValue(null).Failure(ex.Message);
+                return new Result<AddBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.ErrorWileAddingBidOfContractor); 
             }
-            // update bid
-            // delete bid 
-            // get all bids
-            // get bid by Id
-            // get bids by contractorId => I mean showing contractor bids
         }
         public async Task<Result<BidOfContractorDto>> GetByIdAsync(int bidId, CancellationToken cancellationToken)
         {
@@ -214,9 +209,9 @@ namespace ContractorsAuctioneer.Services
                     return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("پیشنهادی وجود ندارد");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(ex.Message);
+                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطایی در بازیابی پیشنهادات رخ داده است.");
             }
             
         }

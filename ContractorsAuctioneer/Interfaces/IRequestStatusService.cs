@@ -8,7 +8,7 @@ namespace ContractorsAuctioneer.Interfaces
         Task<Result<RequestStatusDto>> AddAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken);
         Task<Result<RequestStatusDto>> GetByIdAsync(int reqStatusId, CancellationToken cancellationToken);
         Task<Result<RequestStatusDto>> UpdateAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken);
-        Task<Result<RequestStatusDto>> GetRequestStatusByRequestId(int requesId, CancellationToken cancellationToken);
+        Task<Result<List<RequestStatusDto>>> GetRequestStatusesByRequestId(int requesId, CancellationToken cancellationToken);
 
     }
 }

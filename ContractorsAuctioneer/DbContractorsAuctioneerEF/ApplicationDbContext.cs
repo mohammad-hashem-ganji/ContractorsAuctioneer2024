@@ -31,8 +31,11 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
             modelBuilder.ApplyConfiguration(new ClientConfiguration());
             modelBuilder.ApplyConfiguration(new FileAttachmentConfiguration());
             modelBuilder.ApplyConfiguration(new LastLoginHistoryConfiguration());
-            modelBuilder.ApplyConfiguration(new RejectedRequestConfiguration());
+            
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<RequestStatus>().HasQueryFilter(x => x.IsDeleted == false);
+
             List<IdentityRole<int>> roles = new List<IdentityRole<int>>
             {
                 new IdentityRole<int>
@@ -71,7 +74,7 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         public DbSet<ProjectStatusHistory> ProjectStatusHistories { get; set; }
         public DbSet<FileAttachment> FileAttachments { get; set; }
         public DbSet<LastLoginHistory> LastLoginHistories{ get; set; }
-        public DbSet<RejectedRequest> RejectedRequests{ get; set; }
+        
         public DbSet<RequestRejectedByContractor> RequestRejectedByContractors{ get; set; }
     }
 

@@ -10,6 +10,6 @@
         public bool CanChangeOrder { get; set; }
         public int ClientId { get; set; }
         public int RegionId { get; set; }
-
+        public DateTime EpireAt { get; set; }
     }
 }

@@ -14,9 +14,9 @@ namespace ContractorsAuctioneer.Controllers
         private readonly IBidOfContractorService _bidOfContractorService;
         private readonly IProjectService _projectService;
         private readonly IRequestService _requestService;
-        private readonly IRejectedRequestService _rejectedRequestService;
+        private readonly IRejectedRequestByClientService _rejectedRequestService;
         private readonly IRequestStatusService _requestStatusService;
-        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRejectedRequestService rejectedRequestService, IRequestStatusService requestStatusService)
+        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRejectedRequestByClientService rejectedRequestService, IRequestStatusService requestStatusService)
         {
             _bidOfContractorService = bidOfContractorService;
             _projectService = projectService;
@@ -62,7 +62,7 @@ namespace ContractorsAuctioneer.Controllers
                     });
             }
         }
-        [HttpPut]
+        [HttpPost]
         [Route(nameof(AcceptRequest))]
         public async Task<IActionResult> AcceptRequest([FromBody] UpdateRejectedRequestDto requestDto, CancellationToken cancellationToken)
         {
@@ -70,49 +70,27 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
+
+            var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
+            if (!request.IsSuccessful || request.Data == null) return NotFound(request);
+            if (requestDto.IsAccepted == true)
             {
-                var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
-                if (!request.IsSuccessful || request.Data == null) return NotFound(request);
-                if (requestDto.IsAccepted == true) request.Data.IsAcceptedByClient = true;
-                var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
-                if (!updateRequest.IsSuccessful) return BadRequest(updateRequest);
-                var requestStatus = await _requestStatusService.GetRequestStatusByRequestId(requestDto.RequestId, cancellationToken);
-                if (!requestStatus.IsSuccessful)
+                var newStatus = new RequestStatusDto
                 {
-                    var newStatus = new RequestStatusDto
-                    {
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = requestDto.UpdatedBy,
-                        RequestId = requestDto.RequestId,
-                        Status = Entites.RequestStatusEnum.Approved
-                    };
-                    var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
-                    if (!newRequestStatus.IsSuccessful) return BadRequest(newRequestStatus);
-                    else return Ok();
-                }
-                else
-                {
-                    requestStatus.Data.UpdatedAt = DateTime.Now;
-                    requestStatus.Data.UpdatedBy = requestDto.UpdatedBy;
-                    requestStatus.Data.Status = Entites.RequestStatusEnum.Approved;
-                    var result = await _requestStatusService.UpdateAsync(requestStatus.Data, cancellationToken);
-                    if (!result.IsSuccessful) return BadRequest(result);
-                    else return Ok();
-                }
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = requestDto.UpdatedBy,
+                    RequestId = requestDto.RequestId,
+                    Status = Entites.RequestStatusEnum.RequestApprovedByClient
+                };
+
+                var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
+                if (!newRequestStatus.IsSuccessful) return BadRequest(newRequestStatus);
+                return Ok();
             }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-               new
-               {
-                   Message = "An error occurred while retrieving the requests.",
-                   Details = ex.Message
-               });
-            }
+            else return BadRequest("مقادیر ورودی نا معتبر است");
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route(nameof(RejectingRequest))]
         public async Task<IActionResult> RejectingRequest([FromBody] UpdateRejectedRequestDto requestDto, CancellationToken cancellationToken)
         {
@@ -120,26 +98,24 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
+
+            var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
+            if (!request.IsSuccessful || request.Data == null) return NotFound(request);
+            if (requestDto.IsAccepted == false)
             {
-                var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
-                if (!request.IsSuccessful || request.Data == null) return NotFound(request);
-                request.Data.IsAcceptedByClient = false;
-                var updateRequest = await _requestService.UpdateAsync(request.Data, cancellationToken);
-                if (!updateRequest.IsSuccessful) return BadRequest(updateRequest);
-                var result = await _rejectedRequestService.AddAsync(requestDto, cancellationToken);
-                if (!result.IsSuccessful) return BadRequest(result);
-                return NoContent();
+                var newStatus = new RequestStatusDto
+                {
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = requestDto.UpdatedBy,
+                    RequestId = requestDto.RequestId,
+                    Status = Entites.RequestStatusEnum.RequestRejectedByClient
+                };
+                var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
+                if (!newRequestStatus.IsSuccessful) return BadRequest(newRequestStatus);
+                return Ok();
+                //از اینجا به بعد باید به سامانه مهندسی ارجا داده بشه.
             }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-               new
-               {
-                   Message = "An error occurred while retrieving the requests.",
-                   Details = ex.Message
-               });
-            }
+            else return BadRequest("مقادیر ورودی نا معتبر است");
         }
 
 

@@ -12,29 +12,42 @@ namespace ContractorsAuctioneer.Controllers
     [ApiController]
     public class ContractorController : ControllerBase
     {
-        private readonly IContractorService _contractorService;
-        private readonly IRequestService _requestService;
-        private readonly IRequestRejecteByContractorService _requestRejecteByContractorService;
-        public ContractorController(IContractorService contractorService, IRequestService requestService)
+       private readonly IRequestService _requestService;
+        private readonly IRequestStatusService _requestStatusService;
+
+        public ContractorController(IRequestService requestService, IRequestStatusService requestStatusService)
         {
-            _contractorService = contractorService;
             _requestService = requestService;
+            _requestStatusService = requestStatusService;
         }
 
         [HttpPut]
         [Route(nameof(RejectRequest))]
-        public async Task<IActionResult> RejectRequest(AddRejectedRequestDto rejectedRequestDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> RejectRequest(UpdateRejectedRequestDto rejectedRequestDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var resalt = await _requestRejecteByContractorService.AddAsync(rejectedRequestDto, cancellationToken);
-            if (!resalt.IsSuccessful)
+            var request = await _requestService.GetByIdAsync(rejectedRequestDto.RequestId, cancellationToken);
+            if (!request.IsSuccessful)
             {
-                return BadRequest(resalt);
+                return NotFound(request);
             }
-            return BadRequest(resalt);
+            if (rejectedRequestDto.IsAccepted == false)
+            {
+                var newStatus = new RequestStatusDto
+                {
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = rejectedRequestDto.UpdatedBy,
+                    RequestId = rejectedRequestDto.RequestId,
+                    Status = Entites.RequestStatusEnum.RequestApprovedByContractor
+                };
+                var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
+                if (!newRequestStatus.IsSuccessful) return BadRequest(newRequestStatus);
+                return Ok();
+            }
+            else return BadRequest("مقادیر ورودی نا معتبر است");
         }
     }
 }

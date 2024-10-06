@@ -29,44 +29,27 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
+            var result = await _bidOfContractorService.AddAsync(bidOfContractorDto, cancellationToken);
+            if (result.IsSuccessful)
             {
-                var result = await _bidOfContractorService.AddAsync(bidOfContractorDto, cancellationToken);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                return StatusCode(500, result);
+                return Ok(result);
             }
-            catch (Exception ex)
-            {
-
-                return StatusCode(500, ex.Message);
-            }
+            return StatusCode(500, result);
         }
         [HttpGet]
         [Route(nameof(GetbidById))]
         public async Task<IActionResult> GetbidById(int bidId, CancellationToken cancellationToken)
         {
-            try
+            if (bidId <= 0)
             {
-                var result = await _bidOfContractorService.GetByIdAsync(bidId, cancellationToken);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                return NotFound(result);
+                return BadRequest("ورودی نامعتبر");
             }
-            catch (Exception ex)
+            var result = await _bidOfContractorService.GetByIdAsync(bidId, cancellationToken);
+            if (result.IsSuccessful)
             {
-                // Log 
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "An error occurred while retrieving the bid.",
-                        Details = ex.Message
-                    });
+                return Ok(result);
             }
+            return NotFound(result);
         }
         [HttpGet]
         [Route(nameof(GetAllBids))]
@@ -153,29 +136,23 @@ namespace ContractorsAuctioneer.Controllers
         [Route(nameof(GetBidsOfContractor))]
         public async Task<IActionResult> GetBidsOfContractor(int contractorId, CancellationToken cancellationToken)
         {
-            try
+            if (contractorId <= 0)
             {
-                var bidsOfContractor = await _bidOfContractorService.GetBidsOfContractorAsync(contractorId, cancellationToken);
-                if (bidsOfContractor.IsSuccessful)
+                return BadRequest("ورودی نامعتبر");
+            }
+            var bidsOfContractor = await _bidOfContractorService.GetBidsOfContractorAsync(contractorId, cancellationToken);
+            if (bidsOfContractor.IsSuccessful)
+            {
+                //var bids = bidsOfContractor.Data;
+                if (bidsOfContractor.Data.Any())
                 {
-                    //var bids = bidsOfContractor.Data;
-                    if (bidsOfContractor.Data.Any())
-                    {
-                        return Ok(bidsOfContractor);
-                    }
-                    return NotFound(bidsOfContractor);
+                    return Ok(bidsOfContractor);
                 }
                 return NotFound(bidsOfContractor);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
-                    });
-            }
+            return NotFound(bidsOfContractor);
+
+
 
         }
 

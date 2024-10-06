@@ -15,7 +15,7 @@ namespace ContractorsAuctioneer.Entites
         public string? Description { get; set; }
         public DateTime? RegistrationDate { get; set; }
         public DateTime? ConfirmationDate { get; set; }
-        public DateTime ExpireAt { get; set; }
+        public DateTime? ExpireAt { get; set; }
         public bool IsAcceptedByClient { get; set; }
         public int ClientId { get; set; }
         public Client? Client { get; set; }
@@ -27,8 +27,6 @@ namespace ContractorsAuctioneer.Entites
         public ICollection<FileAttachment>? FileAttachments { get; set; }
         public ICollection<RequestStatus>? RequestStatuses { get; set; }
         public ICollection<BidOfContractor>? BidOfContractors { get; set; }
-        public ICollection<RejectedRequest>? RejectedRequests { get; set; }
-        public ICollection<RequestRejectedByContractor> RequestNotAcceptedByContractors { get; set; }
 
     }
 }

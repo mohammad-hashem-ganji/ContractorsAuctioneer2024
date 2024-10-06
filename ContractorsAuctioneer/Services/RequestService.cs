@@ -125,13 +125,15 @@ namespace ContractorsAuctioneer.Services
                     IsDeleted = x.IsDeleted,
                     UpdatedAt = x.UpdatedAt,
                     UpdatedBy = x.UpdatedBy,
-                    RequestStatuses = x.RequestStatuses.Select(rs => new RequestStatusDto
+                    RequestStatuses = x.RequestStatuses
+                    .Where(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient)
+                    .Select(rs => new RequestStatusDto
                     {
                         Id = rs.Id,
                         Status = rs.Status,
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
-                    }).FirstOrDefault(),
+                    }).ToList(),
                     //BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
                     //{
                     //    Id = b.Id,
@@ -182,7 +184,7 @@ namespace ContractorsAuctioneer.Services
             {
                 var request = await _context.Requests
                    .Where(x =>
-                   x.Id == requestId && x.IsTenderOver == false  && x.IsActive == true && x.IsAcceptedByClient == false)
+                   x.Id == requestId && x.IsTenderOver == false  && x.IsActive == true)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -215,7 +217,7 @@ namespace ContractorsAuctioneer.Services
                         Status = rs.Status,
                         UpdatedAt = rs.UpdatedAt,
                         UpdatedBy = rs.UpdatedBy
-                    }).FirstOrDefault(),
+                    }).ToList(),
                     FileAttachments = request.FileAttachments.Select(f => new FileAttachmentDto
                     {
                         Id = f.Id,
@@ -277,7 +279,7 @@ namespace ContractorsAuctioneer.Services
                            Status = rs.Status,
                            UpdatedAt = rs.UpdatedAt,
                            UpdatedBy = rs.UpdatedBy
-                       }).FirstOrDefault(),
+                       }).ToList(),
                        BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
                        {
                            Id = b.Id,
@@ -329,6 +331,7 @@ namespace ContractorsAuctioneer.Services
                 request.ConfirmationDate = request.ConfirmationDate;
                 request.Description = requestDto.Description;
                 request.IsAcceptedByClient = requestDto.IsAcceptedByClient;
+                request.ExpireAt = requestDto.ExpireAt;
                 request.IsTenderOver = requestDto.IsTenderOver;
                 request.IsActive = requestDto.IsActive;
                 request.UpdatedAt = requestDto.UpdatedAt;
@@ -348,7 +351,27 @@ namespace ContractorsAuctioneer.Services
 
 
         }
-        
+        //public async Task<Result<UpdateRequestDto>> SetSevenDaysForReview(int requestId, CancellationToken cancellationToken)
+        //{
+        //    if (requestId <= 0)
+        //    {
+        //        return new Result<UpdateRequestDto>().WithValue(null).Failure("ورودی نا معتبر");
+        //    }
+        //    try
+        //    {
+        //        var request = await GetByIdAsync(requestId, cancellationToken);
+        //        if (!request.IsSuccessful)
+        //        {
+        //            return new Result<UpdateRequestDto>().WithValue(null).Failure(request.Message);
+        //            // این اکشن کلا اینجا جاش اشتباهه******************************
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
 
     }
 }

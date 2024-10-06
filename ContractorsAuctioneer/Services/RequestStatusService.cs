@@ -77,19 +77,21 @@ namespace ContractorsAuctioneer.Services
                         Id = requestStatus.Id,
                         Status = requestStatus.Status,
                         RequestId = requestStatus.RequestId,
+                        CreatedAt = requestStatus.CreatedAt,
+                        CreatedBy = requestStatus.CreatedBy,
                         UpdatedBy = requestStatus.UpdatedBy,
                         UpdatedAt = requestStatus.UpdatedAt
                     };
                     return new Result<RequestStatusDto>()
                         .WithValue(requestStatusDto)
-                        .Success("وضعیت تغییر یافت.");
+                        .Success("وضعیت پیدا شد .");
                 }   
             }
             catch (Exception ex)
             {
                 return new Result<RequestStatusDto>()
                     .WithValue(null)
-                    .Failure(ex.Message);
+                    .Failure(ErrorMessages.ErrorWhileRetrievingStatus);
             }
         }
         public async Task<Result<RequestStatusDto>> UpdateAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken)
@@ -132,33 +134,33 @@ namespace ContractorsAuctioneer.Services
                     .WithValue(null).Failure(ErrorMessages.AnErrorWhileUpdatingStatus);
             }
         }
-        public async Task<Result<RequestStatusDto>> GetRequestStatusByRequestId(int requesId, CancellationToken cancellationToken)
+        public async Task<Result<List<RequestStatusDto>>> GetRequestStatusesByRequestId(int requesId, CancellationToken cancellationToken)
         {
             try
             {
                 var result = await _context.RequestStatuses
                     .Where(x =>
-                    x.RequestId == requesId && x.IsDeleted == false)
+                    x.RequestId == requesId )
                     .Include(s => s.Request)
                     .Include(s => s.RequestStatusHistories)
+                    .OrderBy(x => x.CreatedAt)
                     .Select(r => new RequestStatusDto
                     {
                         CreatedAt = r.CreatedAt,
-                        UpdatedAt = r.UpdatedAt,
-                        UpdatedBy = r.UpdatedBy,
+                        CreatedBy = r.CreatedBy,
                         RequestId = r.RequestId,
                         Status = r.Status,
-                    }).FirstOrDefaultAsync(cancellationToken);
-                if (result is null) return new Result<RequestStatusDto>()
+                    }).ToListAsync(cancellationToken);
+                if (result is null) return new Result<List<RequestStatusDto>>()
                         .WithValue(null)
                         .Failure(ErrorMessages.RequestStatusNotFound);
-                else return new Result<RequestStatusDto>()
+                else return new Result<List<RequestStatusDto>>()
                         .WithValue(result)
                         .Success(SuccessMessages.RequestStatusFound);
             }
             catch (Exception)
             {
-                return new Result<RequestStatusDto>()
+                return new Result<List<RequestStatusDto>>()
                     .WithValue(null)
                     .Failure(ErrorMessages.ErroWhileRetrievingRequestStatus);
             }
