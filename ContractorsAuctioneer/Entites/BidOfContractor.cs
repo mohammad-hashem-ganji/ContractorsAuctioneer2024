@@ -15,6 +15,7 @@ namespace ContractorsAuctioneer.Entites
     {
         public int Id { get; set; }
         public int? SuggestedFee { get; set; }
+        public DateTime ExpireAte { get; set; }
         public int ContractorId { get; set; }
         public Contractor? Contractor { get; set; }
         public int RequestId { get; set; }

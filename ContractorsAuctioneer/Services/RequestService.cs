@@ -13,17 +13,19 @@ namespace ContractorsAuctioneer.Services
     public class RequestService : IRequestService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IContractorService _contractorService;
         private readonly IClientService _clientService;
         private readonly IRegionService _regionService;
         private readonly IAuthService _authService;
         private readonly IFileAttachmentService _fileAttachmentService;
-        public RequestService(ApplicationDbContext context, IClientService clientService, IRegionService regionService, IAuthService authService, IFileAttachmentService fileAttachmentService)
+        public RequestService(ApplicationDbContext context, IClientService clientService, IRegionService regionService, IAuthService authService, IFileAttachmentService fileAttachmentService, IContractorService contractorService)
         {
             _context = context;
             _clientService = clientService;
             _regionService = regionService;
             _authService = authService;
             _fileAttachmentService = fileAttachmentService;
+            _contractorService = contractorService;
         }
         public async Task<bool> AddAsync(AddRequestDto requestDto, CancellationToken cancellationToken)
         {
@@ -51,9 +53,9 @@ namespace ContractorsAuctioneer.Services
                     IsDeleted = false,
                     DeletedBy = null,
                     DeletedAt = null,
-                    ApplicationUserId = applicationUserResult.Data.RegisteredUserId,                   
+                    ApplicationUserId = applicationUserResult.Data.RegisteredUserId,
                 }, cancellationToken);
-                if (clientId == 0 )
+                if (clientId == 0)
                 {
                     return false;
                 }
@@ -61,7 +63,7 @@ namespace ContractorsAuctioneer.Services
                 {
                     Title = requestDto.Region.Title,
                     ContractorSystemCode = requestDto.Region.ContractorSystemCode,
-                },cancellationToken);
+                }, cancellationToken);
                 var request = new Entites.Request
                 {
                     Title = requestDto.Title,
@@ -88,7 +90,7 @@ namespace ContractorsAuctioneer.Services
                     File = requestDto.FileUploadDto.File,
                     FileAttachmentType = requestDto.FileUploadDto.FileAttachmentType,
                     RequestId = request.Id,
-                },cancellationToken);
+                }, cancellationToken);
                 return true;
             }
             catch (Exception)
@@ -125,43 +127,12 @@ namespace ContractorsAuctioneer.Services
                     IsDeleted = x.IsDeleted,
                     UpdatedAt = x.UpdatedAt,
                     UpdatedBy = x.UpdatedBy,
-                    RequestStatuses = x.RequestStatuses
-                    .Where(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient)
-                    .Select(rs => new RequestStatusDto
+                    FileAttachments = x.FileAttachments
+                    .Where(f => f.IsDeleted == false)
+                    .Select(f => new FileAttachmentDto
                     {
-                        Id = rs.Id,
-                        Status = rs.Status,
-                        UpdatedAt = rs.UpdatedAt,
-                        UpdatedBy = rs.UpdatedBy
-                    }).ToList(),
-                    //BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
-                    //{
-                    //    Id = b.Id,
-                    //    SuggestedFee = b.SuggestedFee,
-                    //    ContractorId = b.ContractorId,
-                    //    IsAccepted = b.IsAccepted,
-                    //    CanChangeBid = b.CanChangeBid,
-                    //    CreatedAt = b.CreatedAt,
-                    //    CreatedBy = b.CreatedBy,
-                    //    DeletedAt = b.DeletedAt,
-                    //    DeletedBy = b.DeletedBy,
-                    //    IsDeleted = b.IsDeleted,
-                    //    UpdatedAt = b.UpdatedAt,
-                    //    UpdatedBy = b.UpdatedBy
-                    //}).ToList(),
-                    //FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
-                    //{
-                    //    Id = f.Id,
-                    //    FileName = f.FileName,
-                    //    FilePath = f.FilePath,
-                    //    CreatedAt = f.CreatedAt,
-                    //    CreatedBy = f.CreatedBy,
-                    //    DeletedAt = f.DeletedAt,
-                    //    DeletedBy = f.DeletedBy,
-                    //    IsDeleted = f.IsDeleted,
-                    //    UpdatedAt = f.UpdatedAt,
-                    //    UpdatedBy = f.UpdatedBy
-                    //}).ToList()
+                        Id = f.Id
+                    }).ToList()
                 }).ToList();
                 if (requestDtos.Any())
                 {
@@ -170,7 +141,7 @@ namespace ContractorsAuctioneer.Services
                 else
                 {
 
-                return new Result<List<RequestDto>>().WithValue(requestDtos).Failure("درخواستی وجود ندارد");
+                    return new Result<List<RequestDto>>().WithValue(requestDtos).Failure("درخواستی وجود ندارد");
                 }
             }
             catch (Exception ex)
@@ -184,7 +155,7 @@ namespace ContractorsAuctioneer.Services
             {
                 var request = await _context.Requests
                    .Where(x =>
-                   x.Id == requestId && x.IsTenderOver == false  && x.IsActive == true)
+                   x.Id == requestId && x.IsTenderOver == false && x.IsActive == true)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -245,8 +216,8 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var result = await _context.Requests
-                   .Where(x => 
-                   x.ClientId == clientId && x.IsTenderOver == false  && x.IsActive == true && x.IsAcceptedByClient == false)
+                   .Where(x =>
+                   x.ClientId == clientId && x.IsTenderOver == false && x.IsActive == true && x.IsAcceptedByClient == false)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -313,13 +284,62 @@ namespace ContractorsAuctioneer.Services
             }
 
         }
+
+        public async Task<Result<List<RequestDto>>> GetRequestsforContractor(int contractorId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var requests = await _context.Requests
+                   .Where(x => x.IsTenderOver == false && x.IsActive == true && x.RequestStatuses
+                   .All(status => status.Status != RequestStatusEnum.RequestRejectedByContractor 
+                   && status.RequestId == x.Id 
+                   && status.CreatedBy == contractorId))
+                   .Include(x => x.FileAttachments) 
+                   .ToListAsync(cancellationToken);
+                var requestDtos = requests.Select(x => new RequestDto
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    ClientId = x.ClientId,
+                    RegionId = x.RegionId,
+                    FileAttachments = x.FileAttachments
+                    .Where(f => f.IsDeleted == false)
+                    .Select(f => new FileAttachmentDto
+                    {
+                        Id = f.Id
+                    }).ToList()
+                }).ToList();
+                if (requestDtos.Any())
+                {
+                    return new Result<List<RequestDto>>()
+                        .WithValue(requestDtos)
+                        .Success("درخواست ها یافت شدند .");
+                }
+                else
+                {
+
+                    return new Result<List<RequestDto>>()
+                        .WithValue(requestDtos)
+                        .Failure("درخواستی وجود ندارد");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Result<List<RequestDto>>()
+                    .WithValue(null)
+                    .Failure("هنگام اجرا خطایی پیش آمد!");
+            }
+        }
+
+
         public async Task<Result<RequestDto>> UpdateAsync(RequestDto requestDto, CancellationToken cancellationToken)
         {
             try
             {
                 Entites.Request? request = await _context.Requests
-                .Where(x => 
-                x.Id == requestDto.Id && x.IsActive == true && x.IsTenderOver ==false)
+                .Where(x =>
+                x.Id == requestDto.Id && x.IsActive == true && x.IsTenderOver == false)
                 .FirstOrDefaultAsync(cancellationToken);
                 if (request is null)
                 {
@@ -344,34 +364,14 @@ namespace ContractorsAuctioneer.Services
             {
                 return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
             }
-            
+
 
 
 
 
 
         }
-        //public async Task<Result<UpdateRequestDto>> SetSevenDaysForReview(int requestId, CancellationToken cancellationToken)
-        //{
-        //    if (requestId <= 0)
-        //    {
-        //        return new Result<UpdateRequestDto>().WithValue(null).Failure("ورودی نا معتبر");
-        //    }
-        //    try
-        //    {
-        //        var request = await GetByIdAsync(requestId, cancellationToken);
-        //        if (!request.IsSuccessful)
-        //        {
-        //            return new Result<UpdateRequestDto>().WithValue(null).Failure(request.Message);
-        //            // این اکشن کلا اینجا جاش اشتباهه******************************
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
 
-        //        throw;
-        //    }
-        //}
 
     }
 }

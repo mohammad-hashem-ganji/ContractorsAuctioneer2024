@@ -92,5 +92,8 @@ namespace ContractorsAuctioneer.Services
                 return new Result<ClientDto>().WithValue(null).Failure(ex.Message);
             }
         }
+
+
+
     }
 }

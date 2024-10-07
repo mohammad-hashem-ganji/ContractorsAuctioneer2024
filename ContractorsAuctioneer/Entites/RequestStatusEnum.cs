@@ -16,7 +16,8 @@ namespace ContractorsAuctioneer.Entites
         Cancelled = 5,      // The request has been cancelled
         OnHold = 6,         // The request is on hold
         RequestRejectedByClient = 7,
-        RequestApprovedByContractor = 8
+        RequestRejectedByContractor = 8,
+        RequestTenderFinished =9,
 
     }
 }

@@ -30,6 +30,7 @@ builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<IContractorService, ContractorService>();
 // BidOfContractor
 builder.Services.AddScoped<IBidOfContractorService, BidOfContractorService>();
+builder.Services.AddScoped<IBidStatusService, BidStatusService>();
 // Project
 builder.Services.AddScoped<IProjectService, ProjectService>();
 // FileAttachment

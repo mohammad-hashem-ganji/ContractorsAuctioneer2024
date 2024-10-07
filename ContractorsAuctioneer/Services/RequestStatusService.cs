@@ -20,40 +20,29 @@ namespace ContractorsAuctioneer.Services
             _context = context;
             _requestStatusHistoryService = requestStatusHistoryService;
         }
-        public async Task<Result<RequestStatusDto>> AddAsync(RequestStatusDto requestStatusDto, CancellationToken cancellationToken)
+        public async Task<Result<AddRequestStatusDto>> AddAsync(AddRequestStatusDto requestStatusDto, CancellationToken cancellationToken) 
         {
             if (requestStatusDto is null)
             {
-                return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
+                return new Result<AddRequestStatusDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
             }
             try
             {
                 var requestStatus = new RequestStatus
                 {
-                    RequestId = requestStatusDto.Id,
+                    RequestId = requestStatusDto.RequestId,
                     Status = requestStatusDto.Status,
                     CreatedBy = requestStatusDto.CreatedBy,
                     CreatedAt = requestStatusDto.CreatedAt,
                 };
                 await _context.RequestStatuses.AddAsync(requestStatus, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
-                var addRequestStatusHistoryDto = new AddRequestStatusHistoryDto
-                {
-                    Status = requestStatusDto.Status,
-                    RequetStatusId = requestStatus.Id,
-                    CreatedAt = requestStatusDto.CreatedAt,
-                    CreatedBy = requestStatus.CreatedBy
-                };
-             var result = await _requestStatusHistoryService.AddAsync(addRequestStatusHistoryDto, cancellationToken);
-                if (!result.IsSuccessful)
-                {
-                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);
-                }
-                return new Result<RequestStatusDto>().WithValue(requestStatusDto).Success(SuccessMessages.RequestStatusAdded);
+
+                return new Result<AddRequestStatusDto>().WithValue(requestStatusDto).Success(SuccessMessages.RequestStatusAdded);
             }
             catch (Exception ex)
             {
-                return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);         
+                return new Result<AddRequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);         
             }
         }
         public async Task<Result<RequestStatusDto>> GetByIdAsync(int reqStatusId, CancellationToken cancellationToken)
@@ -112,18 +101,7 @@ namespace ContractorsAuctioneer.Services
                 requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
                 _context.RequestStatuses.Update(requestStatus);
                 await _context.SaveChangesAsync();
-                var addRequestStatusHistoryDto = new AddRequestStatusHistoryDto
-                {
-                    Status = requestStatusDto.Status,
-                    RequetStatusId = requestStatus.Id,
-                    CreatedAt = requestStatusDto.CreatedAt,
-                    CreatedBy = requestStatus.CreatedBy
-                };
-                var result = await _requestStatusHistoryService.AddAsync(addRequestStatusHistoryDto, cancellationToken);
-                if (!result.IsSuccessful)
-                {
-                    return new Result<RequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);
-                }
+
                 return new Result<RequestStatusDto>()
                     .WithValue(requestStatusDto)
                     .Success($"وضعیت تغییر به {requestStatusDto.Status}تغییر پیدا کرد.");
@@ -142,8 +120,7 @@ namespace ContractorsAuctioneer.Services
                     .Where(x =>
                     x.RequestId == requesId )
                     .Include(s => s.Request)
-                    .Include(s => s.RequestStatusHistories)
-                    .OrderBy(x => x.CreatedAt)
+                    .OrderByDescending(x => x.CreatedAt)
                     .Select(r => new RequestStatusDto
                     {
                         CreatedAt = r.CreatedAt,

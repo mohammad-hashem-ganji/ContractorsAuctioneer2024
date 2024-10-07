@@ -5,6 +5,6 @@ namespace ContractorsAuctioneer.Interfaces
 {
     public interface IRejectedRequestByClientService
     {
-        Task<Result<UpdateRejectedRequestDto>> AddAsync(UpdateRejectedRequestDto requestDto, CancellationToken cancellationToken);
+        Task<Result<UpdateRequestAcceptanceDto>> AddAsync(UpdateRequestAcceptanceDto requestDto, CancellationToken cancellationToken);
     }
 }

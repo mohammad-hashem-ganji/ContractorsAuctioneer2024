@@ -10,5 +10,6 @@ namespace ContractorsAuctioneer.Interfaces
         Task<Result<List<BidOfContractorDto>>> GetAllAsync(CancellationToken cancellationToken);
         Task<Result<BidOfContractorDto>> UpdateAsync(BidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken);
         Task<Result<List<BidOfContractorDto>>> GetBidsOfContractorAsync(int contractorId, CancellationToken cancellationToken);
+        Task<Result<List<BidOfContractorDto>>> GetBidsOfRequestAsync(int requestId, CancellationToken cancellationToken);
     }
 }

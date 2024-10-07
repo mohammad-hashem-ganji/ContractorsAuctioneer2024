@@ -5,14 +5,18 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading;
 
 namespace ContractorsAuctioneer.Services
 {
     public class BidOfContractorService : IBidOfContractorService
     {
-        //Add bid
+
         private readonly ApplicationDbContext _context;
         private readonly IContractorService _contractorService;
         public BidOfContractorService(ApplicationDbContext context, IContractorService contractorService)
@@ -43,7 +47,7 @@ namespace ContractorsAuctioneer.Services
             }
             catch (Exception ex)
             {
-                return new Result<AddBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.ErrorWileAddingBidOfContractor); 
+                return new Result<AddBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.ErrorWileAddingBidOfContractor);
             }
         }
         public async Task<Result<BidOfContractorDto>> GetByIdAsync(int bidId, CancellationToken cancellationToken)
@@ -85,7 +89,9 @@ namespace ContractorsAuctioneer.Services
                             Status = b.Status,
                             UpdatedAt = b.UpdatedAt,
                             UpdatedBy = b.UpdatedBy
-                        }).SingleOrDefault()
+                        })
+                        .OrderByDescending(b => b.CreatedAt)
+                        .ToList()
                     };
                     return new Result<BidOfContractorDto>().WithValue(bidOfContractorDto).Success("پیشنهاد پیدا شد");
                 }
@@ -121,9 +127,11 @@ namespace ContractorsAuctioneer.Services
                     {
                         Id = b.Id,
                         Status = b.Status,
-                        UpdatedAt = b.UpdatedAt,
-                        UpdatedBy = b.UpdatedBy
-                    }).SingleOrDefault()
+                        CreatedAt = b.CreatedAt,
+                        CreatedBy = b.CreatedBy
+                    })
+                    .OrderByDescending(b => b.CreatedAt)
+                    .ToList()
 
                 }).ToList();
                 if (bidsOfContractorDto.Any())
@@ -137,7 +145,7 @@ namespace ContractorsAuctioneer.Services
             }
             catch (Exception ex)
             {
-                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(ex.Message);
+                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(ErrorMessages.ErrorWhileRetrievingBidsOfContracotrs);
             }
         }
         public async Task<Result<BidOfContractorDto>> UpdateAsync(BidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
@@ -198,7 +206,7 @@ namespace ContractorsAuctioneer.Services
                         IsDeleted = b.IsDeleted,
                         UpdatedAt = b.UpdatedAt,
                         UpdatedBy = b.UpdatedBy
-                    }).SingleOrDefault()
+                    }).ToList()
                 }).ToListAsync(cancellationToken);
                 if (result.Any())
                 {
@@ -213,7 +221,96 @@ namespace ContractorsAuctioneer.Services
             {
                 return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطایی در بازیابی پیشنهادات رخ داده است.");
             }
-            
+
         }
+        public async Task<Result<List<BidOfContractorDto>>> GetBidsOfRequestAsync(int requestId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
+                        .Where(x => x.RequestId == requestId
+                        && x.Request.IsTenderOver == true
+                        && x.Request.IsActive == true
+                        && x.IsDeleted == false)
+                        .Include(x => x.Request)
+                        .Select(bid => new BidOfContractorDto
+                        {
+                            Id = bid.Id,
+                            RequestId = bid.RequestId,
+                            CreatedAt = bid.CreatedAt,
+                            ContractorId = bid.ContractorId,
+                            IsAccepted = bid.IsAccepted,
+                            SuggestedFee = bid.SuggestedFee,
+                        })
+                        .ToListAsync(cancellationToken);
+                if (bidsOfContractor.Any())
+                {
+                    return new Result<List<BidOfContractorDto>>()
+                        .WithValue(bidsOfContractor)
+                        .Success(SuccessMessages.BidsOfRequestFound);
+                }
+                else
+                {
+                    return new Result<List<BidOfContractorDto>>()
+                        .WithValue(null)
+                        .Failure(ErrorMessages.BidsOfRequestNotFound);
+                }
+            }
+            catch (Exception)
+            {
+                return new Result<List<BidOfContractorDto>>()
+                    .WithValue(null)
+                    .Failure(ErrorMessages.ErrorWhileRetrievingBidsOfContracotrs);
+            }
+
+        }
+        public async Task<Result<List<BidOfContractorDto>>> UnAcceptRestBidsOfRequestAsync(int requestId,
+             List<int> unAcceptedBidsId,CancellationToken cancellationToken)
+        {
+            try
+            {
+            List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
+                    .Where(x => x.RequestId == requestId
+                    && unAcceptedBidsId.Contains(x.Id)
+                    && x.Request.IsTenderOver == true
+                    && x.Request.IsActive == true
+                    && x.IsDeleted == false)
+                    .Include(x => x.Request)
+                    .Select(bid => new BidOfContractorDto
+                    {
+                        Id = bid.Id,
+                        RequestId = bid.RequestId,
+                        CreatedAt = bid.CreatedAt,
+                        ContractorId = bid.ContractorId,
+                        IsAccepted = bid.IsAccepted,
+                        SuggestedFee = bid.SuggestedFee,
+                    })
+                    .ToListAsync(cancellationToken);
+
+
+                if (bidsOfContractor.Any())
+                {
+                    bidsOfContractor.ForEach(x => x.IsAccepted = false);
+                    //_context.UpdateRange(bidsOfContractor);
+                    await _context.SaveChangesAsync(cancellationToken);
+                    return new Result<List<BidOfContractorDto>>()
+                        .WithValue(bidsOfContractor)
+                        .Success(SuccessMessages.BidsOfRequestFoundAndChangedAcceptance);
+                }
+                else
+                {
+                    return new Result<List<BidOfContractorDto>>()
+                        .WithValue(null)
+                        .Failure(ErrorMessages.BidsOfRequestNotFound);
+                }
+            }
+            catch (Exception)
+            {
+                return new Result<List<BidOfContractorDto>>()
+                        .WithValue(null)
+                        .Failure(ErrorMessages.ErrorWhileRetrievingBidsOfContracotrs);
+            }
+        }
+
     }
 }

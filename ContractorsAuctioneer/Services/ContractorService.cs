@@ -62,7 +62,7 @@ namespace ContractorsAuctioneer.Services
                   .FirstOrDefaultAsync(cancellationToken);
                 if (contractor is null)
                 {
-                    return new Result<ContractorDto>().WithValue(null).Failure(ErrorMessages.ClientNotFound);
+                    return new Result<ContractorDto>().WithValue(null).Failure(ErrorMessages.ContractorNotFound);
                 }
                 else
                 {
@@ -104,6 +104,6 @@ namespace ContractorsAuctioneer.Services
                 return new Result<ContractorDto>().WithValue(null).Failure(ex.Message);
             }
         }
-
+        
     }
 }
