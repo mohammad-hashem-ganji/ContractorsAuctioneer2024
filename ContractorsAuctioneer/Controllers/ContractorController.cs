@@ -16,12 +16,13 @@ namespace ContractorsAuctioneer.Controllers
         private readonly IRequestService _requestService;
         private readonly IRequestStatusService _requestStatusService;
         private readonly IContractorService _contractorService;
-
-        public ContractorController(IRequestService requestService, IRequestStatusService requestStatusService, IContractorService contractorService)
+        private readonly IBidOfContractorService _bidOfContractorService;
+        public ContractorController(IRequestService requestService, IRequestStatusService requestStatusService, IContractorService contractorService, IBidOfContractorService bidOfContractorService)
         {
             _requestService = requestService;
             _requestStatusService = requestStatusService;
             _contractorService = contractorService;
+            _bidOfContractorService = bidOfContractorService;
         }
 
         [HttpPut]
@@ -69,5 +70,17 @@ namespace ContractorsAuctioneer.Controllers
             }
             return Ok(requests);
         }
+
+        public async Task<IActionResult> ShowBidsAcceptedByClient(int contractorId, CancellationToken cancellationToken)
+        {
+            var acceptedBids = await _bidOfContractorService.GetBidsAcceptedByClient(contractorId, cancellationToken);
+            if (!acceptedBids.IsSuccessful)
+            {
+                return NotFound(acceptedBids);
+            }
+            return Ok(acceptedBids);
+        }
+
+
     }
 }

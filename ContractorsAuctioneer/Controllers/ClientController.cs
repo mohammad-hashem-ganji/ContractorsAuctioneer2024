@@ -1,6 +1,7 @@
 ﻿using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Services;
+using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -31,6 +32,7 @@ namespace ContractorsAuctioneer.Controllers
         [Route(nameof(AcceptBid))]
         public async Task<IActionResult> AcceptBid(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
+            List<int> unAcceptedBidId = new List<int>();
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -44,57 +46,54 @@ namespace ContractorsAuctioneer.Controllers
                 }
                 if (bidDto.IsAccepted == true)
                 {
-                    bid.Data!.IsAccepted = true; // update it
-                    var allBidsOfRequest = await _bidOfContractorService.GetBidsOfRequestAsync(bid.Data.RequestId, cancellationToken);
+                    var allBidsOfRequest = await _bidOfContractorService
+                        .GetBidsOfRequestAsync(bid.Data.RequestId, cancellationToken);
                     if (!allBidsOfRequest.IsSuccessful)
                     {
                         return NotFound(allBidsOfRequest);
                     }
-                    var otherUnAcceptedBids = allBidsOfRequest.Data.Where(x => x.Id != bidDto.BidId);
-                    if (!otherUnAcceptedBids.Any())
+                    var otherUnAcceptedBids = allBidsOfRequest.Data
+                        .Where(x => x.Id != bidDto.BidId).ToList();
+                    if (otherUnAcceptedBids.Any())
                     {
-                        var un
-                    }
+                        otherUnAcceptedBids.ForEach(x => unAcceptedBidId.Add(x.Id));
+                        var unAcceptedRestOfBids = await _bidOfContractorService
+                            .UnAcceptRestBidsOfRequestAsync(bid.Data.RequestId, unAcceptedBidId, cancellationToken);
+                        if (!unAcceptedRestOfBids.IsSuccessful)
+                        {
+                            return Problem(unAcceptedRestOfBids.Message);
+                        }
 
+                    }
 
                     var newStatus = new AddBidStatusDto
                     {
-                        BidOfContractorId = bidDto.BidId,
+                        BidOfContractorId = bid.Data.Id,
                         Status = Entites.BidStatusEnum.BidApprovedByClient,
                         CreatedAt = DateTime.Now,
                         CreatedBy = bidDto.UpdatedBy
                     };
-                    var result = await _bidStatusService.AddAsync(newStatus, cancellationToken);
-                    if (!result.IsSuccessful)
+                    var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
+                    if (!newBidStatus.IsSuccessful)
                     {
-                        return Problem(result.Message);
+                        return Problem(newBidStatus.Message);
                     }
+                    bid.Data.ExpireAt = DateTime.Now.AddDays(2);
+                    var updatedBid = await _bidOfContractorService.UpdateAsync(bid.Data, cancellationToken);
+                    if (!updatedBid.IsSuccessful)
+                    {
+                        return Problem(updatedBid.Message);
+                    }
+                    return Ok(updatedBid);
                 }
-
-
-                var entity = await _bidOfContractorService.GetByIdAsync(bidDto.BidId, cancellationToken);
-                if (entity.IsSuccessful && entity.Data != null)
-                {
-
-                    // go to project flow
-                    //var newProject = await _projectService.AddAsync(addProjectDto, cancellationToken);
-                    //if (!newProject.IsSuccessful) return BadRequest(newProject);
-                    //var request = await _requestService.GetByIdAsync(result.Data.RequestId, cancellationToken);
-                    //if (!request.IsSuccessful || request.Data == null) return BadRequest(request);
-                    //request.Data.IsTenderOver = true;
-                    //var requestResult = await _requestService.UpdateAsync(request.Data, cancellationToken);
-                    //if (!requestResult.IsSuccessful) return BadRequest(requestResult);
-                    return NoContent();
-                }
-                return NotFound(entity);
+                return BadRequest();
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new
                     {
-                        Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
+                        Message = "خطایی هنگام قبول پیشنهاد  رخ داده است.",
                     });
             }
         }

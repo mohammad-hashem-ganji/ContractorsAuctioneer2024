@@ -9,5 +9,6 @@ namespace ContractorsAuctioneer.Entites
     public enum BidStatusEnum
     {
         BidApprovedByClient = 0,
+        TimeForCheckingBidForClientExpired = 1,
     }
 }

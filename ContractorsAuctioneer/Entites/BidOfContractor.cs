@@ -15,12 +15,12 @@ namespace ContractorsAuctioneer.Entites
     {
         public int Id { get; set; }
         public int? SuggestedFee { get; set; }
-        public DateTime ExpireAte { get; set; }
+        public DateTime? ExpireAt { get; set; }
         public int ContractorId { get; set; }
         public Contractor? Contractor { get; set; }
         public int RequestId { get; set; }
         public Request? Request { get; set; }
-        public bool? IsAccepted { get; set; }
+        public bool? IsAcceptedByClient { get; set; }
         public bool? CanChangeBid { get; set; }
         public ICollection<BidStatus>? BidStatuses { get; set; }
         public Project? Project { get; set; }

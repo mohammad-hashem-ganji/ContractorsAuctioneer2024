@@ -38,7 +38,6 @@ namespace ContractorsAuctioneer.Services
                     CanChangeBid = true,
                     ContractorId = bidOfContractorDto.ContractorId,
                     RequestId = bidOfContractorDto.RequestId,
-                    IsAccepted = false,
                     CreatedAt = DateTime.Now
                 };
                 await _context.BidOfContractors.AddAsync(bidOfContractor, cancellationToken);
@@ -78,7 +77,6 @@ namespace ContractorsAuctioneer.Services
                         CreatedAt = bidOfContractor.CreatedAt,
                         CreatedBy = bidOfContractor.CreatedBy,
                         ContractorId = bidOfContractor.ContractorId,
-                        IsAccepted = bidOfContractor.IsAccepted,
                         IsDeleted = bidOfContractor.IsDeleted,
                         UpdatedBy = bidOfContractor.UpdatedBy,
                         UpdatedAt = bidOfContractor.UpdatedAt,
@@ -118,7 +116,6 @@ namespace ContractorsAuctioneer.Services
                     CreatedAt = x.CreatedAt,
                     CreatedBy = x.CreatedBy,
                     ContractorId = x.ContractorId,
-                    IsAccepted = x.IsAccepted,
                     IsDeleted = x.IsDeleted,
                     UpdatedBy = x.UpdatedBy,
                     UpdatedAt = x.UpdatedAt,
@@ -162,7 +159,6 @@ namespace ContractorsAuctioneer.Services
                 }
                 bidOfContractor.UpdatedAt = bidOfContractorDto.UpdatedAt;
                 bidOfContractor.UpdatedBy = bidOfContractorDto.UpdatedBy;
-                bidOfContractor.IsAccepted = bidOfContractorDto.IsAccepted;
                 bidOfContractor.CanChangeBid = bidOfContractorDto.CanChangeBid;
                 bidOfContractor.IsDeleted = bidOfContractorDto.IsDeleted;
                 bidOfContractor.SuggestedFee = bidOfContractorDto.SuggestedFee;
@@ -187,7 +183,6 @@ namespace ContractorsAuctioneer.Services
                     ContractorId = x.ContractorId,
                     Id = x.Id,
                     CanChangeBid = x.CanChangeBid,
-                    IsAccepted = x.IsAccepted,
                     SuggestedFee = x.SuggestedFee,
                     IsDeleted = x.IsDeleted,
                     RequestId = x.RequestId,
@@ -239,7 +234,6 @@ namespace ContractorsAuctioneer.Services
                             RequestId = bid.RequestId,
                             CreatedAt = bid.CreatedAt,
                             ContractorId = bid.ContractorId,
-                            IsAccepted = bid.IsAccepted,
                             SuggestedFee = bid.SuggestedFee,
                         })
                         .ToListAsync(cancellationToken);
@@ -265,32 +259,31 @@ namespace ContractorsAuctioneer.Services
 
         }
         public async Task<Result<List<BidOfContractorDto>>> UnAcceptRestBidsOfRequestAsync(int requestId,
-             List<int> unAcceptedBidsId,CancellationToken cancellationToken)
+             List<int> unAcceptedBidsId, CancellationToken cancellationToken)
         {
             try
             {
-            List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
-                    .Where(x => x.RequestId == requestId
-                    && unAcceptedBidsId.Contains(x.Id)
-                    && x.Request.IsTenderOver == true
-                    && x.Request.IsActive == true
-                    && x.IsDeleted == false)
-                    .Include(x => x.Request)
-                    .Select(bid => new BidOfContractorDto
-                    {
-                        Id = bid.Id,
-                        RequestId = bid.RequestId,
-                        CreatedAt = bid.CreatedAt,
-                        ContractorId = bid.ContractorId,
-                        IsAccepted = bid.IsAccepted,
-                        SuggestedFee = bid.SuggestedFee,
-                    })
-                    .ToListAsync(cancellationToken);
+                List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
+                        .Where(x => x.RequestId == requestId
+                        && unAcceptedBidsId.Contains(x.Id)
+                        && x.Request.IsTenderOver == true
+                        && x.Request.IsActive == true
+                        && x.IsDeleted == false)
+                        .Include(x => x.Request)
+                        .Select(bid => new BidOfContractorDto
+                        {
+                            Id = bid.Id,
+                            RequestId = bid.RequestId,
+                            CreatedAt = bid.CreatedAt,
+                            ContractorId = bid.ContractorId,
+                            SuggestedFee = bid.SuggestedFee,
+                        })
+                        .ToListAsync(cancellationToken);
 
 
-                if (bidsOfContractor.Any())
+                if (bidsOfContractor.Count != 0)
                 {
-                    bidsOfContractor.ForEach(x => x.IsAccepted = false);
+                    bidsOfContractor.ForEach(x => x.IsAcceptedByClient = false);
                     //_context.UpdateRange(bidsOfContractor);
                     await _context.SaveChangesAsync(cancellationToken);
                     return new Result<List<BidOfContractorDto>>()
@@ -311,6 +304,30 @@ namespace ContractorsAuctioneer.Services
                         .Failure(ErrorMessages.ErrorWhileRetrievingBidsOfContracotrs);
             }
         }
+        public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(int contractorId, CancellationToken cancellationToken)
+        {
+            var acceptedBids = await _context.BidOfContractors
+                .Where(b => b.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))
+                .Include(x => x.BidStatuses)
+                .Select(x => new BidOfContractorDto
+                {
+                    Id = x.Id,
+                    SuggestedFee = x.SuggestedFee,
+                    RequestId = x.RequestId,
 
+                }).ToListAsync(cancellationToken);
+            if (acceptedBids.Count != 0)
+            {
+                return new Result<List<BidOfContractorDto>>()
+                    .WithValue(acceptedBids)
+                    .Success(SuccessMessages.AcceptedBidsFound);
+            }
+            else
+            {
+                return new Result<List<BidOfContractorDto>>()
+                    .WithValue(null)
+                    .Failure(ErrorMessages.BidOfContractorNotFound);
+            }
+        }
     }
 }
