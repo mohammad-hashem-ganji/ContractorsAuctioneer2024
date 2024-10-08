@@ -81,7 +81,7 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var bid = await _context.BidOfContractors
-                    .Where(x => x.RequestId == requestId && x.IsAccepted == true)
+                    .Where(x => x.RequestId == requestId )
                     .Include(b => b.Project)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (bid == null)

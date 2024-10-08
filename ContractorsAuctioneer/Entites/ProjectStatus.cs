@@ -13,7 +13,6 @@ namespace ContractorsAuctioneer.Entites
         public int ProjectId { get; set; }
         public Project? Project { get; set; }
         public ProjectStatusEnum? Status { get; set; }
-        public ICollection<ProjectStatusHistory>? ProjectStatusHistories { get; set; }
 
     }
 }

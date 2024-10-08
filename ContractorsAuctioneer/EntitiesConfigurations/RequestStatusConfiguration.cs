@@ -16,12 +16,6 @@ namespace ContractorsAuctioneer.EntitiesConfigurations
         public void Configure(EntityTypeBuilder<RequestStatus> builder)
         {
             builder.HasKey(r => r.Id);
-
-            builder.HasMany(r => r.RequestStatusHistories)
-                .WithOne(r => r.RequestStatus)
-                .HasForeignKey(x => x.RequestStatusId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired();
         }
     }
 }

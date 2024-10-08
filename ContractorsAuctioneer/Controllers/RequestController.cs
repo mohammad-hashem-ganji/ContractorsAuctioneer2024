@@ -81,9 +81,9 @@ namespace ContractorsAuctioneer.Controllers
                 }
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "خطایی هنگام به پایان رساندن مناقصه رخ داد.");
             }
 
         }

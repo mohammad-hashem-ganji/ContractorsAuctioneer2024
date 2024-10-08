@@ -34,14 +34,34 @@ namespace ContractorsAuctioneer.Services
 
                 try
                 {
-                    var xpiredbidsForClients = await dbContext.BidOfContractors
-                        .Where(c => (c.ExpireAt.HasValue && c.ExpireAt <= DateTime.Now) ||
+                    var expiredBidsForClients = await dbContext.BidOfContractors
+                        .Where(c => (c.ExpireAt.HasValue && c.ExpireAt <= DateTime.Now) &&
                             (c.BidStatuses != null && c.BidStatuses
-                            .Any(x => x.Status != BidStatusEnum.BidApprovedByClient 
-                            || x.Status != BidStatusEnum.TimeForCheckingBidForClientExpired)))
+                            .Any(x => x.Status != BidStatusEnum.BidApprovedByClient)))
                             .ToArrayAsync(stoppingToken);
+                    var expiredBidsForContractors = await dbContext.BidOfContractors
+                        .Where(b => (b.ExpireAt.HasValue && b.ExpireAt <= DateTime.Now) &&
+                        (b.BidStatuses != null && b.BidStatuses
+                        .Any(x => x.Status != BidStatusEnum.BidApprovedByContractor)))
+                        .ToArrayAsync(stoppingToken);
+                    foreach (var bid in expiredBidsForContractors)
+                    {
+                        bid.ExpireAt = null;
+                        var expired = await _bidStatusService
+                            .AddAsync(new Dtos.AddBidStatusDto
+                            {
+                                CreatedAt = DateTime.Now,
+                                CreatedBy = 100,
+                                BidOfContractorId = bid.Id,
+                                Status = BidStatusEnum.TimeForCheckingBidForContractorExpired
+                            }, stoppingToken);
+                        if (expired.IsSuccessful)
+                        {
+                            dbContext.BidOfContractors.Update(bid);
+                        }
+                    }
 
-                    foreach (var bid in xpiredbidsForClients)
+                    foreach (var bid in expiredBidsForClients)
                     {
 
                         bid.ExpireAt = null;

@@ -19,13 +19,10 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         {
             modelBuilder.ApplyConfiguration(new RequestConfiguration());
             modelBuilder.ApplyConfiguration(new RequestStatusConfiguration());
-            modelBuilder.ApplyConfiguration(new RequestStatusHistoryConfiguration());
             modelBuilder.ApplyConfiguration(new ContractorBidConfiguration());
             modelBuilder.ApplyConfiguration(new BidStatusConfiguration());
-            modelBuilder.ApplyConfiguration(new BidStatusHistoryConfiguration());
             modelBuilder.ApplyConfiguration(new ProjectConfiguration());
             modelBuilder.ApplyConfiguration(new ProjectStatusConfiguration());
-            modelBuilder.ApplyConfiguration(new ProjectStatusHistoryConfiguration());
             modelBuilder.ApplyConfiguration(new RegionConfiguration());
             modelBuilder.ApplyConfiguration(new ContractorConfiguration());
             modelBuilder.ApplyConfiguration(new ClientConfiguration());
@@ -62,16 +59,13 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         }
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestStatus> RequestStatuses { get; set; }
-        public DbSet<RequestStatusHistory> RequestStatusHistories { get; set; }
         public DbSet<Region> Regions { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Contractor> Contractors { get; set; }
         public DbSet<BidOfContractor> BidOfContractors { get; set; }
         public DbSet<BidStatus> BidStatuses { get; set; }
-        public DbSet<BidStatusHistory> BidStatusHistories { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectStatus> ProjectStatuses { get; set; }
-        public DbSet<ProjectStatusHistory> ProjectStatusHistories { get; set; }
         public DbSet<FileAttachment> FileAttachments { get; set; }
         public DbSet<LastLoginHistory> LastLoginHistories{ get; set; }
         

@@ -13,7 +13,6 @@ namespace ContractorsAuctioneer.Entites
         public int RequestId { get; set; }
         public Request? Request { get; set; }
         public RequestStatusEnum? Status { get; set; }
-        public ICollection<RequestStatusHistory>? RequestStatusHistories { get; set; }
 
     }
 }

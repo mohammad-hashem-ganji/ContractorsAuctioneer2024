@@ -32,70 +32,41 @@ namespace ContractorsAuctioneer.Controllers
         [Route(nameof(AcceptBid))]
         public async Task<IActionResult> AcceptBid(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
-            List<int> unAcceptedBidId = new List<int>();
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            try
+            var bid = await _bidOfContractorService.GetByIdAsync(bidDto.BidId, cancellationToken);
+            if (!bid.IsSuccessful)
             {
-                var bid = await _bidOfContractorService.GetByIdAsync(bidDto.BidId, cancellationToken);
-                if (!bid.IsSuccessful)
-                {
-                    return NotFound(bid);
-                }
-                if (bidDto.IsAccepted == true)
-                {
-                    var allBidsOfRequest = await _bidOfContractorService
-                        .GetBidsOfRequestAsync(bid.Data.RequestId, cancellationToken);
-                    if (!allBidsOfRequest.IsSuccessful)
-                    {
-                        return NotFound(allBidsOfRequest);
-                    }
-                    var otherUnAcceptedBids = allBidsOfRequest.Data
-                        .Where(x => x.Id != bidDto.BidId).ToList();
-                    if (otherUnAcceptedBids.Any())
-                    {
-                        otherUnAcceptedBids.ForEach(x => unAcceptedBidId.Add(x.Id));
-                        var unAcceptedRestOfBids = await _bidOfContractorService
-                            .UnAcceptRestBidsOfRequestAsync(bid.Data.RequestId, unAcceptedBidId, cancellationToken);
-                        if (!unAcceptedRestOfBids.IsSuccessful)
-                        {
-                            return Problem(unAcceptedRestOfBids.Message);
-                        }
-
-                    }
-
-                    var newStatus = new AddBidStatusDto
-                    {
-                        BidOfContractorId = bid.Data.Id,
-                        Status = Entites.BidStatusEnum.BidApprovedByClient,
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = bidDto.UpdatedBy
-                    };
-                    var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
-                    if (!newBidStatus.IsSuccessful)
-                    {
-                        return Problem(newBidStatus.Message);
-                    }
-                    bid.Data.ExpireAt = DateTime.Now.AddDays(2);
-                    var updatedBid = await _bidOfContractorService.UpdateAsync(bid.Data, cancellationToken);
-                    if (!updatedBid.IsSuccessful)
-                    {
-                        return Problem(updatedBid.Message);
-                    }
-                    return Ok(updatedBid);
-                }
-                return BadRequest();
+                return NotFound(bid);
             }
-            catch (Exception ex)
+            if (bidDto.IsAccepted == true)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "خطایی هنگام قبول پیشنهاد  رخ داده است.",
-                    });
+
+                var newStatus = new AddBidStatusDto
+                {
+                    BidOfContractorId = bid.Data.Id,
+                    Status = Entites.BidStatusEnum.BidApprovedByClient,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = bidDto.UpdatedBy
+                };
+                var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
+                if (!newBidStatus.IsSuccessful)
+                {
+                    return Problem(newBidStatus.Message);
+                }
+                bid.Data.ExpireAt = DateTime.Now.AddDays(2);
+                var updatedBid = await _bidOfContractorService.UpdateAsync(bid.Data, cancellationToken);
+                if (!updatedBid.IsSuccessful)
+                {
+                    return Problem(updatedBid.Message);
+                }
+                return Ok(updatedBid);
             }
+            return BadRequest();
+
+
         }
         [HttpPost]
         [Route(nameof(AcceptRequest))]

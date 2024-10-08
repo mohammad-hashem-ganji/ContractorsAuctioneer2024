@@ -223,10 +223,12 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
-                        .Where(x => x.RequestId == requestId
+                        .Where(x => (x.RequestId == requestId
                         && x.Request.IsTenderOver == true
                         && x.Request.IsActive == true
                         && x.IsDeleted == false)
+                        || (x.BidStatuses.Any(b => b.Status == BidStatusEnum.BidRejectedByContractor &&
+                        b.ContractorBidId == x.Id)))
                         .Include(x => x.Request)
                         .Select(bid => new BidOfContractorDto
                         {
@@ -329,5 +331,8 @@ namespace ContractorsAuctioneer.Services
                     .Failure(ErrorMessages.BidOfContractorNotFound);
             }
         }
+
+
+
     }
 }

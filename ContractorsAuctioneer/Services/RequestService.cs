@@ -256,7 +256,6 @@ namespace ContractorsAuctioneer.Services
                            Id = b.Id,
                            SuggestedFee = b.SuggestedFee,
                            ContractorId = b.ContractorId,
-                           IsAccepted = b.IsAccepted,
                            CreatedAt = b.CreatedAt,
                        }).ToList(),
                        FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto

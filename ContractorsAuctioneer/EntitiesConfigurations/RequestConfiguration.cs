@@ -43,10 +43,6 @@ namespace ContractorsAuctioneer.EntitiesConfigurations
                 .HasForeignKey(s => s.RequestId)
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
-            builder.HasMany(n => n.RequestNotAcceptedByContractors)
-                .WithOne(r => r.Request)
-                .HasForeignKey(r => r.RequestId)
-                .OnDelete(DeleteBehavior.NoAction);
                 
         }
     }

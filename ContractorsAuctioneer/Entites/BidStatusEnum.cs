@@ -10,5 +10,8 @@ namespace ContractorsAuctioneer.Entites
     {
         BidApprovedByClient = 0,
         TimeForCheckingBidForClientExpired = 1,
+        BidApprovedByContractor = 2,
+        TimeForCheckingBidForContractorExpired = 3,
+        BidRejectedByContractor = 4,
     }
 }

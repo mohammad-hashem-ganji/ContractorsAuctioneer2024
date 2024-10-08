@@ -82,7 +82,6 @@ namespace ContractorsAuctioneer.Services
                             Id = b.Id,
                             CanChangeBid = b.CanChangeBid,
                             SuggestedFee = b.SuggestedFee,
-                            IsAccepted = b.IsAccepted,
                             RequestId = b.RequestId,
                             IsDeleted = b.IsDeleted,
                             CreatedAt = b.CreatedAt,

@@ -13,7 +13,6 @@ namespace ContractorsAuctioneer.Entites
         public int ContractorBidId { get; set; }
         public BidOfContractor? ContractorBid { get; set; }
         public BidStatusEnum Status { get; set; }
-        public ICollection<BidStatusHistory>? BidStatusHistories { get; set; }
 
     }
 }

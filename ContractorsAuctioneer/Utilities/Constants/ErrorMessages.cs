@@ -28,5 +28,6 @@
         public const string ErrorWhileRejectingRequest = "خطا در هنگام رد کردن درخواست";
         public const string ErrorWhileRetrievingStatus = "خطا در بازیابی وضعیت. لطفاً دوباره تلاش کنید";
         public const string ErrorWhileRetrievingBidsOfContracotrs = "خطا در بازیابی پیشنهادات پیمانکاران";
+        public const string ErrorWhileAcceptingBid = "خطا هنگام تایید پیشنهاد.";
     }
 }
