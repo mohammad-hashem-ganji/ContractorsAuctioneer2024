@@ -14,7 +14,7 @@ namespace ContractorsAuctioneer.Services
         private readonly ApplicationDbContext _context;
         private readonly IAuthService _authService;
         
-        public ContractorService(ApplicationDbContext context, IAuthService authService, IRequestRejecteByContractorService requestRejecteByContractorService)
+        public ContractorService(ApplicationDbContext context, IAuthService authService)
         {
             _context = context;
             _authService = authService;
@@ -24,7 +24,7 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                const string role = "Constractor";
+                const string role = "Contractor";
                 var applicationUserResult = await _authService.RegisterAsync(contractorDto.Username, contractorDto.Password, role);
                 if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
@@ -47,7 +47,7 @@ namespace ContractorsAuctioneer.Services
             }
             catch (Exception ex)
             {
-                return new Result<AddContractorDto>().WithValue(null).Success(ex.Message);
+                return new Result<AddContractorDto>().WithValue(null).Failure(ex.Message);
             }
 
         }

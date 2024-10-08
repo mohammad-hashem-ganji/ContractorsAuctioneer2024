@@ -18,7 +18,12 @@ namespace ContractorsAuctioneer.Services
         private readonly IRegionService _regionService;
         private readonly IAuthService _authService;
         private readonly IFileAttachmentService _fileAttachmentService;
-        public RequestService(ApplicationDbContext context, IClientService clientService, IRegionService regionService, IAuthService authService, IFileAttachmentService fileAttachmentService, IContractorService contractorService)
+        public RequestService(ApplicationDbContext context,
+            IClientService clientService,
+            IRegionService regionService, 
+            IAuthService authService,
+            IFileAttachmentService fileAttachmentService,
+            IContractorService contractorService)
         {
             _context = context;
             _clientService = clientService;
@@ -70,12 +75,11 @@ namespace ContractorsAuctioneer.Services
                     Description = requestDto.Description,
                     RegistrationDate = requestDto.RegistrationDate,
                     ConfirmationDate = requestDto.ConfirmationDate,
-                    IsFileCheckedByClient = false,
                     IsActive = true,
                     ExpireAt = DateTime.Now.AddDays(3),
                     RegionId = regionId,
                     ClientId = clientId,
-                    CreatedAt = requestDto.CreatedAt,
+                    CreatedAt = DateTime.Now,
                     RequestNumber = requestDto.RequestNumber,
                     IsTenderOver = false,
                     IsDeleted = false
@@ -85,12 +89,12 @@ namespace ContractorsAuctioneer.Services
                 await _context.Requests.AddAsync(request, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 // Add fillAttachment ### here
-                await _fileAttachmentService.AddAsync(new FileUploadDto
-                {
-                    File = requestDto.FileUploadDto.File,
-                    FileAttachmentType = requestDto.FileUploadDto.FileAttachmentType,
-                    RequestId = request.Id,
-                }, cancellationToken);
+                //await _fileAttachmentService.AddAsync(new FileUploadDto
+                //{
+                //    File = requestDto.FileUploadDto.File,
+                //    FileAttachmentType = requestDto.FileUploadDto.FileAttachmentType,
+                //    RequestId = request.Id,
+                //}, cancellationToken);
                 return true;
             }
             catch (Exception)
@@ -120,13 +124,7 @@ namespace ContractorsAuctioneer.Services
                     ConfirmationDate = x.ConfirmationDate,
                     ClientId = x.ClientId,
                     RegionId = x.RegionId,
-                    CreatedAt = x.CreatedAt,
-                    CreatedBy = x.CreatedBy,
-                    DeletedAt = x.DeletedAt,
-                    DeletedBy = x.DeletedBy,
-                    IsDeleted = x.IsDeleted,
-                    UpdatedAt = x.UpdatedAt,
-                    UpdatedBy = x.UpdatedBy,
+             
                     FileAttachments = x.FileAttachments
                     .Where(f => f.IsDeleted == false)
                     .Select(f => new FileAttachmentDto
@@ -175,32 +173,19 @@ namespace ContractorsAuctioneer.Services
                     ConfirmationDate = request.ConfirmationDate,
                     ClientId = request.ClientId,
                     RegionId = request.RegionId,
-                    CreatedAt = request.CreatedAt,
-                    CreatedBy = request.CreatedBy,
-                    DeletedAt = request.DeletedAt,
-                    DeletedBy = request.DeletedBy,
-                    IsDeleted = request.IsDeleted,
-                    UpdatedAt = request.UpdatedAt,
-                    UpdatedBy = request.UpdatedBy,
+
                     RequestStatuses = request.RequestStatuses.Select(rs => new RequestStatusDto
                     {
                         Id = rs.Id,
                         Status = rs.Status,
-                        UpdatedAt = rs.UpdatedAt,
-                        UpdatedBy = rs.UpdatedBy
+       
                     }).ToList(),
                     FileAttachments = request.FileAttachments.Select(f => new FileAttachmentDto
                     {
                         Id = f.Id,
                         FileName = f.FileName,
                         FilePath = f.FilePath,
-                        CreatedAt = f.CreatedAt,
-                        CreatedBy = f.CreatedBy,
-                        DeletedAt = f.DeletedAt,
-                        DeletedBy = f.DeletedBy,
-                        IsDeleted = f.IsDeleted,
-                        UpdatedAt = f.UpdatedAt,
-                        UpdatedBy = f.UpdatedBy
+    
                     }).ToList()
                 };
 
@@ -237,19 +222,12 @@ namespace ContractorsAuctioneer.Services
                        ClientId = x.ClientId,
                        RegionId = x.RegionId,
                        RequestNumber = x.RequestNumber,
-                       CreatedAt = x.CreatedAt,
-                       CreatedBy = x.CreatedBy,
-                       DeletedAt = x.DeletedAt,
-                       DeletedBy = x.DeletedBy,
-                       IsDeleted = x.IsDeleted,
-                       UpdatedAt = x.UpdatedAt,
-                       UpdatedBy = x.UpdatedBy,
+              
                        RequestStatuses = x.RequestStatuses.Select(rs => new RequestStatusDto
                        {
                            Id = rs.Id,
                            Status = rs.Status,
-                           UpdatedAt = rs.UpdatedAt,
-                           UpdatedBy = rs.UpdatedBy
+                      
                        }).ToList(),
                        BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
                        {
@@ -263,7 +241,7 @@ namespace ContractorsAuctioneer.Services
                            Id = f.Id,
                            FileName = f.FileName,
                            FilePath = f.FilePath,
-                           IsDeleted = f.IsDeleted,
+                      
                        }).ToList()
 
                    }).FirstOrDefaultAsync(cancellationToken);
@@ -353,8 +331,8 @@ namespace ContractorsAuctioneer.Services
                 request.ExpireAt = requestDto.ExpireAt;
                 request.IsTenderOver = requestDto.IsTenderOver;
                 request.IsActive = requestDto.IsActive;
-                request.UpdatedAt = requestDto.UpdatedAt;
-                request.UpdatedBy = requestDto.UpdatedBy;
+                request.UpdatedAt = DateTime.Now;
+                //request.UpdatedBy = requestDto.UpdatedBy;
                 _context.Requests.Update(request);
                 await _context.SaveChangesAsync(cancellationToken);
                 return new Result<RequestDto>().WithValue(requestDto).Success("درخواست آپدیت شد");

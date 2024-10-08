@@ -174,5 +174,22 @@ namespace ContractorsAuctioneer.Controllers
             }
             return BadRequest(ErrorMessages.AnErrorWhileUpdatingStatus);
         }
+
+        [HttpPost]
+        [Route(nameof(AddContractor))]
+        public async Task<IActionResult> AddContractor(AddContractorDto contractorDto, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _contractorService.AddAsync(contractorDto, cancellationToken);
+            if (!result.IsSuccessful)
+            {
+                return Problem(result.Message);
+            }
+            return Ok(result);
+        }
+
     }
 }

@@ -2,9 +2,8 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class AddClientDto : BaseAuditableEntity
+    public class AddClientDto : BaseAddAuditableDto
     {
-        public int Id { get; set; }
         public string? NCcode { get; set; }
         public string? MobileNubmer { get; set; }
         public string? PostalCode { get; set; }
@@ -12,6 +11,5 @@ namespace ContractorsAuctioneer.Dtos
         public string? address { get; set; }
         public string? MainSection { get; set; }
         public string? SubSection { get; set; }
-        public int ApplicationUserId { get; set; }
     }
 }

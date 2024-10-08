@@ -17,11 +17,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Authentication&Autherization
+// Authentication&Autherization 3
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Request
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IRequestStatusService, RequestStatusService>();
+builder.Services.AddSingleton<IHostedService, RequestCheckService>();
 // Client
 builder.Services.AddScoped<IClientService, ClientService>();
 // Region
@@ -31,6 +32,8 @@ builder.Services.AddScoped<IContractorService, ContractorService>();
 // BidOfContractor
 builder.Services.AddScoped<IBidOfContractorService, BidOfContractorService>();
 builder.Services.AddScoped<IBidStatusService, BidStatusService>();
+builder.Services.AddSingleton<IHostedService, BidOfContractorCheckService>();
+
 // Project
 builder.Services.AddScoped<IProjectService, ProjectService>();
 // FileAttachment

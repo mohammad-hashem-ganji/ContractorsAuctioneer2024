@@ -80,7 +80,7 @@ namespace ContractorsAuctioneer.Controllers
         }
         [HttpPost]
         [Route(nameof(UpdateBid))]
-        public async Task<IActionResult> UpdateBid([FromBody] BidOfContractorDto bidDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateBid([FromBody] UpdateBidOfContractorDto bidDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -115,7 +115,21 @@ namespace ContractorsAuctioneer.Controllers
                 if (entity.IsSuccessful && entity.Data != null)
                 {
                     entity.Data.IsDeleted = true;
-                    var result = await _bidOfContractorService.UpdateAsync(entity.Data, cancellationToken);
+                    var updatecontract = new UpdateBidOfContractorDto
+                    {
+                        BidStatuses = entity.Data.BidStatuses,
+                        CanChangeBid = entity.Data.CanChangeBid,
+                        DeletedAt = DateTime.Now,
+                        DeletedBy = entity.Data.DeletedBy,
+                        ExpireAt = entity.Data.ExpireAt,
+                        Id = entity.Data.Id,
+                        IsDeleted = true,
+                        RequestId = entity.Data.RequestId,
+                        SuggestedFee = entity.Data.SuggestedFee,
+                        UpdatedAt = DateTime.Now,
+                        UpdatedBy = entity.Data.UpdatedBy
+                    };
+                    var result = await _bidOfContractorService.UpdateAsync(updatecontract, cancellationToken);
                     return NoContent();
                 }
                 return NotFound(entity);

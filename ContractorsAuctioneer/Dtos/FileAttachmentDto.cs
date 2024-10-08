@@ -2,7 +2,7 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class FileAttachmentDto : BaseAuditableEntity
+    public class FileAttachmentDto 
     {
         public int Id { get; set; }
         public string? FileName { get; set; }

@@ -2,7 +2,7 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class AddBidOfContractorDto : BaseAuditableEntity
+    public class AddBidOfContractorDto : BaseAddAuditableDto
     {
         public int Id { get; set; }
         public int? SuggestedFee { get; set; }

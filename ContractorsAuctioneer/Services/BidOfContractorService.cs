@@ -19,7 +19,8 @@ namespace ContractorsAuctioneer.Services
 
         private readonly ApplicationDbContext _context;
         private readonly IContractorService _contractorService;
-        public BidOfContractorService(ApplicationDbContext context, IContractorService contractorService)
+        public BidOfContractorService(ApplicationDbContext context, 
+            IContractorService contractorService)
         {
             _context = context;
             _contractorService = contractorService;
@@ -74,13 +75,11 @@ namespace ContractorsAuctioneer.Services
                         Id = bidOfContractor.Id,
                         CanChangeBid = bidOfContractor.CanChangeBid,
                         RequestId = bidOfContractor.RequestId,
-                        CreatedAt = bidOfContractor.CreatedAt,
-                        CreatedBy = bidOfContractor.CreatedBy,
                         ContractorId = bidOfContractor.ContractorId,
                         IsDeleted = bidOfContractor.IsDeleted,
-                        UpdatedBy = bidOfContractor.UpdatedBy,
-                        UpdatedAt = bidOfContractor.UpdatedAt,
                         SuggestedFee = bidOfContractor.SuggestedFee,
+                        CreatedBy= bidOfContractor.CreatedBy,
+                        CreatedAt = bidOfContractor.CreatedAt,
                         BidStatuses = bidOfContractor.BidStatuses.Select(b => new BidStatus
                         {
                             Id = b.Id,
@@ -113,13 +112,10 @@ namespace ContractorsAuctioneer.Services
                     Id = x.Id,
                     CanChangeBid = x.CanChangeBid,
                     RequestId = x.RequestId,
-                    CreatedAt = x.CreatedAt,
-                    CreatedBy = x.CreatedBy,
                     ContractorId = x.ContractorId,
                     IsDeleted = x.IsDeleted,
-                    UpdatedBy = x.UpdatedBy,
-                    UpdatedAt = x.UpdatedAt,
                     SuggestedFee = x.SuggestedFee,
+                    CreatedAt = x.CreatedAt,
                     BidStatuses = x.BidStatuses.Select(b => new BidStatus
                     {
                         Id = b.Id,
@@ -145,17 +141,17 @@ namespace ContractorsAuctioneer.Services
                 return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(ErrorMessages.ErrorWhileRetrievingBidsOfContracotrs);
             }
         }
-        public async Task<Result<BidOfContractorDto>> UpdateAsync(BidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
+        public async Task<Result<UpdateBidOfContractorDto>> UpdateAsync(UpdateBidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
         {
             try
             {
 
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
-                  .Where(x => x.Id == bidOfContractorDto.Id && x.IsDeleted == false)
+                  .Where(x => x.Id == bidOfContractorDto.Id )
                   .FirstOrDefaultAsync(cancellationToken);
                 if (bidOfContractor is null)
                 {
-                    return new Result<BidOfContractorDto>().WithValue(null).Failure(ErrorMessages.BidOfContractorNotFound);
+                    return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.BidOfContractorNotFound);
                 }
                 bidOfContractor.UpdatedAt = bidOfContractorDto.UpdatedAt;
                 bidOfContractor.UpdatedBy = bidOfContractorDto.UpdatedBy;
@@ -164,11 +160,11 @@ namespace ContractorsAuctioneer.Services
                 bidOfContractor.SuggestedFee = bidOfContractorDto.SuggestedFee;
                 _context.BidOfContractors.Update(bidOfContractor);
                 await _context.SaveChangesAsync(cancellationToken);
-                return new Result<BidOfContractorDto>().WithValue(bidOfContractorDto).Success("پیشنهاد آپدیت شد");
+                return new Result<UpdateBidOfContractorDto>().WithValue(bidOfContractorDto).Success("پیشنهاد آپدیت شد");
             }
             catch (Exception ex)
             {
-                return new Result<BidOfContractorDto>().WithValue(null).Failure(ex.Message);
+                return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure(ex.Message);
             }
         }
         public async Task<Result<List<BidOfContractorDto>>> GetBidsOfContractorAsync(int contractorId, CancellationToken cancellationToken)
@@ -186,8 +182,6 @@ namespace ContractorsAuctioneer.Services
                     SuggestedFee = x.SuggestedFee,
                     IsDeleted = x.IsDeleted,
                     RequestId = x.RequestId,
-                    UpdatedBy = x.UpdatedBy,
-                    UpdatedAt = x.UpdatedAt,
                     CreatedAt = x.CreatedAt,
                     CreatedBy = x.CreatedBy,
                     BidStatuses = x.BidStatuses.Select(b => new BidStatus
@@ -195,12 +189,6 @@ namespace ContractorsAuctioneer.Services
                         Id = b.Id,
                         Status = b.Status,
                         CreatedAt = b.CreatedAt,
-                        CreatedBy = b.CreatedBy,
-                        DeletedAt = b.DeletedAt,
-                        DeletedBy = b.DeletedBy,
-                        IsDeleted = b.IsDeleted,
-                        UpdatedAt = b.UpdatedAt,
-                        UpdatedBy = b.UpdatedBy
                     }).ToList()
                 }).ToListAsync(cancellationToken);
                 if (result.Any())
@@ -227,14 +215,13 @@ namespace ContractorsAuctioneer.Services
                         && x.Request.IsTenderOver == true
                         && x.Request.IsActive == true
                         && x.IsDeleted == false)
-                        || (x.BidStatuses.Any(b => b.Status == BidStatusEnum.BidRejectedByContractor &&
-                        b.ContractorBidId == x.Id)))
+                        || (x.BidStatuses.Any(b => b.Status == BidStatusEnum.BidRejectedByContractor  &&b.ContractorBidId == x.Id)
+                        ))
                         .Include(x => x.Request)
                         .Select(bid => new BidOfContractorDto
                         {
                             Id = bid.Id,
                             RequestId = bid.RequestId,
-                            CreatedAt = bid.CreatedAt,
                             ContractorId = bid.ContractorId,
                             SuggestedFee = bid.SuggestedFee,
                         })
@@ -276,7 +263,6 @@ namespace ContractorsAuctioneer.Services
                         {
                             Id = bid.Id,
                             RequestId = bid.RequestId,
-                            CreatedAt = bid.CreatedAt,
                             ContractorId = bid.ContractorId,
                             SuggestedFee = bid.SuggestedFee,
                         })

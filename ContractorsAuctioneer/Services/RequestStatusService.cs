@@ -13,12 +13,11 @@ namespace ContractorsAuctioneer.Services
     public class RequestStatusService : IRequestStatusService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IRequestStatusHistoryService _requestStatusHistoryService;
+        
 
-        public RequestStatusService(ApplicationDbContext context, IRequestStatusHistoryService requestStatusHistoryService)
+        public RequestStatusService(ApplicationDbContext context)
         {
             _context = context;
-            _requestStatusHistoryService = requestStatusHistoryService;
         }
         public async Task<Result<AddRequestStatusDto>> AddAsync(AddRequestStatusDto requestStatusDto, CancellationToken cancellationToken) 
         {
@@ -66,10 +65,6 @@ namespace ContractorsAuctioneer.Services
                         Id = requestStatus.Id,
                         Status = requestStatus.Status,
                         RequestId = requestStatus.RequestId,
-                        CreatedAt = requestStatus.CreatedAt,
-                        CreatedBy = requestStatus.CreatedBy,
-                        UpdatedBy = requestStatus.UpdatedBy,
-                        UpdatedAt = requestStatus.UpdatedAt
                     };
                     return new Result<RequestStatusDto>()
                         .WithValue(requestStatusDto)
@@ -97,8 +92,8 @@ namespace ContractorsAuctioneer.Services
                 }
                 requestStatus.RequestId = requestStatusDto.RequestId;
                 requestStatus.Status = requestStatusDto.Status;
-                requestStatus.UpdatedAt = requestStatusDto.UpdatedAt;
-                requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
+                requestStatus.UpdatedAt = DateTime.Now;
+                //requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
                 _context.RequestStatuses.Update(requestStatus);
                 await _context.SaveChangesAsync();
 
@@ -123,8 +118,6 @@ namespace ContractorsAuctioneer.Services
                     .OrderByDescending(x => x.CreatedAt)
                     .Select(r => new RequestStatusDto
                     {
-                        CreatedAt = r.CreatedAt,
-                        CreatedBy = r.CreatedBy,
                         RequestId = r.RequestId,
                         Status = r.Status,
                     }).ToListAsync(cancellationToken);

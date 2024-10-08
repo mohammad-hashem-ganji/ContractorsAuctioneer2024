@@ -10,13 +10,12 @@ namespace ContractorsAuctioneer.Services
     public class BidOfContractorCheckService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IBidStatusService _bidStatusService;
+        
 
         private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
-        public BidOfContractorCheckService(IServiceProvider serviceProvider, IBidStatusService bidStatusService)
+        public BidOfContractorCheckService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _bidStatusService = bidStatusService;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -31,7 +30,7 @@ namespace ContractorsAuctioneer.Services
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
+                var bidStatusService = scope.ServiceProvider.GetRequiredService<IBidStatusService>();
                 try
                 {
                     var expiredBidsForClients = await dbContext.BidOfContractors
@@ -47,7 +46,7 @@ namespace ContractorsAuctioneer.Services
                     foreach (var bid in expiredBidsForContractors)
                     {
                         bid.ExpireAt = null;
-                        var expired = await _bidStatusService
+                        var expired = await bidStatusService
                             .AddAsync(new Dtos.AddBidStatusDto
                             {
                                 CreatedAt = DateTime.Now,
@@ -65,7 +64,7 @@ namespace ContractorsAuctioneer.Services
                     {
 
                         bid.ExpireAt = null;
-                        var expired = await _bidStatusService
+                        var expired = await bidStatusService
     
                         .AddAsync(new Dtos.AddBidStatusDto
                         {

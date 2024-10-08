@@ -22,6 +22,7 @@ namespace ContractorsAuctioneer.Entites
         public Request? Request { get; set; }
         public bool? IsAcceptedByClient { get; set; }
         public bool? CanChangeBid { get; set; }
+        public bool IsDeleted { get; set; }
         public ICollection<BidStatus>? BidStatuses { get; set; }
         public Project? Project { get; set; }
 

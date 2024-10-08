@@ -71,15 +71,7 @@ namespace ContractorsAuctioneer.Services
                             Title = rs.Title,
                             ConfirmationDate = rs.ConfirmationDate,
                             RegistrationDate = rs.RegistrationDate,
-                            CreatedAt = rs.CreatedAt,
-                            CreatedBy = rs.CreatedBy,
                             Description = rs.Description,
-                            IsDeleted = rs.IsDeleted,
-                            DeletedAt = rs.DeletedAt,
-                            DeletedBy = rs.DeletedBy,
-                            UpdatedAt = rs.UpdatedAt,
-                            UpdatedBy = rs.UpdatedBy
-
                         }).ToList(),
                         UpdatedAt = client.UpdatedAt,
                         UpdatedBy = client.UpdatedBy,

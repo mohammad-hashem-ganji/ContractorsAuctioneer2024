@@ -17,7 +17,9 @@ namespace ContractorsAuctioneer.Services
         private readonly Random _random = new Random();
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public VerificationService(ApplicationDbContext context, IConfiguration configuration, UserManager<ApplicationUser> userManager)
+        public VerificationService(ApplicationDbContext context,
+            IConfiguration configuration,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _configuration = configuration;

@@ -20,7 +20,11 @@ namespace ContractorsAuctioneer.Services
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManger;
         private readonly IConfiguration _configuration;
-        public AuthService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<int>> roleManager, SignInManager<ApplicationUser> signInManger, ApplicationDbContext context, IConfiguration configuration)
+        public AuthService(UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole<int>> roleManager,
+            SignInManager<ApplicationUser> signInManger,
+            ApplicationDbContext context, 
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;

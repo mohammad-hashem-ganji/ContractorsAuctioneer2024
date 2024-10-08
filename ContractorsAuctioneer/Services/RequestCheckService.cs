@@ -9,13 +9,12 @@ namespace ContractorsAuctioneer.Services
     public class RequestCheckService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IRequestStatusService _requestStatusService;
         private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
 
-        public RequestCheckService(IServiceProvider serviceProvider, IRequestStatusService requestStatusService)
+        public RequestCheckService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _requestStatusService = requestStatusService;
+            
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,6 +31,7 @@ namespace ContractorsAuctioneer.Services
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var requestStatusService = scope.ServiceProvider.GetRequiredService<IRequestStatusService>();
 
                 try
                 {
@@ -61,7 +61,7 @@ namespace ContractorsAuctioneer.Services
                         request.IsActive = true;
                         request.IsTenderOver = true;
                         request.ExpireAt = null;
-                        var tenderOver = await _requestStatusService
+                        var tenderOver = await requestStatusService
                             .AddAsync(new Dtos.AddRequestStatusDto
                             {
                                 CreatedAt = DateTime.Now,

@@ -15,15 +15,13 @@ namespace ContractorsAuctioneer.Controllers
         private readonly IBidOfContractorService _bidOfContractorService;
         private readonly IProjectService _projectService;
         private readonly IRequestService _requestService;
-        private readonly IRejectedRequestByClientService _rejectedRequestService;
         private readonly IRequestStatusService _requestStatusService;
         private readonly IBidStatusService _bidStatusService;
-        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRejectedRequestByClientService rejectedRequestService, IRequestStatusService requestStatusService, IBidStatusService bidStatusService)
+        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRequestStatusService requestStatusService, IBidStatusService bidStatusService)
         {
             _bidOfContractorService = bidOfContractorService;
             _projectService = projectService;
             _requestService = requestService;
-            _rejectedRequestService = rejectedRequestService;
             _requestStatusService = requestStatusService;
             _bidStatusService = bidStatusService;
         }
@@ -49,7 +47,7 @@ namespace ContractorsAuctioneer.Controllers
                     BidOfContractorId = bid.Data.Id,
                     Status = Entites.BidStatusEnum.BidApprovedByClient,
                     CreatedAt = DateTime.Now,
-                    CreatedBy = bidDto.UpdatedBy
+                    //CreatedBy = 
                 };
                 var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newBidStatus.IsSuccessful)
@@ -57,7 +55,21 @@ namespace ContractorsAuctioneer.Controllers
                     return Problem(newBidStatus.Message);
                 }
                 bid.Data.ExpireAt = DateTime.Now.AddDays(2);
-                var updatedBid = await _bidOfContractorService.UpdateAsync(bid.Data, cancellationToken);
+                var updatecontract = new UpdateBidOfContractorDto
+                {
+                    BidStatuses = bid.Data.BidStatuses,
+                    CanChangeBid = bid.Data.CanChangeBid,
+                    DeletedAt = DateTime.Now,
+                    DeletedBy = bid.Data.DeletedBy,
+                    ExpireAt = bid.Data.ExpireAt,
+                    Id = bid.Data.Id,
+                    IsDeleted = true,
+                    RequestId = bid.Data.RequestId,
+                    SuggestedFee = bid.Data.SuggestedFee,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = bid.Data.UpdatedBy
+                };
+                var updatedBid = await _bidOfContractorService.UpdateAsync(updatecontract, cancellationToken);
                 if (!updatedBid.IsSuccessful)
                 {
                     return Problem(updatedBid.Message);
@@ -84,7 +96,7 @@ namespace ContractorsAuctioneer.Controllers
                 var newStatus = new AddRequestStatusDto
                 {
                     CreatedAt = DateTime.Now,
-                    CreatedBy = requestDto.UpdatedBy,
+                    //CreatedBy = requestDto.
                     RequestId = requestDto.RequestId,
                     Status = Entites.RequestStatusEnum.RequestApprovedByClient
                 };
@@ -119,7 +131,7 @@ namespace ContractorsAuctioneer.Controllers
                 var newStatus = new AddRequestStatusDto
                 {
                     CreatedAt = DateTime.Now,
-                    CreatedBy = requestDto.UpdatedBy,
+                    //CreatedBy = requestDto.,
                     RequestId = requestDto.RequestId,
                     Status = Entites.RequestStatusEnum.RequestRejectedByClient
                 };

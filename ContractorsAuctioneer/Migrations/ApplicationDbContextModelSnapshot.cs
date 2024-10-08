@@ -104,10 +104,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int>("ContractorId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -116,7 +116,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsAccepted")
+                    b.Property<DateTime?>("ExpireAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsAcceptedByClient")
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
@@ -131,7 +134,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -154,10 +157,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int>("ContractorBidId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -169,13 +172,13 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("Status")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -183,45 +186,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.HasIndex("ContractorBidId");
 
                     b.ToTable("BidStatuses");
-                });
-
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.BidStatusHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BidStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BidStatusId");
-
-                    b.ToTable("BidStatusHistories");
                 });
 
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Client", b =>
@@ -235,10 +199,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int>("ApplicationUserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -271,7 +235,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.Property<string>("address")
@@ -333,10 +297,10 @@ namespace ContractorsAuctioneer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -360,7 +324,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -381,10 +345,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int>("ApplicationUserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -402,7 +366,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -426,10 +390,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int>("ContractorBidId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -447,7 +411,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -466,10 +430,10 @@ namespace ContractorsAuctioneer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -490,7 +454,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -498,24 +462,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectStatuses");
-                });
-
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.ProjectStatusHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ProjectStatusId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectStatusId");
-
-                    b.ToTable("ProjectStatusHistories");
                 });
 
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Region", b =>
@@ -537,35 +483,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.ToTable("Regions");
                 });
 
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.RejectedRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequestId");
-
-                    b.ToTable("RejectedRequests");
-                });
-
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Request", b =>
                 {
                     b.Property<int>("Id")
@@ -580,10 +497,10 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("ConfirmationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -595,7 +512,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpireAt")
+                    b.Property<DateTime?>("ExpireAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsAcceptedByClient")
@@ -628,7 +545,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -648,10 +565,10 @@ namespace ContractorsAuctioneer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CreatedBy")
+                    b.Property<int>("CreatedBy")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -672,7 +589,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedBy")
+                    b.Property<int>("UpdatedBy")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -680,24 +597,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.HasIndex("RequestId");
 
                     b.ToTable("RequestStatuses");
-                });
-
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.RequestStatusHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("RequestStatusId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequestStatusId");
-
-                    b.ToTable("RequestStatusHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
@@ -883,17 +782,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.Navigation("ContractorBid");
                 });
 
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.BidStatusHistory", b =>
-                {
-                    b.HasOne("ContractorsAuctioneer.Entites.BidStatus", "BidStatus")
-                        .WithMany("BidStatusHistories")
-                        .HasForeignKey("BidStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("BidStatus");
-                });
-
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Client", b =>
                 {
                     b.HasOne("ContractorsAuctioneer.Entites.ApplicationUser", "ApplicationUser")
@@ -960,28 +848,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.ProjectStatusHistory", b =>
-                {
-                    b.HasOne("ContractorsAuctioneer.Entites.ProjectStatus", "ProjectStatus")
-                        .WithMany("ProjectStatusHistories")
-                        .HasForeignKey("ProjectStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ProjectStatus");
-                });
-
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.RejectedRequest", b =>
-                {
-                    b.HasOne("ContractorsAuctioneer.Entites.Request", "Request")
-                        .WithMany("RejectedRequests")
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Request");
-                });
-
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Request", b =>
                 {
                     b.HasOne("ContractorsAuctioneer.Entites.Client", "Client")
@@ -1010,17 +876,6 @@ namespace ContractorsAuctioneer.Migrations
                         .IsRequired();
 
                     b.Navigation("Request");
-                });
-
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.RequestStatusHistory", b =>
-                {
-                    b.HasOne("ContractorsAuctioneer.Entites.RequestStatus", "RequestStatus")
-                        .WithMany("RequestStatusHistories")
-                        .HasForeignKey("RequestStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("RequestStatus");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1090,11 +945,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.BidStatus", b =>
-                {
-                    b.Navigation("BidStatusHistories");
-                });
-
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Client", b =>
                 {
                     b.Navigation("Requests");
@@ -1110,11 +960,6 @@ namespace ContractorsAuctioneer.Migrations
                     b.Navigation("ProjectStatuses");
                 });
 
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.ProjectStatus", b =>
-                {
-                    b.Navigation("ProjectStatusHistories");
-                });
-
             modelBuilder.Entity("ContractorsAuctioneer.Entites.Region", b =>
                 {
                     b.Navigation("Requests");
@@ -1126,14 +971,7 @@ namespace ContractorsAuctioneer.Migrations
 
                     b.Navigation("FileAttachments");
 
-                    b.Navigation("RejectedRequests");
-
                     b.Navigation("RequestStatuses");
-                });
-
-            modelBuilder.Entity("ContractorsAuctioneer.Entites.RequestStatus", b =>
-                {
-                    b.Navigation("RequestStatusHistories");
                 });
 #pragma warning restore 612, 618
         }
