@@ -47,7 +47,6 @@ namespace ContractorsAuctioneer.Controllers
                     BidOfContractorId = bid.Data.Id,
                     Status = Entites.BidStatusEnum.BidApprovedByClient,
                     CreatedAt = DateTime.Now,
-                    //CreatedBy = 
                 };
                 var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newBidStatus.IsSuccessful)
@@ -56,16 +55,9 @@ namespace ContractorsAuctioneer.Controllers
                 }
                 bid.Data.ExpireAt = DateTime.Now.AddDays(2);
                 var updatecontract = new UpdateBidOfContractorDto
-                {
-                    BidStatuses = bid.Data.BidStatuses,
-                    CanChangeBid = bid.Data.CanChangeBid,
-                    DeletedAt = DateTime.Now,
-                    DeletedBy = bid.Data.DeletedBy,
+                { 
                     ExpireAt = bid.Data.ExpireAt,
-                    Id = bid.Data.Id,
-                    IsDeleted = true,
-                    RequestId = bid.Data.RequestId,
-                    SuggestedFee = bid.Data.SuggestedFee,
+                    Id = bid.Data.Id,                   
                     UpdatedAt = DateTime.Now,
                     UpdatedBy = bid.Data.UpdatedBy
                 };

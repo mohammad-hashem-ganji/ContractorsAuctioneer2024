@@ -122,17 +122,9 @@ namespace ContractorsAuctioneer.Controllers
                     entity.Data.IsDeleted = true;
                     var updatecontract = new UpdateBidOfContractorDto
                     {
-                        BidStatuses = entity.Data.BidStatuses,
-                        CanChangeBid = entity.Data.CanChangeBid,
-                        DeletedAt = DateTime.Now,
-                        DeletedBy = entity.Data.DeletedBy,
-                        ExpireAt = entity.Data.ExpireAt,
                         Id = entity.Data.Id,
-                        IsDeleted = true,
-                        RequestId = entity.Data.RequestId,
-                        SuggestedFee = entity.Data.SuggestedFee,
+                        IsDeleted = true,                      
                         UpdatedAt = DateTime.Now,
-                        UpdatedBy = entity.Data.UpdatedBy
                     };
                     var result = await _bidOfContractorService.UpdateAsync(updatecontract, cancellationToken);
                     return NoContent();

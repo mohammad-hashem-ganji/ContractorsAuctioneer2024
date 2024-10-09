@@ -62,7 +62,8 @@ namespace ContractorsAuctioneer.Services
                     CanChangeBid = true,
                     ContractorId = user.UserId,
                     RequestId = bidOfContractorDto.RequestId,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = user.UserId
                 };
                 await _context.BidOfContractors.AddAsync(bidOfContractor, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);

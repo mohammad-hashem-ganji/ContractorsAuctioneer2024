@@ -11,10 +11,12 @@ namespace ContractorsAuctioneer.Services
     public class BidStatusService : IBidStatusService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BidStatusService(ApplicationDbContext context)
+        public BidStatusService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<Result<AddBidStatusDto>> AddAsync(AddBidStatusDto bidDto, CancellationToken cancellationToken)
         {
@@ -24,12 +26,29 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<AddBidStatusDto>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<AddBidStatusDto>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
+                if (user is null)
+                {
+                    return new Result<AddBidStatusDto>().WithValue(null).Failure("خطا.");
+                }
                 var bidStatus = new BidStatus
                 {
                     ContractorBidId = bidDto.BidOfContractorId,
-                    CreatedBy = bidDto.CreatedBy,
+                    CreatedBy = user.UserId,
                     Status = bidDto.Status,
-                    CreatedAt = bidDto.CreatedAt
+                    CreatedAt = DateTime.Now
                 };
                 await _context.BidStatuses.AddAsync(bidStatus, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
