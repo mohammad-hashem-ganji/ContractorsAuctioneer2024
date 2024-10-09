@@ -10,6 +10,6 @@ namespace ContractorsAuctioneer.Dtos
         public bool? CanChangeBid { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime ExpireAt { get; set; }
-        public ICollection<BidStatus>? BidStatuses { get; set; }
+
     }
 }
