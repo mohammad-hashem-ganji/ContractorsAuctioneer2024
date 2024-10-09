@@ -2,7 +2,7 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class AddRequestStatusDto : BaseAddAuditableDto
+    public class AddRequestStatusDto 
     {
         public int RequestId { get; set; }
         public RequestStatusEnum Status { get; set; }

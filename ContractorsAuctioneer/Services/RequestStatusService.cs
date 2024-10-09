@@ -13,11 +13,12 @@ namespace ContractorsAuctioneer.Services
     public class RequestStatusService : IRequestStatusService
     {
         private readonly ApplicationDbContext _context;
-        
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RequestStatusService(ApplicationDbContext context)
+        public RequestStatusService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<Result<AddRequestStatusDto>> AddAsync(AddRequestStatusDto requestStatusDto, CancellationToken cancellationToken) 
         {
@@ -27,12 +28,25 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<AddRequestStatusDto>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<AddRequestStatusDto>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
                 var requestStatus = new RequestStatus
                 {
                     RequestId = requestStatusDto.RequestId,
                     Status = requestStatusDto.Status,
-                    CreatedBy = requestStatusDto.CreatedBy,
-                    CreatedAt = requestStatusDto.CreatedAt,
+                    CreatedBy = user.UserId,
+                    CreatedAt = DateTime.Now
                 };
                 await _context.RequestStatuses.AddAsync(requestStatus, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -65,6 +79,8 @@ namespace ContractorsAuctioneer.Services
                         Id = requestStatus.Id,
                         Status = requestStatus.Status,
                         RequestId = requestStatus.RequestId,
+                        CreatedAt = requestStatus.CreatedAt,
+                        CreatedBy = requestStatus.CreatedBy,
                     };
                     return new Result<RequestStatusDto>()
                         .WithValue(requestStatusDto)
@@ -82,6 +98,19 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<RequestStatusDto>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<RequestStatusDto>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
                 RequestStatus? requestStatus = await _context.RequestStatuses
                     .Where(x => x.Id == requestStatusDto.Id)
                     .Include(s => s.Request)
@@ -93,7 +122,7 @@ namespace ContractorsAuctioneer.Services
                 requestStatus.RequestId = requestStatusDto.RequestId;
                 requestStatus.Status = requestStatusDto.Status;
                 requestStatus.UpdatedAt = DateTime.Now;
-                //requestStatus.UpdatedBy = requestStatusDto.UpdatedBy;
+                requestStatus.UpdatedBy = user.UserId;
                 _context.RequestStatuses.Update(requestStatus);
                 await _context.SaveChangesAsync();
 
@@ -120,6 +149,8 @@ namespace ContractorsAuctioneer.Services
                     {
                         RequestId = r.RequestId,
                         Status = r.Status,
+                        CreatedBy = r.CreatedBy,
+                        CreatedAt = r.CreatedAt
                     }).ToListAsync(cancellationToken);
                 if (result is null) return new Result<List<RequestStatusDto>>()
                         .WithValue(null)

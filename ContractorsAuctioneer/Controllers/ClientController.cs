@@ -28,13 +28,13 @@ namespace ContractorsAuctioneer.Controllers
 
         [HttpPost]
         [Route(nameof(AcceptBid))]
-        public async Task<IActionResult> AcceptBid(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> AcceptBid(GetUpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var bid = await _bidOfContractorService.GetByIdAsync(bidDto.BidId, cancellationToken);
+            var bid = await _bidOfContractorService.GetByIdAsync(bidDto.Id, cancellationToken);
             if (!bid.IsSuccessful)
             {
                 return NotFound(bid);
@@ -46,7 +46,7 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     BidOfContractorId = bid.Data.Id,
                     Status = Entites.BidStatusEnum.BidApprovedByClient,
-                    CreatedAt = DateTime.Now,
+                   
                 };
                 var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newBidStatus.IsSuccessful)
@@ -58,8 +58,6 @@ namespace ContractorsAuctioneer.Controllers
                 { 
                     ExpireAt = bid.Data.ExpireAt,
                     Id = bid.Data.Id,                   
-                    UpdatedAt = DateTime.Now,
-                    UpdatedBy = bid.Data.UpdatedBy
                 };
                 var updatedBid = await _bidOfContractorService.UpdateAsync(updatecontract, cancellationToken);
                 if (!updatedBid.IsSuccessful)
@@ -87,8 +85,6 @@ namespace ContractorsAuctioneer.Controllers
             {
                 var newStatus = new AddRequestStatusDto
                 {
-                    CreatedAt = DateTime.Now,
-                    //CreatedBy = requestDto.
                     RequestId = requestDto.RequestId,
                     Status = Entites.RequestStatusEnum.RequestApprovedByClient
                 };

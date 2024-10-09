@@ -1,6 +1,6 @@
 ﻿namespace ContractorsAuctioneer.Dtos
 {
-    public class UpdateRequestAcceptanceDto : BaseUpdateAuditableDto
+    public class UpdateRequestAcceptanceDto 
     {
         public int RequestId { get; set; }
         public bool IsAccepted { get; set; }
