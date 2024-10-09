@@ -197,8 +197,6 @@ namespace ContractorsAuctioneer.Services
                     FileAttachments = request.FileAttachments.Select(f => new FileAttachmentDto
                     {
                         Id = f.Id,
-                        FileName = f.FileName,
-                        FilePath = f.FilePath,
     
                     }).ToList()
                 };
@@ -253,8 +251,6 @@ namespace ContractorsAuctioneer.Services
                        FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
                        {
                            Id = f.Id,
-                           FileName = f.FileName,
-                           FilePath = f.FilePath,
                       
                        }).ToList()
 

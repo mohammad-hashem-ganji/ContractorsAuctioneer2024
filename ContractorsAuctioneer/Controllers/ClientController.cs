@@ -118,8 +118,6 @@ namespace ContractorsAuctioneer.Controllers
             {
                 var newStatus = new AddRequestStatusDto
                 {
-                    CreatedAt = DateTime.Now,
-                    //CreatedBy = requestDto.,
                     RequestId = requestDto.RequestId,
                     Status = Entites.RequestStatusEnum.RequestRejectedByClient
                 };

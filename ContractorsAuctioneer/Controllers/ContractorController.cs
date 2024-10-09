@@ -46,8 +46,6 @@ namespace ContractorsAuctioneer.Controllers
             {
                 var newStatus = new AddRequestStatusDto
                 {
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = rejectedRequestDto.UpdatedBy,
                     RequestId = rejectedRequestDto.RequestId,
                     Status = Entites.RequestStatusEnum.RequestRejectedByContractor
                 };
@@ -105,8 +103,6 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     BidOfContractorId = bid.Data.Id,
                     Status = Entites.BidStatusEnum.BidApprovedByContractor,
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = bidDto.UpdatedBy
                 };
                 var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newBidStatus.IsSuccessful)
@@ -150,8 +146,6 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     BidOfContractorId = bid.Data.Id,
                     Status = Entites.BidStatusEnum.BidRejectedByContractor,
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = bidDto.UpdatedBy
                 };
                 var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newBidStatus.IsSuccessful)

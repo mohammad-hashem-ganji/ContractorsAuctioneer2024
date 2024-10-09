@@ -49,8 +49,6 @@ namespace ContractorsAuctioneer.Services
                         var expired = await bidStatusService
                             .AddAsync(new Dtos.AddBidStatusDto
                             {
-                                CreatedAt = DateTime.Now,
-                                CreatedBy = 100,
                                 BidOfContractorId = bid.Id,
                                 Status = BidStatusEnum.TimeForCheckingBidForContractorExpired
                             }, stoppingToken);
@@ -68,8 +66,6 @@ namespace ContractorsAuctioneer.Services
     
                         .AddAsync(new Dtos.AddBidStatusDto
                         {
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = 100,
                             BidOfContractorId = bid.Id,
                             Status = BidStatusEnum.TimeForCheckingBidForClientExpired,
                         }, stoppingToken);

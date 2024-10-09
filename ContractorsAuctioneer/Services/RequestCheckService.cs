@@ -64,8 +64,6 @@ namespace ContractorsAuctioneer.Services
                         var tenderOver = await requestStatusService
                             .AddAsync(new Dtos.AddRequestStatusDto
                             {
-                                CreatedAt = DateTime.Now,
-                                CreatedBy = 100,
                                 RequestId = request.Id,
                                 Status = RequestStatusEnum.RequestTenderFinished,
                             }, stoppingToken);
