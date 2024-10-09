@@ -29,5 +29,16 @@ namespace ContractorsAuctioneer.Controllers
 
             return BadRequest(result);
         }
+        [HttpGet]
+        [Route(nameof(GetFile))]
+        public async Task<IActionResult> GetFile(int fileId, CancellationToken cancellationToken)
+        {
+            var file = await _fileAttachmentService.GetFileAsync(fileId, cancellationToken);
+            if (file.IsSuccessful)
+            {
+                return Ok(file);
+            }
+            return BadRequest(file);
+        }
     }
 }

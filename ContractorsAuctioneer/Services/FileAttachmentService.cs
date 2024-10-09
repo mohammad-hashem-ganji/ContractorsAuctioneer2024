@@ -118,7 +118,7 @@ namespace ContractorsAuctioneer.Services
             }
         }
 
-        public async Task<Result<FileStreamResult>> GetFileAsync(int fileId)
+        public async Task<Result<FileStreamResult>> GetFileAsync(int fileId,CancellationToken cancellationToken)
         {
             var fileAttachment = await _context.FileAttachments.FindAsync(fileId);
             if (fileAttachment == null)
