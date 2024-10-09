@@ -2,6 +2,7 @@
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +15,15 @@ namespace ContractorsAuctioneer.Controllers
     {
         private readonly IBidOfContractorService _bidOfContractorService;
         private readonly IContractorService _contractorService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BidOfContractorController(IBidOfContractorService bidOfContractorService, IContractorService contractorService)
+        public BidOfContractorController(IBidOfContractorService bidOfContractorService, IContractorService contractorService, IHttpContextAccessor httpContextAccessor)
         {
             _bidOfContractorService = bidOfContractorService;
             _contractorService = contractorService;
+            _httpContextAccessor = httpContextAccessor;
         }
-
+        [Authorize(Roles= "Contractor")]
         [HttpPost]
         [Route(nameof(AddBid))]
         public async Task<IActionResult> AddBid([FromBody] AddBidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
@@ -29,12 +32,12 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var result = await _bidOfContractorService.AddAsync(bidOfContractorDto, cancellationToken);
-            if (result.IsSuccessful)
+            var addResult = await _bidOfContractorService.AddAsync(bidOfContractorDto, cancellationToken);
+            if (addResult.IsSuccessful)
             {
-                return Ok(result);
+                return Ok(addResult);
             }
-            return StatusCode(500, result);
+            return StatusCode(500, addResult);
         }
         [HttpGet]
         [Route(nameof(GetbidById))]
@@ -51,12 +54,14 @@ namespace ContractorsAuctioneer.Controllers
             }
             return NotFound(result);
         }
+        [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(GetAllBids))]
         public async Task<IActionResult> GetAllBids(CancellationToken cancellationToken)
         {
             try
             {
+                var users = HttpContext.User.Identity;
                 var result = await _bidOfContractorService.GetAllAsync(cancellationToken);
                 if (result.IsSuccessful)
                 {
@@ -88,6 +93,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             try
             {
+             
                 var result = await _bidOfContractorService.UpdateAsync(bidDto, cancellationToken);
                 if (result.IsSuccessful)
                 {
@@ -95,13 +101,12 @@ namespace ContractorsAuctioneer.Controllers
                 }
                 return NotFound(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new
                     {
                         Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
                     });
             }
         }
@@ -134,13 +139,12 @@ namespace ContractorsAuctioneer.Controllers
                 }
                 return NotFound(entity);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new
                     {
                         Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
                     });
             }
 
@@ -148,13 +152,9 @@ namespace ContractorsAuctioneer.Controllers
 
         [HttpGet]
         [Route(nameof(GetBidsOfContractor))]
-        public async Task<IActionResult> GetBidsOfContractor(int contractorId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBidsOfContractor(CancellationToken cancellationToken)
         {
-            if (contractorId <= 0)
-            {
-                return BadRequest("ورودی نامعتبر");
-            }
-            var bidsOfContractor = await _bidOfContractorService.GetBidsOfContractorAsync(contractorId, cancellationToken);
+            var bidsOfContractor = await _bidOfContractorService.GetBidsOfContractorAsync(cancellationToken);
             if (bidsOfContractor.IsSuccessful)
             {
                 //var bids = bidsOfContractor.Data;

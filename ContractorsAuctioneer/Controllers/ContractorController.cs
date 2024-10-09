@@ -76,9 +76,9 @@ namespace ContractorsAuctioneer.Controllers
         }
         [HttpGet]
         [Route(nameof(ShowBidsAcceptedByClient))]
-        public async Task<IActionResult> ShowBidsAcceptedByClient(int contractorId, CancellationToken cancellationToken)
+        public async Task<IActionResult> ShowBidsAcceptedByClient(CancellationToken cancellationToken)
         {
-            var acceptedBids = await _bidOfContractorService.GetBidsAcceptedByClient(contractorId, cancellationToken);
+            var acceptedBids = await _bidOfContractorService.GetBidsAcceptedByClient(cancellationToken);
             if (!acceptedBids.IsSuccessful)
             {
                 return NotFound(acceptedBids);

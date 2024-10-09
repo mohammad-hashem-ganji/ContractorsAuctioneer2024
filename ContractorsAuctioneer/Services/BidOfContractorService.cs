@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 
@@ -19,25 +20,47 @@ namespace ContractorsAuctioneer.Services
 
         private readonly ApplicationDbContext _context;
         private readonly IContractorService _contractorService;
-        public BidOfContractorService(ApplicationDbContext context, 
-            IContractorService contractorService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public BidOfContractorService(ApplicationDbContext context,
+            IContractorService contractorService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _contractorService = contractorService;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<Result<AddBidOfContractorDto>> AddAsync(AddBidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
         {
+            
             if (bidOfContractorDto == null)
             {
                 return new Result<AddBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
             }
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<AddBidOfContractorDto>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<AddBidOfContractorDto>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
+                if (user is null)
+                {
+                    return new Result<AddBidOfContractorDto>().WithValue(null).Failure("خطا.");
+                }
+
                 var bidOfContractor = new BidOfContractor
                 {
                     SuggestedFee = bidOfContractorDto.SuggestedFee,
                     CanChangeBid = true,
-                    ContractorId = bidOfContractorDto.ContractorId,
+                    ContractorId = user.UserId,
                     RequestId = bidOfContractorDto.RequestId,
                     CreatedAt = DateTime.Now
                 };
@@ -45,7 +68,7 @@ namespace ContractorsAuctioneer.Services
                 await _context.SaveChangesAsync(cancellationToken);
                 return new Result<AddBidOfContractorDto>().WithValue(bidOfContractorDto).Success(SuccessMessages.OperationSuccessful);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new Result<AddBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.ErrorWileAddingBidOfContractor);
             }
@@ -54,6 +77,7 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
+           
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
                     .Where(x => x.Id == bidId)
                     .Include(x => x.Contractor)
@@ -73,19 +97,16 @@ namespace ContractorsAuctioneer.Services
                     var bidOfContractorDto = new BidOfContractorDto
                     {
                         Id = bidOfContractor.Id,
-                        CanChangeBid = bidOfContractor.CanChangeBid,
                         RequestId = bidOfContractor.RequestId,
                         ContractorId = bidOfContractor.ContractorId,
-                        IsDeleted = bidOfContractor.IsDeleted,
                         SuggestedFee = bidOfContractor.SuggestedFee,
-                        CreatedBy= bidOfContractor.CreatedBy,
                         CreatedAt = bidOfContractor.CreatedAt,
                         BidStatuses = bidOfContractor.BidStatuses.Select(b => new BidStatus
                         {
                             Id = b.Id,
                             Status = b.Status,
                             UpdatedAt = b.UpdatedAt,
-                            UpdatedBy = b.UpdatedBy
+                            UpdatedBy = b.CreatedBy
                         })
                         .OrderByDescending(b => b.CreatedAt)
                         .ToList()
@@ -110,10 +131,8 @@ namespace ContractorsAuctioneer.Services
                 var bidsOfContractorDto = bidsOfContractor.Where(a => a.IsDeleted == false).Select(x => new BidOfContractorDto
                 {
                     Id = x.Id,
-                    CanChangeBid = x.CanChangeBid,
                     RequestId = x.RequestId,
                     ContractorId = x.ContractorId,
-                    IsDeleted = x.IsDeleted,
                     SuggestedFee = x.SuggestedFee,
                     CreatedAt = x.CreatedAt,
                     BidStatuses = x.BidStatuses.Select(b => new BidStatus
@@ -145,7 +164,19 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure(errorMessage);
+                }
 
+                var user = result.Data;
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
                   .Where(x => x.Id == bidOfContractorDto.Id )
                   .FirstOrDefaultAsync(cancellationToken);
@@ -153,8 +184,8 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure(ErrorMessages.BidOfContractorNotFound);
                 }
-                bidOfContractor.UpdatedAt = bidOfContractorDto.UpdatedAt;
-                bidOfContractor.UpdatedBy = bidOfContractorDto.UpdatedBy;
+                bidOfContractor.UpdatedAt = DateTime.Now;
+                bidOfContractor.UpdatedBy = user.UserId;
                 bidOfContractor.CanChangeBid = bidOfContractorDto.CanChangeBid;
                 bidOfContractor.IsDeleted = bidOfContractorDto.IsDeleted;
                 bidOfContractor.SuggestedFee = bidOfContractorDto.SuggestedFee;
@@ -167,33 +198,45 @@ namespace ContractorsAuctioneer.Services
                 return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        public async Task<Result<List<BidOfContractorDto>>> GetBidsOfContractorAsync(int contractorId, CancellationToken cancellationToken)
+        public async Task<Result<List<BidOfContractorDto>>> GetBidsOfContractorAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _context
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
+                var bids = await _context
                 .BidOfContractors
-                .Where(x => x.ContractorId == contractorId && x.IsDeleted == false)
+                .Where(x => x.ContractorId == user.UserId && x.IsDeleted == false)
                 .Select(x => new BidOfContractorDto
                 {
                     ContractorId = x.ContractorId,
                     Id = x.Id,
-                    CanChangeBid = x.CanChangeBid,
                     SuggestedFee = x.SuggestedFee,
                     IsDeleted = x.IsDeleted,
                     RequestId = x.RequestId,
                     CreatedAt = x.CreatedAt,
-                    CreatedBy = x.CreatedBy,
                     BidStatuses = x.BidStatuses.Select(b => new BidStatus
                     {
                         Id = b.Id,
                         Status = b.Status,
                         CreatedAt = b.CreatedAt,
+                        CreatedBy = b.CreatedBy
                     }).ToList()
                 }).ToListAsync(cancellationToken);
-                if (result.Any())
+                if (bids.Any())
                 {
-                    return new Result<List<BidOfContractorDto>>().WithValue(result).Success("پیشنهاد ها یافت شدند .");
+                    return new Result<List<BidOfContractorDto>>().WithValue(bids).Success("پیشنهاد ها یافت شدند .");
                 }
                 else
                 {
@@ -247,58 +290,29 @@ namespace ContractorsAuctioneer.Services
             }
 
         }
-        public async Task<Result<List<BidOfContractorDto>>> UnAcceptRestBidsOfRequestAsync(int requestId,
-             List<int> unAcceptedBidsId, CancellationToken cancellationToken)
-        {
-            try
-            {
-                List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
-                        .Where(x => x.RequestId == requestId
-                        && unAcceptedBidsId.Contains(x.Id)
-                        && x.Request.IsTenderOver == true
-                        && x.Request.IsActive == true
-                        && x.IsDeleted == false)
-                        .Include(x => x.Request)
-                        .Select(bid => new BidOfContractorDto
-                        {
-                            Id = bid.Id,
-                            RequestId = bid.RequestId,
-                            ContractorId = bid.ContractorId,
-                            SuggestedFee = bid.SuggestedFee,
-                        })
-                        .ToListAsync(cancellationToken);
 
-
-                if (bidsOfContractor.Count != 0)
-                {
-                    bidsOfContractor.ForEach(x => x.IsAcceptedByClient = false);
-                    //_context.UpdateRange(bidsOfContractor);
-                    await _context.SaveChangesAsync(cancellationToken);
-                    return new Result<List<BidOfContractorDto>>()
-                        .WithValue(bidsOfContractor)
-                        .Success(SuccessMessages.BidsOfRequestFoundAndChangedAcceptance);
-                }
-                else
-                {
-                    return new Result<List<BidOfContractorDto>>()
-                        .WithValue(null)
-                        .Failure(ErrorMessages.BidsOfRequestNotFound);
-                }
-            }
-            catch (Exception)
-            {
-                return new Result<List<BidOfContractorDto>>()
-                        .WithValue(null)
-                        .Failure(ErrorMessages.ErrorWhileRetrievingBidsOfContracotrs);
-            }
-        }
-        public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(int contractorId, CancellationToken cancellationToken)
+        public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(CancellationToken cancellationToken)
         {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext is null)
+            {
+                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطا.");
+            }
+            var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+            if (!result.IsSuccessful)
+            {
+                var errorMessage = result.Message ?? "خطا !";
+                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure(errorMessage);
+            }
+
+            var user = result.Data;
             var acceptedBids = await _context.BidOfContractors
-                .Where(b => b.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))
+                .Where(b => b.ContractorId ==user.UserId &&
+                b.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))
                 .Include(x => x.BidStatuses)
                 .Select(x => new BidOfContractorDto
                 {
+                    
                     Id = x.Id,
                     SuggestedFee = x.SuggestedFee,
                     RequestId = x.RequestId,

@@ -64,33 +64,35 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return Unauthorized();
             }
-            IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user.Data);
-            if (!userUpdateResult.Succeeded)
-            {
-                return BadRequest(userUpdateResult.Errors); 
-            }
-            var phoneNumber = user.Data.PhoneNumber;
-            if (phoneNumber == null)
-            {
-                return BadRequest("Phone number is not set for this user.");
-            }
-            var result = await _verificationService
-                .GenerateAndSendCodeAsync(user.Data.Id, phoneNumber, CancellationToken.None);
+            var token = await _authService.GenerateJwtTokenAsync(user.Data);
+            return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
+            //IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user.Data);
+            //if (!userUpdateResult.Succeeded)
+            //{
+            //    return BadRequest(userUpdateResult.Errors); 
+            //}
+            //var phoneNumber = user.Data.PhoneNumber;
+            //if (phoneNumber == null)
+            //{
+            //    return BadRequest("Phone number is not set for this user.");
+            //}
+            //var result = await _verificationService
+            //    .GenerateAndSendCodeAsync(user.Data.Id, phoneNumber, CancellationToken.None);
 
-            if (!result.IsSuccessful)
-            {
-                return BadRequest(result.Message);
-            }
+            //if (!result.IsSuccessful)
+            //{
+            //    return BadRequest(result.Message);
+            //}
             //Add lastLoginHistory
-            AddLastLoginHistoryDto lastLogin = new AddLastLoginHistoryDto
-            {
-                ApplicationUserId = user.Data.Id,
-                CreatedAt = DateTime.Now,
-                CreatedBy = user.Data.Id,
-                LastLoginTime = DateTime.Now
-            };
-            await _lastLoginHistoryService.AddAsync(lastLogin,cancellationToken);
-            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}" });
+            //AddLastLoginHistoryDto lastLogin = new AddLastLoginHistoryDto
+            //{
+            //    ApplicationUserId = user.Data.Id,
+            //    CreatedAt = DateTime.Now,
+            //    CreatedBy = user.Data.Id,
+            //    LastLoginTime = DateTime.Now
+            //};
+            //await _lastLoginHistoryService.AddAsync(lastLogin,cancellationToken);
+            //return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}" });
         }
 
         [HttpPost("VerifyTwoFactorCode")]
@@ -110,15 +112,16 @@ namespace ContractorsAuctioneer.Controllers
             };
             return Ok(new { Token = token, Result = userProfileDto });
         }
-        //[Authorize]
-        //[HttpGet("AutherizeAuthenticatedUsers")]
-        //public async Task<IActionResult> AutherizeAuthenticatedUsers()
-        //{
-        //    //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
-        //    var user = User.Identity?.IsAuthenticated;
-        //    var users = HttpContext.User.Identity;
-        //    return Ok("you are autherized");
-        //}
+        [Authorize]
+        [HttpGet("AutherizeAuthenticatedUsers")]
+        public async Task<IActionResult> AutherizeAuthenticatedUsers()
+        {
+            //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
+            var user = User.Identity?.IsAuthenticated;
+            var users = HttpContext.User.Identity;
+            var a = 0;
+            return Ok("you are autherized");
+        }
     }
 }
 

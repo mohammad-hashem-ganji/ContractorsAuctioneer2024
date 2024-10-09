@@ -4,7 +4,6 @@ namespace ContractorsAuctioneer.Dtos
 {
     public class AddContractorDto : BaseAddAuditableDto
     {
-        public int Id { get; set; }
         public string? Name { get; set; }
         public string? CompanyName { get; set; }
         public string? LandlineNumber { get; set; }
@@ -14,7 +13,7 @@ namespace ContractorsAuctioneer.Dtos
         public string? Address { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public int ApplicationUserId { get; set; }
+
 
     }
 }

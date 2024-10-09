@@ -39,7 +39,7 @@ namespace ContractorsAuctioneer.Services
 
                 return new Result<AddRequestStatusDto>().WithValue(requestStatusDto).Success(SuccessMessages.RequestStatusAdded);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new Result<AddRequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);         
             }
@@ -71,7 +71,7 @@ namespace ContractorsAuctioneer.Services
                         .Success("وضعیت پیدا شد .");
                 }   
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new Result<RequestStatusDto>()
                     .WithValue(null)

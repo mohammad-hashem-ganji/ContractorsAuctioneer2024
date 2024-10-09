@@ -25,5 +25,6 @@
         public const string BidsOfRequestFound = "پیشنهادات درخواست یافت شد";
         public const string BidsOfRequestFoundAndChangedAcceptance = "پیشنهادات درخواست پیدا شده و به عدم پذیرش تغییر یافته";
         public const string AcceptedBidsFound = "پیشنهادات پذیرفته شده یافت شد.";
+        public const string UserIDandroleretrievedsuccessfully = "شناسه کاربر و نقش با موفقیت بازیابی شد.";
     }
 }
