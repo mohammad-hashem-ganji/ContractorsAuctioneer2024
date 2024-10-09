@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ContractorsAuctioneer.Entites
 {
-    public class Region
+    public class Region : BaseAuditableEntity
     {
         public int Id { get; set; }
         public string? Title { get; set; }

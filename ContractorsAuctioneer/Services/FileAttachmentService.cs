@@ -4,7 +4,9 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography.Xml;
 using System.Threading;
 
 namespace ContractorsAuctioneer.Services
@@ -72,7 +74,7 @@ namespace ContractorsAuctioneer.Services
                     FilePath = filePath,
                     RequestId = model.RequestId,
                     CreatedAt = DateTime.Now,
-                    IsDeleted = false,                   
+                    IsDeleted = false,
                 };
                 await _context.FileAttachments.AddAsync(fileAttachment, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -88,9 +90,6 @@ namespace ContractorsAuctioneer.Services
                     .WithValue(null)
                     .Failure(ex.Message);
             }
-
-
-
         }
 
 
@@ -99,7 +98,7 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var file = await _context.FileAttachments
-                    .Where(f => f.Id == fileAttachmentDto.Id && f.IsDeleted == false )
+                    .Where(f => f.Id == fileAttachmentDto.Id && f.IsDeleted == false)
                     .Include(f => f.Request)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (file == null)
@@ -108,8 +107,7 @@ namespace ContractorsAuctioneer.Services
                 }
                 file.IsDeleted = fileAttachmentDto.IsDeleted;
                 file.UpdatedBy = fileAttachmentDto.UpdatedBy;
-                file.DeletedAt = fileAttachmentDto.DeletedAt;
-                file.DeletedBy = fileAttachmentDto.DeletedBy;
+                file.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync(cancellationToken);
 
                 return new Result<UpdateFileAttachmentDto>().WithValue(fileAttachmentDto).Success(SuccessMessages.FileDetailsUpdated);
@@ -120,7 +118,52 @@ namespace ContractorsAuctioneer.Services
             }
         }
 
+        public async Task<Result<FileStreamResult>> GetFileAsync(int fileId)
+        {
+            var fileAttachment = await _context.FileAttachments.FindAsync(fileId);
+            if (fileAttachment == null)
+            {
+                return new Result<FileStreamResult>().WithValue(null).Failure("فایل پیدا نشد");
+            }
 
+            var filePath = fileAttachment.FilePath;
+            if (!System.IO.File.Exists(filePath))
+            {
+                return new Result<FileStreamResult>().WithValue(null).Failure("خطا!");
+            }
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+
+            var contentType = GetContentType(filePath);
+            return new Result<FileStreamResult>()
+                .WithValue(new FileStreamResult(memory, contentType)
+                {
+                    FileDownloadName = fileAttachment.FileName
+                }).Success("فایل یافت شد");
+
+        }
+
+        private string GetContentType(string path)
+        {
+            var types = GetMimeTypes();
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+        {
+            { ".txt", "text/plain" },
+            { ".pdf", "application/pdf" },
+            { ".png", "image/png" },
+            };
+        }
 
 
 

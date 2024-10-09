@@ -2,7 +2,7 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class AddClientDto : BaseAddAuditableDto
+    public class AddClientDto 
     {
         public string? NCcode { get; set; }
         public string? MobileNubmer { get; set; }

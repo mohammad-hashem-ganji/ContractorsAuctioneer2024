@@ -18,12 +18,14 @@ namespace ContractorsAuctioneer.Services
         private readonly IRegionService _regionService;
         private readonly IAuthService _authService;
         private readonly IFileAttachmentService _fileAttachmentService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public RequestService(ApplicationDbContext context,
             IClientService clientService,
-            IRegionService regionService, 
+            IRegionService regionService,
             IAuthService authService,
             IFileAttachmentService fileAttachmentService,
-            IContractorService contractorService)
+            IContractorService contractorService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _clientService = clientService;
@@ -31,6 +33,7 @@ namespace ContractorsAuctioneer.Services
             _authService = authService;
             _fileAttachmentService = fileAttachmentService;
             _contractorService = contractorService;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<bool> AddAsync(AddRequestDto requestDto, CancellationToken cancellationToken)
         {
@@ -43,6 +46,18 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return false;
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    return false;
+                }
+
+                var user = result.Data;
                 var applicationUserResult = await _authService.RegisterAsync(requestDto.Username, requestDto.Password, role);
                 if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
@@ -56,6 +71,8 @@ namespace ContractorsAuctioneer.Services
                     address = requestDto.Client.address,
                     LicensePlate = requestDto.Client.LicensePlate,
                     IsDeleted = false,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = user.UserId,
                     DeletedBy = null,
                     DeletedAt = null,
                     ApplicationUserId = applicationUserResult.Data.RegisteredUserId,
@@ -68,6 +85,9 @@ namespace ContractorsAuctioneer.Services
                 {
                     Title = requestDto.Region.Title,
                     ContractorSystemCode = requestDto.Region.ContractorSystemCode,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = user.UserId,
+                    IsDeleted = false,   
                 }, cancellationToken);
                 var request = new Entites.Request
                 {
@@ -80,6 +100,7 @@ namespace ContractorsAuctioneer.Services
                     RegionId = regionId,
                     ClientId = clientId,
                     CreatedAt = DateTime.Now,
+                    CreatedBy = user.UserId,
                     RequestNumber = requestDto.RequestNumber,
                     IsTenderOver = false,
                     IsDeleted = false
@@ -88,13 +109,6 @@ namespace ContractorsAuctioneer.Services
 
                 await _context.Requests.AddAsync(request, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
-                // Add fillAttachment ### here
-                //await _fileAttachmentService.AddAsync(new FileUploadDto
-                //{
-                //    File = requestDto.FileUploadDto.File,
-                //    FileAttachmentType = requestDto.FileUploadDto.FileAttachmentType,
-                //    RequestId = request.Id,
-                //}, cancellationToken);
                 return true;
             }
             catch (Exception)

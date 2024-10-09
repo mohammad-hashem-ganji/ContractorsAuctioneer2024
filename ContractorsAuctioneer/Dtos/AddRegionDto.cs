@@ -2,7 +2,7 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class AddRegionDto : BaseAddAuditableDto
+    public class AddRegionDto 
     {
         public string? Title { get; set; }
         public int? ContractorSystemCode { get; set; }
