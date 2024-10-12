@@ -34,17 +34,17 @@ namespace ContractorsAuctioneer.Services
         }
 
     
-        public async Task<Result<RegisterResult>> RegisterAsync(string username, string password, string role)
+        public async Task<Result<RegisterResult>> RegisterAsync(string nCode, string phoneNumber, string role)
         {
-
+            const string key = "ParsianContractorAuthenearproject";
 
             var user = new ApplicationUser
             {
-                UserName = username,
-                Email = username
+                UserName = string.Concat(nCode, key),
+                PhoneNumber = phoneNumber
             };
 
-            var result = await _userManager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(user);
 
             if (!result.Succeeded)
             {
@@ -52,7 +52,6 @@ namespace ContractorsAuctioneer.Services
                 {
                     IdentityResult = result,
                     RegisteredUserId = 0,
-                    IdentityError = result.Errors.ToList()
                 };
                 return new Result<RegisterResult>()
                     .WithValue(registerResult)
@@ -90,7 +89,8 @@ namespace ContractorsAuctioneer.Services
 
         public async Task<Result<ApplicationUser>> AuthenticateAsync(string nCode, string phoneNumber)
         {
-            var user = await _userManager.FindByNameAsync(nCode);
+            const string key = "ParsianContractorAuthenearproject";
+            var user = await _userManager.FindByNameAsync(string.Concat(nCode, key));
             if (user == null || user.PhoneNumber != phoneNumber)
             {
                 return new Result<ApplicationUser>()

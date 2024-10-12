@@ -58,7 +58,7 @@ namespace ContractorsAuctioneer.Services
                 }
 
                 var user = result.Data;
-                var applicationUserResult = await _authService.RegisterAsync(requestDto.Username, requestDto.Password, role);
+                var applicationUserResult = await _authService.RegisterAsync(requestDto.NCode, requestDto.PhoneNumber, role);
                 if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
                     return false;

@@ -54,7 +54,6 @@ namespace ContractorsAuctioneer.Services
                 return new Result<GetVerificationCodeDto>()
                    .WithValue(verificationCodeDto)
                    .Success("کد تایید شد");
-
             }
             return new Result<GetVerificationCodeDto>()
             .WithValue(null)
