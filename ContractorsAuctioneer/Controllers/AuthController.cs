@@ -112,16 +112,16 @@ namespace ContractorsAuctioneer.Controllers
             };
             return Ok(new { Token = token, Result = userProfileDto });
         }
-        [Authorize]
-        [HttpGet("AutherizeAuthenticatedUsers")]
-        public async Task<IActionResult> AutherizeAuthenticatedUsers()
-        {
-            //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
-            var user = User.Identity?.IsAuthenticated;
-            var users = HttpContext.User.Identity;
-            var a = 0;
-            return Ok("you are autherized");
-        }
+        //[Authorize]
+        //[HttpGet("AutherizeAuthenticatedUsers")]
+        //public async Task<IActionResult> AutherizeAuthenticatedUsers()
+        //{
+        //    //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
+        //    var user = User.Identity?.IsAuthenticated;
+        //    var users = HttpContext.User.Identity;
+        //    var a = 0;
+        //    return Ok("you are autherized");
+        //}
     }
 }
 

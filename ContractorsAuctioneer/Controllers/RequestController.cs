@@ -1,6 +1,7 @@
 ﻿using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ namespace ContractorsAuctioneer.Controllers
             _requestService = requestService;
             _projectService = projectService;
         }
-
+        [Authorize(Roles = "")]
         [HttpPost]
         [Route(nameof(AddRequestAsync))]
         public async Task<IActionResult> AddRequestAsync([FromBody] AddRequestDto requestDto, CancellationToken cancellationToken)
@@ -43,6 +44,7 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [Authorize(Roles = "Contractor, Client")]
         [HttpGet]
         [Route(nameof(GetRequestByIdAsync))]
         public async Task<IActionResult> GetRequestByIdAsync(int id, CancellationToken cancellationToken)
@@ -62,31 +64,8 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpPut]
-        [Route(nameof(OverTender))]
-        public async Task<IActionResult> OverTender(int requestId, bool IsTenderOver, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var result = await _requestService.GetByIdAsync(requestId, cancellationToken);
-                if (!result.IsSuccessful)
-                {
-                    return NotFound(result);
-                }
-                result.Data.IsTenderOver = IsTenderOver;
-                var updateResult = await _requestService.UpdateAsync(result.Data, cancellationToken);
-                if (!updateResult.IsSuccessful)
-                {
-                    return BadRequest(updateResult);
-                }
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "خطایی هنگام به پایان رساندن مناقصه رخ داد.");
-            }
 
-        }
+        [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(GetAllRequestsAsync))]
         public async Task<IActionResult> GetAllRequestsAsync(CancellationToken cancellationToken)

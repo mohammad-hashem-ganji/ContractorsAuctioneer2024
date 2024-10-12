@@ -2,6 +2,7 @@
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Services;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -25,10 +26,10 @@ namespace ContractorsAuctioneer.Controllers
             _requestStatusService = requestStatusService;
             _bidStatusService = bidStatusService;
         }
-
+        [Authorize(Roles = "Client")]
         [HttpPost]
-        [Route(nameof(AcceptBid))]
-        public async Task<IActionResult> AcceptBid(GetUpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
+        [Route(nameof(AcceptBidByClient))]
+        public async Task<IActionResult> AcceptBidByClient(GetUpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -70,9 +71,10 @@ namespace ContractorsAuctioneer.Controllers
 
 
         }
+        [Authorize(Roles = "Client")]
         [HttpPost]
-        [Route(nameof(AcceptRequest))]
-        public async Task<IActionResult> AcceptRequest([FromBody] UpdateRequestAcceptanceDto requestDto, CancellationToken cancellationToken)
+        [Route(nameof(AcceptRequestByClient))]
+        public async Task<IActionResult> AcceptRequestByClient([FromBody] UpdateRequestAcceptanceDto requestDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -102,10 +104,10 @@ namespace ContractorsAuctioneer.Controllers
             }
             else return BadRequest("مقادیر ورودی نا معتبر است");
         }
-
+        [Authorize(Roles = "Client")]
         [HttpPost]
-        [Route(nameof(RejectingRequest))]
-        public async Task<IActionResult> RejectingRequest([FromBody] UpdateRequestAcceptanceDto requestDto, CancellationToken cancellationToken)
+        [Route(nameof(RejectingRequestByClient))]
+        public async Task<IActionResult> RejectingRequestByClient([FromBody] UpdateRequestAcceptanceDto requestDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -128,10 +130,10 @@ namespace ContractorsAuctioneer.Controllers
             }
             else return BadRequest("مقادیر ورودی نا معتبر است");
         }
-
+        [Authorize(Roles = "Client")]
         [HttpPost]
-        [Route(nameof(GetBidsOfRequest))]
-        public async Task<IActionResult> GetBidsOfRequest(int requestId, CancellationToken cancellationToken)
+        [Route(nameof(GetBidsOfRequestByClient))]
+        public async Task<IActionResult> GetBidsOfRequestByClient(int requestId, CancellationToken cancellationToken)
         {
             if (requestId < 0)
             {
@@ -144,7 +146,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             return Ok(bidsOfRequest);
         }
-        // select (Accept one bid)
+        
 
 
 

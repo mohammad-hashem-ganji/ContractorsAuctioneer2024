@@ -4,6 +4,7 @@ using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Services;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,10 +29,10 @@ namespace ContractorsAuctioneer.Controllers
             _bidStatusService = bidStatusService;
             _projectService = projectService;
         }
-
+        [Authorize(Roles = "Contractor")]
         [HttpPut]
-        [Route(nameof(RejectRequest))]
-        public async Task<IActionResult> RejectRequest(UpdateRequestAcceptanceDto rejectedRequestDto, CancellationToken cancellationToken)
+        [Route(nameof(RejectRequestByContractor))]
+        public async Task<IActionResult> RejectRequestByContractor(UpdateRequestAcceptanceDto rejectedRequestDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -56,7 +57,7 @@ namespace ContractorsAuctioneer.Controllers
             else return BadRequest("مقادیر ورودی نا معتبر است");
         }
 
-
+        [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(ShowRequestsToContractor))]
         public async Task<IActionResult> ShowRequestsToContractor(int contractorId, CancellationToken cancellationToken)
@@ -72,6 +73,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             return Ok(requests);
         }
+        [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(ShowBidsAcceptedByClient))]
         public async Task<IActionResult> ShowBidsAcceptedByClient(CancellationToken cancellationToken)
@@ -83,9 +85,10 @@ namespace ContractorsAuctioneer.Controllers
             }
             return Ok(acceptedBids);
         }
+        [Authorize(Roles = "Contractor")]
         [HttpPost]
-        [Route(nameof(AcceptBid))]
-        public async Task<IActionResult> AcceptBid(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
+        [Route(nameof(AcceptBidByContractor))]
+        public async Task<IActionResult> AcceptBidByContractor(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -126,6 +129,7 @@ namespace ContractorsAuctioneer.Controllers
 
             return Problem(ErrorMessages.ErrorWhileAcceptingBid);
         }
+        [Authorize(Roles = "Contractor")]
         [HttpPost]
         [Route(nameof(RejectBidByContractor))]
         public async Task<IActionResult> RejectBidByContractor(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
@@ -168,7 +172,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             return BadRequest(ErrorMessages.AnErrorWhileUpdatingStatus);
         }
-
+        [Authorize(Roles = "Contractor")]
         [HttpPost]
         [Route(nameof(AddContractor))]
         public async Task<IActionResult> AddContractor(AddContractorDto contractorDto, CancellationToken cancellationToken)

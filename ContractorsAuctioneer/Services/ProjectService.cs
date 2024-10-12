@@ -1,4 +1,5 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
+using Azure.Core;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
@@ -76,12 +77,15 @@ namespace ContractorsAuctioneer.Services
                 return new Result<GetProjectDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        public async Task<Result<GetProjectDto>> GetProjectOfRequestAsync(int requestId, CancellationToken cancellationToken)
+
+
+
+        public async Task<Result<GetProjectDto>> GetProjectOfbidAsync(int bidId, CancellationToken cancellationToken)
         {
             try
             {
                 var bid = await _context.BidOfContractors
-                    .Where(x => x.RequestId == requestId )
+                    .Where(x => x.RequestId == bidId )
                     .Include(b => b.Project)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (bid == null)

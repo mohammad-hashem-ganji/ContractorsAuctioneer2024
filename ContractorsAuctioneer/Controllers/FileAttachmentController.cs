@@ -1,6 +1,7 @@
 ﻿using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,7 @@ namespace ContractorsAuctioneer.Controllers
 
             return BadRequest(result);
         }
+        [Authorize(Roles = "Client")]
         [HttpGet]
         [Route(nameof(GetFile))]
         public async Task<IActionResult> GetFile(int fileId, CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 ﻿using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
@@ -17,30 +18,8 @@ namespace ContractorsAuctioneer.Controllers
         {
             _projectService = projectService;
         }
-        [HttpPost]
-        [Route(nameof(AddProject))]
-        public async Task<IActionResult> AddProject([FromBody] AddProjectDto projectDto, CancellationToken cancellationToken)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var result = await _projectService.AddAsync(projectDto, cancellationToken);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                return StatusCode(500, result);
-            }
-            catch (Exception ex)
-            {
 
-                return StatusCode(500, ex.Message);
-            }
-        }
-
+        [Authorize(Roles = "Contractor, Client")]
         [HttpGet]
         [Route(nameof(GetProjectById))]
         public async Task<IActionResult> GetProjectById(int projectId, CancellationToken cancellationToken)
@@ -65,14 +44,14 @@ namespace ContractorsAuctioneer.Controllers
                     });
             }
         }
-
+        [Authorize(Roles = "Contractor")]
         [HttpPost]
-        [Route(nameof(GetProjectOfRequest))]
-        public async Task<IActionResult> GetProjectOfRequest(int requestId, CancellationToken cancellationToken)
+        [Route(nameof(GetProjectOfBid))]
+        public async Task<IActionResult> GetProjectOfBid(int bidId, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _projectService.GetByIdAsync(requestId, cancellationToken);
+                var result = await _projectService.GetProjectOfbidAsync(bidId, cancellationToken);
                 if (result.IsSuccessful)
                 {
                     return Ok(result);
@@ -91,35 +70,8 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
 
-        [HttpPost]
-        [Route(nameof(UpdateProject))]
-        public async Task<IActionResult> UpdateProject([FromBody] GetProjectDto projectDto, CancellationToken cancellationToken)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                var result = await _projectService.UpdateAsync(projectDto, cancellationToken);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                return NotFound(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
-                    });
-            }
-        }
 
-
+        
 
     }
 }

@@ -55,34 +55,6 @@ namespace ContractorsAuctioneer.Controllers
             return NotFound(result);
         }
         [Authorize(Roles = "Contractor")]
-        [HttpGet]
-        [Route(nameof(GetAllBids))]
-        public async Task<IActionResult> GetAllBids(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var users = HttpContext.User.Identity;
-                var result = await _bidOfContractorService.GetAllAsync(cancellationToken);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return NotFound(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log 
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
-                        Details = ex.Message
-                    });
-            }
-        }
         [HttpPost]
         [Route(nameof(UpdateBid))]
         public async Task<IActionResult> UpdateBid([FromBody] UpdateBidOfContractorDto bidDto, CancellationToken cancellationToken)
@@ -110,6 +82,7 @@ namespace ContractorsAuctioneer.Controllers
                     });
             }
         }
+        [Authorize(Roles = "Contractor")]
         [HttpPost]
         [Route(nameof(DeleteBid))]
         public async Task<IActionResult> DeleteBid(int bidId, CancellationToken cancellationToken)
@@ -141,7 +114,7 @@ namespace ContractorsAuctioneer.Controllers
             }
 
         }
-
+        [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(GetBidsOfContractor))]
         public async Task<IActionResult> GetBidsOfContractor(CancellationToken cancellationToken)
