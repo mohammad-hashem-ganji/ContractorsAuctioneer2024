@@ -19,7 +19,7 @@ namespace ContractorsAuctioneer.Controllers
             _requestService = requestService;
             _projectService = projectService;
         }
-       
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [Route(nameof(AddRequestAsync))]
         public async Task<IActionResult> AddRequestAsync([FromBody] AddRequestDto requestDto, CancellationToken cancellationToken)

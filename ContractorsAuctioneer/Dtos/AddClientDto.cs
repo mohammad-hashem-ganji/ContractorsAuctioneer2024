@@ -4,8 +4,7 @@ namespace ContractorsAuctioneer.Dtos
 {
     public class AddClientDto 
     {
-        public string? NCcode { get; set; }
-        public string? MobileNubmer { get; set; }
+
         public string? PostalCode { get; set; }
         public string? LicensePlate { get; set; }
         public string? address { get; set; }

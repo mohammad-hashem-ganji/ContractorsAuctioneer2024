@@ -61,7 +61,14 @@ namespace ContractorsAuctioneer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ContractorSystemCode = table.Column<int>(type: "int", nullable: true)
+                    ContractorSystemCode = table.Column<int>(type: "int", nullable: true),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -193,7 +200,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -244,7 +251,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -280,7 +287,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -310,12 +317,12 @@ namespace ContractorsAuctioneer.Migrations
                     RequestId = table.Column<int>(type: "int", nullable: false),
                     IsAcceptedByClient = table.Column<bool>(type: "bit", nullable: true),
                     CanChangeBid = table.Column<bool>(type: "bit", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -347,7 +354,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -373,7 +380,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -399,7 +406,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -426,7 +433,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -452,7 +459,7 @@ namespace ContractorsAuctioneer.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>

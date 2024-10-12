@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContractorsAuctioneer.EntitiesConfigurations
 {
-    public class ApplicationUserConfiguration
+    public class ApplicationUserConfiguration 
     {
         public static void SeedUsers(ModelBuilder builder)
         {

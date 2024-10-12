@@ -65,7 +65,8 @@ namespace ContractorsAuctioneer.Services
                 }
                 var clientId = await _clientService.AddAsync(new Client
                 {
-                    NCcode = requestDto.Client.NCcode,
+                    NCcode = requestDto.NCode,
+                    MobileNubmer = requestDto.PhoneNumber,
                     MainSection = requestDto.Client.MainSection,
                     SubSection = requestDto.Client.SubSection,
                     address = requestDto.Client.address,
