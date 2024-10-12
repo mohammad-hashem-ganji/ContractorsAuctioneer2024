@@ -88,25 +88,18 @@ namespace ContractorsAuctioneer.Services
             }
         }
 
-        public async Task<Result<ApplicationUser>> AuthenticateAsync(string username, string password)
+        public async Task<Result<ApplicationUser>> AuthenticateAsync(string nCode, string phoneNumber)
         {
-            var user = await _userManager.FindByNameAsync(username);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+            var user = await _userManager.FindByNameAsync(nCode);
+            if (user == null || user.PhoneNumber != phoneNumber)
             {
                 return new Result<ApplicationUser>()
                     .WithValue(null)
                     .Failure(ErrorMessages.InvalidUserNameOrPassword);
             }
-            var login = await _signInManger.PasswordSignInAsync(user.UserName, password, true, false);
-            if (!login.Succeeded)
-            {
-                return new Result<ApplicationUser>()
-                    .WithValue(null)
-                    .Failure(ErrorMessages.LoginFaild);
-            }
             return new Result<ApplicationUser>()
                 .WithValue(user)
-                .Success(SuccessMessages.UserLogedin);
+                .Success("Verification code sent.");
         }
 
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)

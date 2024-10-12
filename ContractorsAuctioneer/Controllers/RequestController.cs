@@ -72,6 +72,7 @@ namespace ContractorsAuctioneer.Controllers
         {
             try
             {
+                var user = User.Identity.IsAuthenticated;
                 var result = await _requestService.GetAllAsync(cancellationToken);
                 if (result.IsSuccessful)
                 {

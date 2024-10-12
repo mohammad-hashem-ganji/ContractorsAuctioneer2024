@@ -59,40 +59,34 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var user = await _authService.AuthenticateAsync(loginDto.Username, loginDto.Password);
+            var user = await _authService.AuthenticateAsync(loginDto.Ncode, loginDto.PhoneNumber);
             if (user.Data == null || user.IsSuccessful == false)
             {
                 return Unauthorized();
             }
-            var token = await _authService.GenerateJwtTokenAsync(user.Data);
-            return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
-            //IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user.Data);
-            //if (!userUpdateResult.Succeeded)
-            //{
-            //    return BadRequest(userUpdateResult.Errors); 
-            //}
-            //var phoneNumber = user.Data.PhoneNumber;
-            //if (phoneNumber == null)
-            //{
-            //    return BadRequest("Phone number is not set for this user.");
-            //}
-            //var result = await _verificationService
-            //    .GenerateAndSendCodeAsync(user.Data.Id, phoneNumber, CancellationToken.None);
+            //var token = await _authService.GenerateJwtTokenAsync(user.Data);
+            //return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
+            if (user.Data.PhoneNumber == null)
+            {
+                return BadRequest("Phone number is not set for this user.");
+            }
+            var verification = await _verificationService
+                .GenerateAndSendCodeAsync(user.Data.Id, user.Data.PhoneNumber, CancellationToken.None);
 
-            //if (!result.IsSuccessful)
-            //{
-            //    return BadRequest(result.Message);
-            //}
-            //Add lastLoginHistory
-            //AddLastLoginHistoryDto lastLogin = new AddLastLoginHistoryDto
-            //{
-            //    ApplicationUserId = user.Data.Id,
-            //    CreatedAt = DateTime.Now,
-            //    CreatedBy = user.Data.Id,
-            //    LastLoginTime = DateTime.Now
-            //};
-            //await _lastLoginHistoryService.AddAsync(lastLogin,cancellationToken);
-            //return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}" });
+            if (!verification.IsSuccessful)
+            {
+                return BadRequest(verification.Message);
+            }
+            
+            AddLastLoginHistoryDto lastLogin = new AddLastLoginHistoryDto
+            {
+                ApplicationUserId = user.Data.Id,
+                CreatedAt = DateTime.Now,
+                CreatedBy = user.Data.Id,
+                LastLoginTime = DateTime.Now
+            };
+            await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
+            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}{verification.Data}" });
         }
 
         [HttpPost("VerifyTwoFactorCode")]

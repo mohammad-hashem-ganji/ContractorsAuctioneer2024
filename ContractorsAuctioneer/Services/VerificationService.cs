@@ -34,9 +34,8 @@ namespace ContractorsAuctioneer.Services
             if (user != null)
             {
                 var token = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultPhoneProvider);
-                int a = 1;
                 await _userManager.UpdateAsync(user);
-                await SendSmsAsync(phoneNumber, $"کد: {token}", cancellationToken);
+                //await SendSmsAsync(phoneNumber, $"کد: {token}", cancellationToken);
                 return new Result<string>()
                     .WithValue(token)
                     .Success(SuccessMessages.CodeGeneratedAndSent);
