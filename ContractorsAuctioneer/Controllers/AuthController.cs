@@ -52,6 +52,7 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto,CancellationToken cancellationToken)
         {
@@ -62,7 +63,7 @@ namespace ContractorsAuctioneer.Controllers
             var user = await _authService.AuthenticateAsync(loginDto.Ncode, loginDto.PhoneNumber);
             if (user.Data == null || user.IsSuccessful == false)
             {
-                return Unauthorized();
+                return BadRequest("کد ملی یا شماره همراه اشتباه است.");
             }
             //var token = await _authService.GenerateJwtTokenAsync(user.Data);
             //return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
