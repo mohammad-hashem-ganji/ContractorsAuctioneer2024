@@ -119,6 +119,17 @@ builder.Services.AddSwaggerGen(optins => {
 }
 );
 
+#region CORS
+
+builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
+{
+    b.WithOrigins("*") //.AllowAnyOrigin() //WithOrigins("http://localhost:8080")
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+    //.AllowCredentials();
+}));
+
+#endregion
 
 var app = builder.Build();
 
@@ -134,6 +145,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors(policyName: "MyPolicy");
 
 app.Run();
 
