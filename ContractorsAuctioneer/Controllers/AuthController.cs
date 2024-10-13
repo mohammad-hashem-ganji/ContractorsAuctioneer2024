@@ -1,6 +1,7 @@
 ﻿using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -64,10 +65,11 @@ namespace ContractorsAuctioneer.Controllers
                 CreatedBy = user.Data.Id,
                 LastLoginTime = DateTime.Now
             };
+            
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
             return Ok(new { RequiresTwoFactor = true,
                 Message = $"کد تایید با موفقیت ارسال شد." ,
-                Code = verification.Data,
+                Data = verification,
                 user.Data.Id});
         }
         [AllowAnonymous]
