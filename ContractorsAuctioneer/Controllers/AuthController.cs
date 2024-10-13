@@ -28,29 +28,7 @@ namespace ContractorsAuctioneer.Controllers
             _lastLoginHistoryService = lastLoginHistoryService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
-        {
-            try
-            {
-                var result = await _authService.RegisterAsync(registerDto.Username, registerDto.Password, registerDto.Role);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                return BadRequest(result);
-            }
-            catch (Exception ex)
-            {
-
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Message = "An error occurred while retrieving the requests.",
-                        Details = ex.Message
-                    });
-            }
-        }
+    
 
         [AllowAnonymous]
         [HttpPost("login")]
@@ -89,7 +67,7 @@ namespace ContractorsAuctioneer.Controllers
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
             return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}--{verification.Data}" });
         }
-
+        [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]
         public async Task<IActionResult> VerifyTwoFactorCode(GetVerificationCodeDto verificationCode, CancellationToken cancellationToken)
         {          
