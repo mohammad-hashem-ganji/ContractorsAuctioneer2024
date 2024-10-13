@@ -34,33 +34,46 @@ namespace ContractorsAuctioneer.Services
 
 
 
-        public async Task<Result<string>> GenerateAndSendCodeAsync(int userId, string phoneNumber, CancellationToken cancellationToken)
+        public async Task<Result<GetVerificationCodeDto>> GenerateAndSendCodeAsync(int userId, string phoneNumber, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user != null)
             {
+                const string key = "ParsianContractorAuthenearproject";
+                string userName = user.UserName;
+                if (userName.EndsWith(key))
+                {
+                    userName = userName.Substring(0, userName.Length - key.Length);
+                }
                 var token = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultPhoneProvider);
                 await _userManager.UpdateAsync(user);
+                var result = new GetVerificationCodeDto
+                {
+                    VerificationCodeCode = token,
+                    PhoneNumber = user.PhoneNumber,
+                    Ncode = userName
+                };
                 //await SendSmsAsync(phoneNumber, $"کد: {token}", cancellationToken);
-                return new Result<string>()
-                    .WithValue(token)
+                return new Result<GetVerificationCodeDto>()
+                    .WithValue(result)
                     .Success(SuccessMessages.CodeGeneratedAndSent);
             }
-            return new Result<string>().WithValue(null).Failure("کد ساخته نشد");
+            return new Result<GetVerificationCodeDto>().WithValue(null).Failure("کد ساخته نشد");
         }
         public async Task<Result<string>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(verificationCodeDto.ApplicationUserId);
-            if (user != null)
+            
+            var result = await _autService.AuthenticateAsync(verificationCodeDto.Ncode, verificationCodeDto.PhoneNumber);
+            if (result != null)
             {
                 var isTokenValid = await _userManager
-                    .VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultPhoneProvider, verificationCodeDto.Code);
+                    .VerifyTwoFactorTokenAsync(result.Data, TokenOptions.DefaultPhoneProvider, verificationCodeDto.VerificationCodeCode);
 
                 if (isTokenValid)
                 {
-                    await _signInManger.SignInAsync(user, isPersistent: false);
+                    await _signInManger.SignInAsync(result.Data, isPersistent: false);
                 }
-                var token = await _autService.GenerateJwtTokenAsync(user);
+                var token = await _autService.GenerateJwtTokenAsync(result.Data);
                 if (token is not null)
                 {
                     return new Result<string>()

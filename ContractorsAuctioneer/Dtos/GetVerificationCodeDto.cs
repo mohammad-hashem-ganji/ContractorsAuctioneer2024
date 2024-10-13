@@ -2,8 +2,9 @@
 {
     public class GetVerificationCodeDto
     {
-        public string Code { get; set; }
-        public string ApplicationUserId { get; set; }
+        public string VerificationCodeCode { get; set; }
+        public string Ncode { get; set; }
+        public string PhoneNumber { get; set; }
 
     }
 }

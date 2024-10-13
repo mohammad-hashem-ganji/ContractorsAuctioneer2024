@@ -48,7 +48,7 @@ namespace ContractorsAuctioneer.Controllers
             //return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
             if (user.Data.PhoneNumber == null)
             {
-                return BadRequest("Phone number is not set for this user.");
+                return BadRequest("شماره موبال با کد ملی ثبت شده مطابقت ندارد");
             }
             var verification = await _verificationService
                 .GenerateAndSendCodeAsync(user.Data.Id, user.Data.PhoneNumber, CancellationToken.None);
@@ -67,28 +67,19 @@ namespace ContractorsAuctioneer.Controllers
             };
             
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { RequiresTwoFactor = true,
-                Message = $"کد تایید با موفقیت ارسال شد." ,
-                Data = verification,
-                user.Data.Id});
+            return Ok(new { verification , user.Data.Id});
         }
         [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]
         public async Task<IActionResult> VerifyTwoFactorCode(GetVerificationCodeDto verificationCode, CancellationToken cancellationToken)
         {          
-            var user = await _usermanager.FindByIdAsync(verificationCode.ApplicationUserId); 
-            if (user is null) return BadRequest("کاربر یافت نشد!");
+
             var token = await _verificationService.VerifyCodeAsync(verificationCode, cancellationToken);
             if (token is null) return BadRequest("هنگام اجرا مشکلی پیش آمد!");
-            IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user);
-            if (!userUpdateResult.Succeeded) return BadRequest("هنگام اجرا مشکلی پیش آمد!");//(userUpdateResult.Errors);
-            var userProfileDto = new UserProfileDto
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email
-            };
-            return Ok(new { Token = token.Data, Result = userProfileDto});
+            //IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user);
+            //if (!userUpdateResult.Succeeded) return BadRequest("هنگام اجرا مشکلی پیش آمد!");//(userUpdateResult.Errors);
+
+            return Ok(token);
         }
         [Authorize(Roles ="Contractor")]
         [HttpGet("AutherizeAuthenticatedUsers")]

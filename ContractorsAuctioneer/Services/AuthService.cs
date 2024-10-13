@@ -99,7 +99,7 @@ namespace ContractorsAuctioneer.Services
             }
             return new Result<ApplicationUser>()
                 .WithValue(user)
-                .Success("Verification code sent.");
+                .Success("");
         }
 
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
