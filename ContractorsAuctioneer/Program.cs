@@ -99,7 +99,9 @@ builder.Services.AddAuthorization();
 
 #endregion
 
+#region CORS
 
+#endregion
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -108,7 +110,7 @@ builder.Services.AddSwaggerGen(optins => {
     {
         Description = "Please enter token",
         In = ParameterLocation.Header,
-        Name = "Autherization",
+        Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });

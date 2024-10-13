@@ -4,5 +4,6 @@
     {
         public string Code { get; set; }
         public string ApplicationUserId { get; set; }
+
     }
 }

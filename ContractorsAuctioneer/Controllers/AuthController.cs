@@ -65,7 +65,10 @@ namespace ContractorsAuctioneer.Controllers
                 LastLoginTime = DateTime.Now
             };
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}--{verification.Data}--{user.Data.Id}" });
+            return Ok(new { RequiresTwoFactor = true,
+                Message = $"کد تایید با موفقیت ارسال شد." ,
+                Code = verification.Data,
+                user.Data.Id});
         }
         [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]
