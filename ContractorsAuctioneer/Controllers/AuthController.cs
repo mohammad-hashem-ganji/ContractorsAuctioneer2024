@@ -65,7 +65,7 @@ namespace ContractorsAuctioneer.Controllers
                 LastLoginTime = DateTime.Now
             };
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}--{verification.Data}" });
+            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}--{verification.Data}--{user.Data.Id}" });
         }
         [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]
@@ -83,7 +83,7 @@ namespace ContractorsAuctioneer.Controllers
                 UserName = user.UserName,
                 Email = user.Email
             };
-            return Ok(new { Token = token.Data, Result = userProfileDto });
+            return Ok(new { Token = token.Data, Result = userProfileDto});
         }
         [Authorize(Roles ="Contractor")]
         [HttpGet("AutherizeAuthenticatedUsers")]
