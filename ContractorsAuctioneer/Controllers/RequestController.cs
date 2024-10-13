@@ -21,8 +21,8 @@ namespace ContractorsAuctioneer.Controllers
         }
         //[Authorize(Roles = "Admin")]
         [HttpPost]
-        [Route(nameof(AddRequestAsync))]
-        public async Task<IActionResult> AddRequestAsync([FromBody] AddRequestDto requestDto, CancellationToken cancellationToken)
+        [Route(nameof(AddRequest))]
+        public async Task<IActionResult> AddRequest([FromBody] AddRequestDto requestDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -44,35 +44,15 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        [Authorize(Roles = "Contractor, Client")]
-        [HttpGet]
-        [Route(nameof(GetRequestByIdAsync))]
-        public async Task<IActionResult> GetRequestByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var result = await _requestService.GetByIdAsync(id, cancellationToken);
-                if (result.IsSuccessful)
-                {
-                    return Ok(result);
-                }
-                return NotFound(result);
-            }
-            catch (Exception ex)
-            {
-                // Log 
-                return StatusCode(500, ex.Message);
-            }
-        }
+
 
         [Authorize(Roles = "Contractor")]
         [HttpGet]
-        [Route(nameof(GetAllRequestsAsync))]
-        public async Task<IActionResult> GetAllRequestsAsync(CancellationToken cancellationToken)
+        [Route(nameof(GetAllRequests))]
+        public async Task<IActionResult> GetAllRequests(CancellationToken cancellationToken)
         {
             try
             {
-                var user = User.Identity.IsAuthenticated;
                 var result = await _requestService.GetAllAsync(cancellationToken);
                 if (result.IsSuccessful)
                 {

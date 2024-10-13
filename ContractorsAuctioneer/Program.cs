@@ -1,4 +1,4 @@
-using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
+﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Services;
@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System.Configuration;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Authentication&Autherization 3
-builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddTransient<IAuthService,AuthService>();
 // Request
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IRequestStatusService, RequestStatusService>();
@@ -47,9 +50,6 @@ builder.Services.AddTransient<ILastLoginHistoryService, LastLoginHistoryService>
 
 
 
-
-
-
 #region EfConfiguration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -57,6 +57,7 @@ builder.Services.AddHostedService<RequestCheckService>();
 #endregion
 
 #region IdentityConfiguration
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -65,30 +66,21 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
+    
 })
 .AddRoles<IdentityRole<int>>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders()
-.AddTokenProvider<PhoneNumberTokenProvider<ApplicationUser>>(TokenOptions.DefaultPhoneProvider);
-
-builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
-{
-    options.TokenLifespan = TimeSpan.FromMinutes(2);
-});
-
-
+.AddDefaultTokenProviders();
 
 #endregion
 
 #region Authentication
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
@@ -98,18 +90,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]))
     };
 });
-builder.Services.AddAuthorization(options =>
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
+    options.TokenLifespan = TimeSpan.FromMinutes(2);
 });
+builder.Services.AddAuthorization();
+
 
 #endregion
+
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(optins =>
-{
+builder.Services.AddSwaggerGen(optins => {
     optins.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Please enter token",
@@ -120,22 +114,9 @@ builder.Services.AddSwaggerGen(optins =>
     });
     optins.OperationFilter<SecurityRequirementsOperationFilter>();
 
-});
+}
+);
 
-
-#region CORS
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("MyPolicy",
-        builder =>
-        {
-            builder.WithOrigins("*")
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-        });
-});
-#endregion
 
 var app = builder.Build();
 
@@ -147,9 +128,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
+
+

@@ -16,14 +16,20 @@ namespace ContractorsAuctioneer.Services
         private readonly IConfiguration _configuration;
         private readonly Random _random = new Random();
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManger;
+        private readonly IAuthService _autService;
 
         public VerificationService(ApplicationDbContext context,
             IConfiguration configuration,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManger,
+            IAuthService autService)
         {
             _context = context;
             _configuration = configuration;
             _userManager = userManager;
+            _signInManger = signInManger;
+            _autService = autService;
         }
 
 
@@ -42,7 +48,7 @@ namespace ContractorsAuctioneer.Services
             }
             return new Result<string>().WithValue(null).Failure("کد ساخته نشد");
         }
-        public async Task<Result<GetVerificationCodeDto>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
+        public async Task<Result<string>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(verificationCodeDto.ApplicationUserId);
             if (user != null)
@@ -50,12 +56,19 @@ namespace ContractorsAuctioneer.Services
                 var isTokenValid = await _userManager
                     .VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultPhoneProvider, verificationCodeDto.Code);
 
-
-                return new Result<GetVerificationCodeDto>()
-                   .WithValue(verificationCodeDto)
+                if (isTokenValid)
+                {
+                    await _signInManger.SignInAsync(user, isPersistent: false);
+                }
+                var token = await _autService.GenerateJwtTokenAsync(user);
+                if (token is not null)
+                {
+                    return new Result<string>()
+                   .WithValue(token)
                    .Success("کد تایید شد");
+                }                
             }
-            return new Result<GetVerificationCodeDto>()
+            return new Result<string>()
             .WithValue(null)
             .Failure("کاربر یافت نشد");
         }

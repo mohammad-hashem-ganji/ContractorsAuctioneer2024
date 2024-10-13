@@ -46,18 +46,18 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return false;
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
-                {
-                    return false;
-                }
+                //var httpContext = _httpContextAccessor.HttpContext;
+                //if (httpContext is null)
+                //{
+                //    return false;
+                //}
+                //var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                //if (!result.IsSuccessful)
+                //{
+                //    return false;
+                //}
 
-                var user = result.Data;
+                //var user = result.Data;
                 var applicationUserResult = await _authService.RegisterAsync(requestDto.NCode, requestDto.PhoneNumber, role);
                 if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
@@ -73,7 +73,7 @@ namespace ContractorsAuctioneer.Services
                     LicensePlate = requestDto.Client.LicensePlate,
                     IsDeleted = false,
                     CreatedAt = DateTime.Now,
-                    CreatedBy = user.UserId,
+                    //CreatedBy = user.UserId,
                     DeletedBy = null,
                     DeletedAt = null,
                     ApplicationUserId = applicationUserResult.Data.RegisteredUserId,
@@ -87,7 +87,7 @@ namespace ContractorsAuctioneer.Services
                     Title = requestDto.Region.Title,
                     ContractorSystemCode = requestDto.Region.ContractorSystemCode,
                     CreatedAt = DateTime.Now,
-                    CreatedBy = user.UserId,
+                    //CreatedBy = user.UserId,
                     IsDeleted = false,   
                 }, cancellationToken);
                 var request = new Entites.Request
@@ -101,7 +101,7 @@ namespace ContractorsAuctioneer.Services
                     RegionId = regionId,
                     ClientId = clientId,
                     CreatedAt = DateTime.Now,
-                    CreatedBy = user.UserId,
+                    //CreatedBy = user.UserId,
                     RequestNumber = requestDto.RequestNumber,
                     IsTenderOver = false,
                     IsDeleted = false
@@ -209,13 +209,26 @@ namespace ContractorsAuctioneer.Services
                 return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
             }
         }
-        public async Task<Result<RequestDto>> GetRequestOfClientAsync(int clientId, CancellationToken cancellationToken)
+        public async Task<Result<RequestDto>> GetRequestOfClientAsync( CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _context.Requests
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<RequestDto>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<RequestDto>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
+                var requestResult = await _context.Requests
                    .Where(x =>
-                   x.ClientId == clientId && x.IsTenderOver == false && x.IsActive == true && x.IsAcceptedByClient == false)
+                   x.ClientId == user.UserId && x.IsTenderOver == false && x.IsActive == true && x.IsAcceptedByClient == false)
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -258,12 +271,12 @@ namespace ContractorsAuctioneer.Services
                    }).FirstOrDefaultAsync(cancellationToken);
                 if (result is not null)
                 {
-                    return new Result<RequestDto>().WithValue(result).Success("درخواست ها یافت شدند .");
+                    return new Result<RequestDto>().WithValue(requestResult).Success("درخواست ها یافت شدند .");
                 }
                 else
                 {
 
-                    return new Result<RequestDto>().WithValue(result).Failure("درخواستی وجود ندارد");
+                    return new Result<RequestDto>().WithValue(requestResult).Failure("درخواستی وجود ندارد");
                 }
             }
             catch (Exception ex)
@@ -273,15 +286,28 @@ namespace ContractorsAuctioneer.Services
 
         }
 
-        public async Task<Result<List<RequestDto>>> GetRequestsforContractor(int contractorId, CancellationToken cancellationToken)
+        public async Task<Result<List<RequestDto>>> GetRequestsforContractor( CancellationToken cancellationToken)
         {
             try
             {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
+                {
+                    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<List<RequestDto>>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
                 var requests = await _context.Requests
                    .Where(x => x.IsTenderOver == false && x.IsActive == true && x.RequestStatuses
                    .All(status => status.Status != RequestStatusEnum.RequestRejectedByContractor 
                    && status.RequestId == x.Id 
-                   && status.CreatedBy == contractorId))
+                   && status.CreatedBy == user.UserId))
                    .Include(x => x.FileAttachments) 
                    .ToListAsync(cancellationToken);
                 var requestDtos = requests.Select(x => new RequestDto

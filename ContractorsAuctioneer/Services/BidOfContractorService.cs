@@ -38,12 +38,8 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return new Result<AddBidOfContractorDto>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+            
+                var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
                 if (!result.IsSuccessful)
                 {
                     var errorMessage = result.Message ?? "خطا !";
@@ -78,9 +74,17 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-           
+                var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<BidOfContractorDto>().WithValue(null).Failure(errorMessage);
+                }
+
+                var user = result.Data;
+
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
-                    .Where(x => x.Id == bidId)
+                    .Where(x => x.Id == bidId && x.ContractorId == user.UserId)
                     .Include(x => x.Contractor)
                     .Include(x => x.Request)
                     .Include(x => x.BidStatuses)
@@ -165,12 +169,9 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return new Result<UpdateBidOfContractorDto>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+               
+          
+                var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
                 if (!result.IsSuccessful)
                 {
                     var errorMessage = result.Message ?? "خطا !";
@@ -203,12 +204,8 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+               
+                var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
                 if (!result.IsSuccessful)
                 {
                     var errorMessage = result.Message ?? "خطا !";
@@ -294,12 +291,7 @@ namespace ContractorsAuctioneer.Services
 
         public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(CancellationToken cancellationToken)
         {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext is null)
-            {
-                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطا.");
-            }
-            var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+            var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
             if (!result.IsSuccessful)
             {
                 var errorMessage = result.Message ?? "خطا !";

@@ -34,10 +34,11 @@ namespace ContractorsAuctioneer.Controllers
         [Route(nameof(RejectRequestByContractor))]
         public async Task<IActionResult> RejectRequestByContractor(UpdateRequestAcceptanceDto rejectedRequestDto, CancellationToken cancellationToken)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var user = User;
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
             var request = await _requestService.GetByIdAsync(rejectedRequestDto.RequestId, cancellationToken);
             if (!request.IsSuccessful)
             {
@@ -60,13 +61,9 @@ namespace ContractorsAuctioneer.Controllers
         [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(ShowRequestsToContractor))]
-        public async Task<IActionResult> ShowRequestsToContractor(int contractorId, CancellationToken cancellationToken)
+        public async Task<IActionResult> ShowRequestsToContractor( CancellationToken cancellationToken)
         {
-            if (contractorId <= 0)
-            {
-                return BadRequest(contractorId);
-            }
-            var requests = await _requestService.GetRequestsforContractor(contractorId, cancellationToken);
+            var requests = await _requestService.GetRequestsforContractor( cancellationToken);
             if (!requests.IsSuccessful)
             {
                 return Problem(requests.Message);
@@ -172,7 +169,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             return BadRequest(ErrorMessages.AnErrorWhileUpdatingStatus);
         }
-        [Authorize(Roles = "Contractor")]
+        
         [HttpPost]
         [Route(nameof(AddContractor))]
         public async Task<IActionResult> AddContractor(AddContractorDto contractorDto, CancellationToken cancellationToken)

@@ -2,7 +2,7 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class AddContractorDto : BaseAddAuditableDto
+    public class AddContractorDto
     {
         public string? Name { get; set; }
         public string? CompanyName { get; set; }
@@ -11,8 +11,8 @@ namespace ContractorsAuctioneer.Dtos
         public string? FaxNumber { get; set; }
         public string? Email { get; set; }
         public string? Address { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string NCode { get; set; }
+        public string PhoneNumber { get; set; }
 
 
     }

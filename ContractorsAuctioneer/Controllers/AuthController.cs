@@ -86,15 +86,15 @@ namespace ContractorsAuctioneer.Controllers
                 LastLoginTime = DateTime.Now
             };
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}{verification.Data}" });
+            return Ok(new { RequiresTwoFactor = true, Message = $"2FA code sent to your phone.{user.Data.PhoneNumber}--{verification.Data}" });
         }
 
         [HttpPost("VerifyTwoFactorCode")]
-        public async Task<IActionResult> VerifyTwoFactorCode(int userId, string code, CancellationToken cancellationToken)
+        public async Task<IActionResult> VerifyTwoFactorCode(GetVerificationCodeDto verificationCode, CancellationToken cancellationToken)
         {          
-            var user = await _usermanager.FindByIdAsync(userId.ToString()); 
+            var user = await _usermanager.FindByIdAsync(verificationCode.ApplicationUserId); 
             if (user is null) return BadRequest("کاربر یافت نشد!");
-            var token = await _authService.GenerateJwtTokenAsync(user);
+            var token = await _verificationService.VerifyCodeAsync(verificationCode, cancellationToken);
             if (token is null) return BadRequest("هنگام اجرا مشکلی پیش آمد!");
             IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user);
             if (!userUpdateResult.Succeeded) return BadRequest("هنگام اجرا مشکلی پیش آمد!");//(userUpdateResult.Errors);
@@ -104,18 +104,18 @@ namespace ContractorsAuctioneer.Controllers
                 UserName = user.UserName,
                 Email = user.Email
             };
-            return Ok(new { Token = token, Result = userProfileDto });
+            return Ok(new { Token = token.Data, Result = userProfileDto });
         }
-        //[Authorize]
-        //[HttpGet("AutherizeAuthenticatedUsers")]
-        //public async Task<IActionResult> AutherizeAuthenticatedUsers()
-        //{
-        //    //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
-        //    var user = User.Identity?.IsAuthenticated;
-        //    var users = HttpContext.User.Identity;
-        //    var a = 0;
-        //    return Ok("you are autherized");
-        //}
+        [Authorize(Roles ="Contractor")]
+        [HttpGet("AutherizeAuthenticatedUsers")]
+        public async Task<IActionResult> AutherizeAuthenticatedUsers()
+        {
+            //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
+            var user = User;
+            //var users = HttpContext.User.Identity;
+            var a = 0;
+            return Ok("you are autherized");
+        }
     }
 }
 

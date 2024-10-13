@@ -25,7 +25,7 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 const string role = "Contractor";
-                var applicationUserResult = await _authService.RegisterAsync(contractorDto.Username, contractorDto.Password, role);
+                var applicationUserResult = await _authService.RegisterAsync(contractorDto.NCode, contractorDto.PhoneNumber, role);
                 if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
                     return new Result<AddContractorDto>().WithValue(null).Failure(ErrorMessages.EntityIsNull);
