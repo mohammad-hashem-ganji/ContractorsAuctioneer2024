@@ -84,7 +84,7 @@ namespace ContractorsAuctioneer.Services
                 var user = result.Data;
 
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
-                    .Where(x => x.Id == bidId && x.ContractorId == user.UserId)
+                    .Where(x => x.Id == bidId )
                     .Include(x => x.Contractor)
                     .Include(x => x.Request)
                     .Include(x => x.BidStatuses)
