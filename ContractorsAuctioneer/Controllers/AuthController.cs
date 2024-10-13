@@ -76,18 +76,15 @@ namespace ContractorsAuctioneer.Controllers
 
             var token = await _verificationService.VerifyCodeAsync(verificationCode, cancellationToken);
             if (token is null) return BadRequest("هنگام اجرا مشکلی پیش آمد!");
-            //IdentityResult userUpdateResult = await _usermanager.UpdateAsync(user);
-            //if (!userUpdateResult.Succeeded) return BadRequest("هنگام اجرا مشکلی پیش آمد!");//(userUpdateResult.Errors);
+
 
             return Ok(token);
         }
         [Authorize(Roles ="Contractor")]
         [HttpGet("AutherizeAuthenticatedUsers")]
         public async Task<IActionResult> AutherizeAuthenticatedUsers()
-        {
-            //var login = await _signInManager.PasswordSignInAsync("mamali1", "mamali123@#", true, false);
-            var user = User;
-            //var users = HttpContext.User.Identity;
+        {            
+            var user = User;         
             var a = 0;
             return Ok("you are autherized");
         }

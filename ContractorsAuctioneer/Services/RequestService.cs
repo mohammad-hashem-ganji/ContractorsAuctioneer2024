@@ -7,6 +7,7 @@ using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ContractorsAuctioneer.Services
 {
@@ -290,26 +291,30 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
-                {
-                    var errorMessage = result.Message ?? "خطا !";
-                    return new Result<List<RequestDto>>().WithValue(null).Failure(errorMessage);
-                }
+                //var httpContext = _httpContextAccessor.HttpContext;
+                //if (httpContext is null)
+                //{
+                //    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا.");
+                //}
+                //var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                //if (!result.IsSuccessful)
+                //{
+                //    var errorMessage = result.Message ?? "خطا !";
+                //    return new Result<List<RequestDto>>().WithValue(null).Failure(errorMessage);
+                //}
 
-                var user = result.Data;
+                int userId;
+                bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
                 var requests = await _context.Requests
-                   .Where(x => x.IsTenderOver == false && x.IsActive == true && x.RequestStatuses
-                   .All(status => status.Status != RequestStatusEnum.RequestRejectedByContractor 
-                   && status.RequestId == x.Id 
-                   && status.CreatedBy == user.UserId))
-                   .Include(x => x.FileAttachments) 
-                   .ToListAsync(cancellationToken);
+                    .Where(r => !r.IsTenderOver && r.IsActive) // Existing conditions
+                    .Where(r => r.RequestStatuses.Any(s =>
+                        s.Status == RequestStatusEnum.RequestApprovedByClient
+                    )) // Only check for "Approved by Client" status
+                    .Where(r => !r.RequestStatuses.Any(s =>
+                        s.Status == RequestStatusEnum.RequestRejectedByContractor
+                    )) // Ensure no "Rejected by Contractor" status exists
+                    .ToListAsync(cancellationToken);
+
                 var requestDtos = requests.Select(x => new RequestDto
                 {
                     Id = x.Id,

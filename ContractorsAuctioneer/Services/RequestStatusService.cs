@@ -4,8 +4,10 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
+using System.Security.Claims;
 using System.Threading;
 
 namespace ContractorsAuctioneer.Services
@@ -28,24 +30,21 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return new Result<AddRequestStatusDto>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
-                {
-                    var errorMessage = result.Message ?? "خطا !";
-                    return new Result<AddRequestStatusDto>().WithValue(null).Failure(errorMessage);
-                }
+                //var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
+                //if (!result.IsSuccessful)
+                //{
+                //    var errorMessage = result.Message ?? "خطا !";
+                //    return new Result<AddRequestStatusDto>().WithValue(null).Failure(errorMessage);
+                //}
+                int userId;
+                bool isconverted =int.TryParse( _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
 
-                var user = result.Data;
+                
                 var requestStatus = new RequestStatus
                 {
                     RequestId = requestStatusDto.RequestId,
                     Status = requestStatusDto.Status,
-                    CreatedBy = user.UserId,
+                    CreatedBy = userId,
                     CreatedAt = DateTime.Now
                 };
                 await _context.RequestStatuses.AddAsync(requestStatus, cancellationToken);
