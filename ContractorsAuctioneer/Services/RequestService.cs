@@ -89,7 +89,7 @@ namespace ContractorsAuctioneer.Services
                     IsActive = true,
                     ExpireAt = DateTime.Now.AddDays(3),
                     RegionId = regionId,
-                    ClientId = applicationUserResult.Data.RegisteredUserId,
+                    ClientId = clientId,
                     CreatedAt = DateTime.Now,
                     //CreatedBy = user.UserId,
                     RequestNumber = requestDto.RequestNumber,
@@ -204,13 +204,14 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(appId, out var clientId))
+                
+                var user =  await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context );
+
+                if (!user.IsSuccessful)
                 {
                     return new Result<RequestDto>().WithValue(null).Failure("خطا");
                 }
-
-                
+                var clientId = user.Data.UserId;
                 var requestResult = await _context.Requests
                    .Where(x =>
                    x.ClientId == clientId 
@@ -277,7 +278,7 @@ namespace ContractorsAuctioneer.Services
             }
             catch (Exception)
             {
-                return new Result<RequestDto>().WithValue(null).Failure("خطا"); ;
+                return new Result<RequestDto>().WithValue(null).Failure("خطا"); 
             }
 
         }

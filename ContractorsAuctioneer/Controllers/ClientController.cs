@@ -7,6 +7,7 @@ using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using System.Net.Http;
 using System.Security.Claims;
@@ -87,26 +88,39 @@ namespace ContractorsAuctioneer.Controllers
                 return BadRequest(ModelState);
             }
             var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(appId, out var clientId))
+            
+               
+            
+            if (!int.TryParse(appId, out var userId))
             {
                 return Problem(
                     detail: "خطا!",
                     statusCode: 400,
                     title: "Bad Request");
             }
-            var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
-            if ((!request.IsSuccessful || request.Data == null) && request.Data.IsActive == false) return NotFound(request);
-            if (requestDto.IsAccepted == true && request.Data.ClientId == clientId)
+            var request = await _requestService.GetRequestOfClientAsync( cancellationToken);
+            if (!request.IsSuccessful || request.Data == null)
+            {
+                return NotFound(request);
+            }
+            if ( requestDto.RequestId != request.Data.Id && request.Data.IsActive == false) return NotFound(request);
+            if (request.Data.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient))
+            {
+                return Problem(detail: "درخواست قبلا تایید شده!",
+                statusCode: 400,
+                title: "Bad Request");
+            }
+            if (requestDto.IsAccepted == true )
             {
                 var newStatus = new AddRequestStatusDto
                 {
-                    RequestId = requestDto.RequestId,
+                    RequestId = request.Data.Id,
                     Status = Entites.RequestStatusEnum.RequestApprovedByClient
                 };
 
                 var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newRequestStatus.IsSuccessful) return Problem(
-                    detail: newRequestStatus.Message,
+                    detail: newRequestStatus.ErrorMessage,
                     statusCode: 500,
                     title: "Internal Server Error");
 
@@ -115,7 +129,7 @@ namespace ContractorsAuctioneer.Controllers
                 if (!updateResult.IsSuccessful)
                 {
                     return Problem(
-                        detail: updateResult.Message,
+                        detail: updateResult.ErrorMessage,
                         statusCode: 500,
                         title: "Internal Server Error");
                 }

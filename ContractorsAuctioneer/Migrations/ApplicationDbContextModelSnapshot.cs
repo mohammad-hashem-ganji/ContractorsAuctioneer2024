@@ -94,16 +94,16 @@ namespace ContractorsAuctioneer.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "370b56da-788f-4903-bf49-7eae486ce509",
+                            ConcurrencyStamp = "7a79f38d-f1e7-4cba-b845-f63cf872235b",
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEInwa3QGhMdpU2XHnStqycEDA4Wm7aTqEYCUo3q99ecNkhK746Ah+SrsuczINfVVPw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJm0aG3S3wLvXjGHduNkWwtGB9zNOgoHlqZsK+ZpDXPd0JKm5emAFYqvq4bH2PdUKQ==",
                             PhoneNumber = "09179",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "93bc7a67-00f5-4ef9-a905-d670d080f755",
+                            SecurityStamp = "fe3c0805-ad41-4e70-9ea8-9060b666e255",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
