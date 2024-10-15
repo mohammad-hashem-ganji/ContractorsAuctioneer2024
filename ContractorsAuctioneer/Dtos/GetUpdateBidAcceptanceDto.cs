@@ -1,10 +1,12 @@
-﻿namespace ContractorsAuctioneer.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ContractorsAuctioneer.Dtos
 {
     public class GetUpdateBidAcceptanceDto
     {
+        [Required]
         public int Id { get; set; }
-        public int? SuggestedFee { get; set; }
-        public bool? CanChangeBid { get; set; }
+        [Required]
         public bool IsAccepted { get; set; }
     }
 }

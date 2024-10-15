@@ -36,7 +36,7 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     return Ok();
                 }
-                return StatusCode(500, "An error occurred while processing your request.");
+                return StatusCode(500, "خطایی هنگام اضافه کردن درخواست رخ داد.");
             }
             catch (Exception ex)
             {

@@ -89,7 +89,7 @@ namespace ContractorsAuctioneer.Services
                     ContractorSystemCode = requestDto.Region.ContractorSystemCode,
                     CreatedAt = DateTime.Now,
                     //CreatedBy = user.UserId,
-                    IsDeleted = false,   
+                    IsDeleted = false,
                 }, cancellationToken);
                 var request = new Entites.Request
                 {
@@ -140,7 +140,7 @@ namespace ContractorsAuctioneer.Services
                     ConfirmationDate = x.ConfirmationDate,
                     ClientId = x.ClientId,
                     RegionId = x.RegionId,
-             
+
                     FileAttachments = x.FileAttachments
                     .Where(f => f.IsDeleted == false)
                     .Select(f => new FileAttachmentDto
@@ -180,6 +180,7 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<RequestDto>().WithValue(null).Failure(ErrorMessages.RequestNotFound);
                 }
+               
                 var requestDto = new RequestDto
                 {
                     Id = request.Id,
@@ -194,42 +195,37 @@ namespace ContractorsAuctioneer.Services
                     {
                         Id = rs.Id,
                         Status = rs.Status,
-       
+
                     }).ToList(),
                     FileAttachments = request.FileAttachments.Select(f => new FileAttachmentDto
                     {
                         Id = f.Id,
-    
+
                     }).ToList()
                 };
 
                 return new Result<RequestDto>().WithValue(requestDto).Success(SuccessMessages.Regionfound);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
+                return new Result<RequestDto>().WithValue(null).Failure("خطا!");
             }
         }
-        public async Task<Result<RequestDto>> GetRequestOfClientAsync( CancellationToken cancellationToken)
+        public async Task<Result<RequestDto>> GetRequestOfClientAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
+                var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(appId, out var clientId))
                 {
-                    return new Result<RequestDto>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
-                {
-                    var errorMessage = result.Message ?? "خطا !";
-                    return new Result<RequestDto>().WithValue(null).Failure(errorMessage);
+                    return new Result<RequestDto>().WithValue(null).Failure("خطا");
                 }
 
-                var user = result.Data;
+                
                 var requestResult = await _context.Requests
                    .Where(x =>
-                   x.ClientId == user.UserId && x.IsTenderOver == false && x.IsActive == true && x.IsAcceptedByClient == false)
+                   x.ClientId == clientId 
+                   && x.IsTenderOver == false && x.IsActive == true )
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -249,12 +245,12 @@ namespace ContractorsAuctioneer.Services
                        ClientId = x.ClientId,
                        RegionId = x.RegionId,
                        RequestNumber = x.RequestNumber,
-              
+
                        RequestStatuses = x.RequestStatuses.Select(rs => new RequestStatusDto
                        {
                            Id = rs.Id,
                            Status = rs.Status,
-                      
+
                        }).ToList(),
                        BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
                        {
@@ -266,80 +262,93 @@ namespace ContractorsAuctioneer.Services
                        FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
                        {
                            Id = f.Id,
-                      
+
                        }).ToList()
 
                    }).FirstOrDefaultAsync(cancellationToken);
-                if (result is not null)
-                {
-                    return new Result<RequestDto>().WithValue(requestResult).Success("درخواست ها یافت شدند .");
+                if (requestResult is not null)
+                {                   
+                    if (requestResult.ExpireAt > DateTime.Now)
+                    {
+                        if (requestResult.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient))
+                        {
+                            return new Result<RequestDto>().WithValue(requestResult).Success("درخواست  یافت شد.");
+                        }
+                        else
+                        {
+                            return new Result<RequestDto>().WithValue(requestResult).Success("لطفا  پروژه درخواستی خود را بررسی کنید.");
+                        }
+                    }
+                    else
+                    {
+                        return new Result<RequestDto>().WithValue(null).Failure("مهلت تایید درخواست تمام شده است!");
+                    }
                 }
-                else
-                {
-
-                    return new Result<RequestDto>().WithValue(requestResult).Failure("درخواستی وجود ندارد");
-                }
+                return new Result<RequestDto>().WithValue(requestResult).Success("درخواست  یافت نشد.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new Result<RequestDto>().WithValue(null).Failure(ex.Message);
+                return new Result<RequestDto>().WithValue(null).Failure("خطا"); ;
             }
 
         }
 
-        public async Task<Result<List<RequestDto>>> GetRequestsforContractor( CancellationToken cancellationToken)
+        public async Task<Result<List<RequestDto>>> GetRequestsforContractor(CancellationToken cancellationToken)
         {
             try
             {
-                //var httpContext = _httpContextAccessor.HttpContext;
-                //if (httpContext is null)
-                //{
-                //    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا.");
-                //}
-                //var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                //if (!result.IsSuccessful)
-                //{
-                //    var errorMessage = result.Message ?? "خطا !";
-                //    return new Result<List<RequestDto>>().WithValue(null).Failure(errorMessage);
-                //}
-
-                int userId;
-                bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
-                var requests = await _context.Requests
-                    .Where(r => !r.IsTenderOver && r.IsActive) // Existing conditions
-                    .Where(r => r.RequestStatuses.Any(s =>
-                        s.Status == RequestStatusEnum.RequestApprovedByClient
-                    )) // Only check for "Approved by Client" status
-                    .Where(r => !r.RequestStatuses.Any(s =>
-                        s.Status == RequestStatusEnum.RequestRejectedByContractor
-                    )) // Ensure no "Rejected by Contractor" status exists
-                    .ToListAsync(cancellationToken);
-
-                var requestDtos = requests.Select(x => new RequestDto
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext is null)
                 {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Description = x.Description,
-                    ClientId = x.ClientId,
-                    RegionId = x.RegionId,
-                    FileAttachments = x.FileAttachments
-                    .Where(f => f.IsDeleted == false)
-                    .Select(f => new FileAttachmentDto
-                    {
-                        Id = f.Id
-                    }).ToList()
-                }).ToList();
-                if (requestDtos.Any())
+                    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا.");
+                }
+                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
+                if (!result.IsSuccessful)
+                {
+                    var errorMessage = result.Message ?? "خطا !";
+                    return new Result<List<RequestDto>>().WithValue(null).Failure(errorMessage);
+                }
+
+                int userId = result.Data.UserId;
+
+
+                var requests = await _context.Requests
+                      .Where(r => r.BidOfContractors.Any(b => b.ContractorId == userId) &&
+                                  r.RequestStatuses.All(rs => rs.Status != RequestStatusEnum.RequestApprovedByClient &&
+                                                              rs.Status != RequestStatusEnum.RequestRejectedByContractor))
+                      .Select(r => new RequestDto
+                      {
+                          Id = r.Id,
+                          RequestNumber = r.RequestNumber,
+                          Title = r.Title,
+                          Description = r.Description,
+                          RegistrationDate = r.RegistrationDate,
+                          ConfirmationDate = r.ConfirmationDate,
+                          ExpireAt = r.ExpireAt,
+                          ClientId = r.ClientId,
+                          RegionId = r.RegionId,
+                          IsTenderOver = r.IsTenderOver,
+                          IsActive = r.IsActive,
+                          IsAcceptedByClient = r.IsAcceptedByClient,
+                          RequestStatuses = r.RequestStatuses.Select(rs => new RequestStatusDto
+                          {
+                              Status = rs.Status,
+                              CreatedAt = rs.CreatedAt,
+                              CreatedBy = rs.CreatedBy
+                          }).ToList(),
+                      }).ToListAsync(cancellationToken);
+
+                if (requests.Any())
                 {
                     return new Result<List<RequestDto>>()
-                        .WithValue(requestDtos)
+                        .WithValue(requests)
                         .Success("درخواست ها یافت شدند .");
                 }
                 else
                 {
 
                     return new Result<List<RequestDto>>()
-                        .WithValue(requestDtos)
+                        .WithValue(requests)
                         .Failure("درخواستی وجود ندارد");
                 }
             }
@@ -391,6 +400,9 @@ namespace ContractorsAuctioneer.Services
 
         }
 
+       
+            
 
+        
     }
 }

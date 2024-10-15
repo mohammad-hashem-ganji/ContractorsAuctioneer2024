@@ -1,11 +1,15 @@
 ﻿using ContractorsAuctioneer.Dtos;
+using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Services;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using System.Net.Http;
+using System.Security.Claims;
 
 namespace ContractorsAuctioneer.Controllers
 {
@@ -82,7 +86,7 @@ namespace ContractorsAuctioneer.Controllers
             }
 
             var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
-            if ((!request.IsSuccessful || request.Data == null) && request.Data.IsActive == true) return NotFound(request);
+            if ((!request.IsSuccessful || request.Data == null) && request.Data.IsActive == false) return NotFound(request);
             if (requestDto.IsAccepted == true)
             {
                 var newStatus = new AddRequestStatusDto
@@ -146,7 +150,19 @@ namespace ContractorsAuctioneer.Controllers
             }
             return Ok(bidsOfRequest);
         }
-        
+        [Authorize(Roles = "Client")]
+        [HttpPost]
+        [Route(nameof(ShowRequestOfClient))]
+        public async Task<IActionResult> ShowRequestOfClient(CancellationToken cancellationToken)
+        {
+            var request = await _requestService.GetRequestOfClientAsync(cancellationToken);
+
+            if (!request.IsSuccessful)
+            {
+                return BadRequest(request);
+            }
+            return Ok(request);
+        }
 
 
 

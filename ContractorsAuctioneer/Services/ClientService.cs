@@ -1,4 +1,5 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
+using Azure.Core;
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
@@ -6,6 +7,7 @@ using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.EntityFrameworkCore;
 using System.Net.NetworkInformation;
+using System.Security.Claims;
 
 namespace ContractorsAuctioneer.Services
 {
@@ -13,18 +15,22 @@ namespace ContractorsAuctioneer.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IAuthService _authService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRequestService _requestService;
 
-        public ClientService(ApplicationDbContext context, IAuthService authService)
+        public ClientService(ApplicationDbContext context, IAuthService authService, IHttpContextAccessor httpContextAccessor, IRequestService requestService)
         {
             _context = context;
             _authService = authService;
+            _httpContextAccessor = httpContextAccessor;
+            _requestService = requestService;
         }
         public async Task<int> AddAsync(Client client, CancellationToken cancellationToken)
         {
             //client.ApplicationUser = _authService.RegisterAsync() 
             await _context.Clients.AddAsync(client, cancellationToken);
             var trackeNum = await _context.SaveChangesAsync(cancellationToken);
-            if (trackeNum >=1)
+            if (trackeNum >= 1)
             {
                 return client.Id;
             }
@@ -32,7 +38,7 @@ namespace ContractorsAuctioneer.Services
             {
                 return 0;
             }
-            
+
         }
         public async Task<Result<ClientDto>> GetByIdAsync(int clientId, CancellationToken cancellationToken)
         {

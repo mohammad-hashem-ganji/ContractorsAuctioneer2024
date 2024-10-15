@@ -66,7 +66,7 @@ namespace ContractorsAuctioneer.Controllers
             var requests = await _requestService.GetRequestsforContractor( cancellationToken);
             if (!requests.IsSuccessful)
             {
-                return Problem(requests.Message);
+                return Problem(requests.ErrorMessage);
             }
             return Ok(requests);
         }
