@@ -30,12 +30,7 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                //var result = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
-                //if (!result.IsSuccessful)
-                //{
-                //    var errorMessage = result.Message ?? "خطا !";
-                //    return new Result<AddRequestStatusDto>().WithValue(null).Failure(errorMessage);
-                //}
+             
                 int userId;
                 bool isconverted =int.TryParse( _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
 
@@ -97,19 +92,8 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
-                {
-                    return new Result<RequestStatusDto>().WithValue(null).Failure("خطا.");
-                }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
-                {
-                    var errorMessage = result.Message ?? "خطا !";
-                    return new Result<RequestStatusDto>().WithValue(null).Failure(errorMessage);
-                }
-
-                var user = result.Data;
+                int userId;
+                bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
                 RequestStatus? requestStatus = await _context.RequestStatuses
                     .Where(x => x.Id == requestStatusDto.Id)
                     .Include(s => s.Request)
@@ -121,7 +105,7 @@ namespace ContractorsAuctioneer.Services
                 requestStatus.RequestId = requestStatusDto.RequestId;
                 requestStatus.Status = requestStatusDto.Status;
                 requestStatus.UpdatedAt = DateTime.Now;
-                requestStatus.UpdatedBy = user.UserId;
+                requestStatus.UpdatedBy = userId;
                 _context.RequestStatuses.Update(requestStatus);
                 await _context.SaveChangesAsync();
 

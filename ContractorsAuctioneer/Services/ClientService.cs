@@ -16,14 +16,14 @@ namespace ContractorsAuctioneer.Services
         private readonly ApplicationDbContext _context;
         private readonly IAuthService _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IRequestService _requestService;
+       
 
-        public ClientService(ApplicationDbContext context, IAuthService authService, IHttpContextAccessor httpContextAccessor, IRequestService requestService)
+        public ClientService(ApplicationDbContext context, IAuthService authService, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _authService = authService;
             _httpContextAccessor = httpContextAccessor;
-            _requestService = requestService;
+           
         }
         public async Task<int> AddAsync(Client client, CancellationToken cancellationToken)
         {

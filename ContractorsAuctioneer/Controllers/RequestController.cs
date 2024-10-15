@@ -75,9 +75,6 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route(nameof(GetRequestById))]
-        //public async Task<IActionResult> GetRequestById(int requestId)
 
 
     }

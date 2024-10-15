@@ -34,11 +34,11 @@ namespace ContractorsAuctioneer.Controllers
         [Route(nameof(RejectRequestByContractor))]
         public async Task<IActionResult> RejectRequestByContractor(UpdateRequestAcceptanceDto rejectedRequestDto, CancellationToken cancellationToken)
         {
-            var user = User;
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var request = await _requestService.GetByIdAsync(rejectedRequestDto.RequestId, cancellationToken);
             if (!request.IsSuccessful)
             {
@@ -158,7 +158,7 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     return Problem(requestDto.Message);
                 }
-                requestDto.Data.ExpireAt = DateTime.Now.AddDays(7);
+                requestDto.Data.ExpireAt = DateTime.Now.AddMinutes(7);
                 var requestResult = await _requestService.UpdateAsync(requestDto.Data, cancellationToken);
                 if (!requestResult.IsSuccessful)
                 {

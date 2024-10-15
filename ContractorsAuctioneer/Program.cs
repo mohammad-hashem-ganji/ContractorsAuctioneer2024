@@ -20,7 +20,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Authentication&Autherization 3
 //builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddTransient<IAuthService,AuthService>();
 // Request

@@ -22,13 +22,15 @@ namespace ContractorsAuctioneer.Controllers
         private readonly IRequestService _requestService;
         private readonly IRequestStatusService _requestStatusService;
         private readonly IBidStatusService _bidStatusService;
-        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRequestStatusService requestStatusService, IBidStatusService bidStatusService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRequestStatusService requestStatusService, IBidStatusService bidStatusService, IHttpContextAccessor httpContextAccessor)
         {
             _bidOfContractorService = bidOfContractorService;
             _projectService = projectService;
             _requestService = requestService;
             _requestStatusService = requestStatusService;
             _bidStatusService = bidStatusService;
+            _httpContextAccessor = httpContextAccessor;
         }
         [Authorize(Roles = "Client")]
         [HttpPost]
@@ -51,18 +53,18 @@ namespace ContractorsAuctioneer.Controllers
                 {
                     BidOfContractorId = bid.Data.Id,
                     Status = Entites.BidStatusEnum.BidApprovedByClient,
-                   
+
                 };
                 var newBidStatus = await _bidStatusService.AddAsync(newStatus, cancellationToken);
                 if (!newBidStatus.IsSuccessful)
                 {
                     return Problem(newBidStatus.Message);
                 }
-                bid.Data.ExpireAt = DateTime.Now.AddDays(2);
+                bid.Data.ExpireAt = DateTime.Now.AddMinutes(3);
                 var updatecontract = new UpdateBidOfContractorDto
-                { 
+                {
                     ExpireAt = bid.Data.ExpireAt,
-                    Id = bid.Data.Id,                   
+                    Id = bid.Data.Id,
                 };
                 var updatedBid = await _bidOfContractorService.UpdateAsync(updatecontract, cancellationToken);
                 if (!updatedBid.IsSuccessful)
@@ -84,10 +86,17 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(appId, out var clientId))
+            {
+                return Problem(
+                    detail: "خطا!",
+                    statusCode: 400,
+                    title: "Bad Request");
+            }
             var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
             if ((!request.IsSuccessful || request.Data == null) && request.Data.IsActive == false) return NotFound(request);
-            if (requestDto.IsAccepted == true)
+            if (requestDto.IsAccepted == true && request.Data.ClientId == clientId)
             {
                 var newStatus = new AddRequestStatusDto
                 {
@@ -96,17 +105,27 @@ namespace ContractorsAuctioneer.Controllers
                 };
 
                 var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
-                if (!newRequestStatus.IsSuccessful) return Problem(newRequestStatus.Message);
-                request.Data.ExpireAt = DateTime.Now.AddDays(7);
+                if (!newRequestStatus.IsSuccessful) return Problem(
+                    detail: newRequestStatus.Message,
+                    statusCode: 500,
+                    title: "Internal Server Error");
+
+                request.Data.ExpireAt = DateTime.Now.AddMinutes(7);
                 var updateResult = await _requestService.UpdateAsync(request.Data, cancellationToken);
                 if (!updateResult.IsSuccessful)
                 {
-                    return Problem(updateResult.Message);
+                    return Problem(
+                        detail: updateResult.Message,
+                        statusCode: 500,
+                        title: "Internal Server Error");
                 }
 
                 return Ok();
             }
-            else return BadRequest("مقادیر ورودی نا معتبر است");
+            else return Problem(
+                detail: "خطا!",
+                statusCode: 400,
+                title: "Bad Request");
         }
         [Authorize(Roles = "Client")]
         [HttpPost]

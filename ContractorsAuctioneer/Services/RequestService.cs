@@ -47,18 +47,7 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                //var httpContext = _httpContextAccessor.HttpContext;
-                //if (httpContext is null)
-                //{
-                //    return false;
-                //}
-                //var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                //if (!result.IsSuccessful)
-                //{
-                //    return false;
-                //}
-
-                //var user = result.Data;
+              
                 var applicationUserResult = await _authService.RegisterAsync(requestDto.NCode, requestDto.PhoneNumber, role);
                 if (applicationUserResult.Data.RegisteredUserId == 0)
                 {
@@ -100,7 +89,7 @@ namespace ContractorsAuctioneer.Services
                     IsActive = true,
                     ExpireAt = DateTime.Now.AddDays(3),
                     RegionId = regionId,
-                    ClientId = clientId,
+                    ClientId = applicationUserResult.Data.RegisteredUserId,
                     CreatedAt = DateTime.Now,
                     //CreatedBy = user.UserId,
                     RequestNumber = requestDto.RequestNumber,
@@ -284,7 +273,7 @@ namespace ContractorsAuctioneer.Services
                         return new Result<RequestDto>().WithValue(null).Failure("مهلت تایید درخواست تمام شده است!");
                     }
                 }
-                return new Result<RequestDto>().WithValue(requestResult).Success("درخواست  یافت نشد.");
+                return new Result<RequestDto>().WithValue(null).Failure("درخواست  یافت نشد.");
             }
             catch (Exception)
             {
@@ -297,23 +286,15 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
+                var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(appId, out var clientId))
                 {
-                    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا.");
+                    return new Result<List<RequestDto>>().WithValue(null).Failure("خطا");
                 }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
-                {
-                    var errorMessage = result.Message ?? "خطا !";
-                    return new Result<List<RequestDto>>().WithValue(null).Failure(errorMessage);
-                }
-
-                int userId = result.Data.UserId;
 
 
                 var requests = await _context.Requests
-                      .Where(r => r.BidOfContractors.Any(b => b.ContractorId == userId) &&
+                      .Where(r => r.BidOfContractors.Any(b => b.ContractorId == clientId) &&
                                   r.RequestStatuses.All(rs => rs.Status != RequestStatusEnum.RequestApprovedByClient &&
                                                               rs.Status != RequestStatusEnum.RequestRejectedByContractor))
                       .Select(r => new RequestDto
