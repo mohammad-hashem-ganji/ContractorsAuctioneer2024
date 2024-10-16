@@ -105,7 +105,7 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<UpdateFileAttachmentDto>().WithValue(null).Failure(ErrorMessages.FileNotFound);
                 }
-                file.IsDeleted = fileAttachmentDto.IsDeleted;
+                //file.IsDeleted = fileAttachmentDto.IsDeleted;
                 file.UpdatedBy = fileAttachmentDto.UpdatedBy;
                 file.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync(cancellationToken);

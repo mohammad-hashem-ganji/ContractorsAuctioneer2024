@@ -6,6 +6,7 @@ namespace ContractorsAuctioneer.Dtos
     {
         public int RequestId { get; set; }
         public RequestStatusEnum Status { get; set; }
+        public int CreatedBy { get; set; }
 
     }
 

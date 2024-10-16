@@ -11,8 +11,7 @@ namespace ContractorsAuctioneer.Services
     {
         private readonly IServiceProvider _serviceProvider;
         
-
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(3);
         public BidOfContractorCheckService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -50,7 +49,8 @@ namespace ContractorsAuctioneer.Services
                             .AddAsync(new Dtos.AddBidStatusDto
                             {
                                 BidOfContractorId = bid.Id,
-                                Status = BidStatusEnum.TimeForCheckingBidForContractorExpired
+                                Status = BidStatusEnum.TimeForCheckingBidForContractorExpired,
+                                CreatedBy = 100
                             }, stoppingToken);
                         if (expired.IsSuccessful)
                         {
@@ -68,11 +68,12 @@ namespace ContractorsAuctioneer.Services
                         {
                             BidOfContractorId = bid.Id,
                             Status = BidStatusEnum.TimeForCheckingBidForClientExpired,
+                            CreatedBy = 100
                         }, stoppingToken);
                         if (expired.IsSuccessful)
                         {
                             dbContext.BidOfContractors.Update(bid);
-                        }  
+                        }
                     }
 
                     await dbContext.SaveChangesAsync(stoppingToken);

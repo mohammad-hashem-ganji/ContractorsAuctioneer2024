@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContractorsAuctioneer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241015095339_first")]
+    [Migration("20241016044542_first")]
     partial class first
     {
         /// <inheritdoc />
@@ -97,16 +97,16 @@ namespace ContractorsAuctioneer.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "7a79f38d-f1e7-4cba-b845-f63cf872235b",
+                            ConcurrencyStamp = "97efcdbf-c4c1-4c96-8536-5f1db7c120b2",
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJm0aG3S3wLvXjGHduNkWwtGB9zNOgoHlqZsK+ZpDXPd0JKm5emAFYqvq4bH2PdUKQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEH6Q5eOKQIFKdJe26ELDZ6XBDxUskpH9a8Ee2KqEtIPPxcaltQoM+YUplBX/ptcyTg==",
                             PhoneNumber = "09179",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "fe3c0805-ad41-4e70-9ea8-9060b666e255",
+                            SecurityStamp = "02f903bd-ed72-4380-bb5d-463d3c13ed43",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });

@@ -5,6 +5,7 @@ using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
+using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -212,10 +213,17 @@ namespace ContractorsAuctioneer.Services
                     return new Result<RequestDto>().WithValue(null).Failure("خطا");
                 }
                 var clientId = user.Data.UserId;
+
+                var appId = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier),out int appUserId);
+                if (!appId)
+                {
+                    return new Result<RequestDto>().WithValue(null).Failure("خطا");
+                }
                 var requestResult = await _context.Requests
                    .Where(x =>
                    x.ClientId == clientId 
-                   && x.IsTenderOver == false && x.IsActive == true )
+                   && x.IsTenderOver == false && x.IsActive == true
+                   )
                    .Include(x => x.Client)
                    .Include(x => x.Region)
                    .Include(x => x.RequestStatuses)
@@ -256,13 +264,15 @@ namespace ContractorsAuctioneer.Services
                        }).ToList()
 
                    }).FirstOrDefaultAsync(cancellationToken);
+                var requestStatusResult = await _context.RequestStatuses.Where(rs => rs.CreatedBy == appUserId).ToListAsync(cancellationToken);
                 if (requestResult is not null)
                 {                   
                     if (requestResult.ExpireAt > DateTime.Now)
                     {
-                        if (requestResult.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient))
+                        if (requestResult.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient 
+                                                                 || rs.Status == RequestStatusEnum.RequestRejectedByClient))
                         {
-                            return new Result<RequestDto>().WithValue(requestResult).Success("درخواست  یافت شد.");
+                            return new Result<RequestDto>().WithValue(requestResult).Failure("درخواست  قبلا بررسی شده است.");
                         }
                         else
                         {
@@ -288,15 +298,15 @@ namespace ContractorsAuctioneer.Services
             try
             {
                 var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(appId, out var clientId))
+                if (!int.TryParse(appId, out var contractorId))
                 {
                     return new Result<List<RequestDto>>().WithValue(null).Failure("خطا");
                 }
 
 
                 var requests = await _context.Requests
-                      .Where(r => r.BidOfContractors.Any(b => b.ContractorId == clientId) &&
-                                  r.RequestStatuses.All(rs => rs.Status != RequestStatusEnum.RequestApprovedByClient &&
+                      .Where(r => r.BidOfContractors.Any(b => b.ContractorId == contractorId) &&
+                                  r.RequestStatuses.All(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient &&
                                                               rs.Status != RequestStatusEnum.RequestRejectedByContractor))
                       .Select(r => new RequestDto
                       {

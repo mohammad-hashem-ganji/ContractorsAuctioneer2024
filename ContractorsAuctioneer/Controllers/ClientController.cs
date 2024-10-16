@@ -151,7 +151,7 @@ namespace ContractorsAuctioneer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var request = await _requestService.GetByIdAsync(requestDto.RequestId, cancellationToken);
+            var request = await _requestService.GetRequestOfClientAsync(cancellationToken);
             if (!request.IsSuccessful || request.Data == null) return NotFound(request);
             if (requestDto.IsAccepted == false)
             {

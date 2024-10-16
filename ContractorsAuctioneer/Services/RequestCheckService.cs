@@ -9,7 +9,7 @@ namespace ContractorsAuctioneer.Services
     public class RequestCheckService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(3);
 
         public RequestCheckService(IServiceProvider serviceProvider)
         {
@@ -36,11 +36,11 @@ namespace ContractorsAuctioneer.Services
                 try
                 {
                     var rejectedRequestByClient = await dbContext.Requests
-                        .Where(r => (r.ExpireAt.HasValue && r.ExpireAt <= DateTime.Now) ||
-                        (r.RequestStatuses != null && r.RequestStatuses
-                        .Any(x => x.Status == RequestStatusEnum.RequestRejectedByClient)))
+                        .Where(r =>  (r.ExpireAt.HasValue && r.ExpireAt<= DateTime.Now)&&                   
+                        r.RequestStatuses != null && r.RequestStatuses
+                        .Any(x => x.Status == RequestStatusEnum.RequestRejectedByClient))
                         .ToArrayAsync(stoppingToken);
-
+                    var a = " ";
                     var requestsAfterTenderExpiered = await dbContext.Requests
                         .Where(r => r.ExpireAt.HasValue
                         && r.ExpireAt <= DateTime.Now
@@ -48,7 +48,11 @@ namespace ContractorsAuctioneer.Services
                         && r.RequestStatuses
                         .Any(x => x.Status == RequestStatusEnum.RequestApprovedByClient))
                         .ToArrayAsync(stoppingToken);
-
+                    var requestsAfterTenderExpieredAndNOotAcceptedByClient = await dbContext.Requests
+                       .Where(r => r.ExpireAt.HasValue
+                       && r.ExpireAt <= DateTime.Now
+                       && r.RequestStatuses == null)
+                       .ToArrayAsync(stoppingToken);
                     foreach (var request in rejectedRequestByClient)
                     {
                         request.IsActive = false;
@@ -66,11 +70,29 @@ namespace ContractorsAuctioneer.Services
                             {
                                 RequestId = request.Id,
                                 Status = RequestStatusEnum.RequestTenderFinished,
+                                CreatedBy =100
                             }, stoppingToken);
                         if (tenderOver.IsSuccessful)
                         {
                             dbContext.Requests.Update(request);
                         }                
+                    }
+                    foreach (var request in requestsAfterTenderExpieredAndNOotAcceptedByClient)
+                    {
+                        request.IsActive = false;
+                        request.IsTenderOver = true;
+                        request.ExpireAt = null;
+                        var tenderOver = await requestStatusService
+                            .AddAsync(new Dtos.AddRequestStatusDto
+                            {
+                                RequestId = request.Id,
+                                Status = RequestStatusEnum.RequestTenderFinished,
+                                CreatedBy = 100
+                            }, stoppingToken);
+                        if (tenderOver.IsSuccessful)
+                        {
+                            dbContext.Requests.Update(request);
+                        }
                     }
                     // Do somthing for rejectedRequestByContractor !! ***
                     await dbContext.SaveChangesAsync(stoppingToken);

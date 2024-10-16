@@ -129,7 +129,7 @@ builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
 }));
 
 #endregion
-
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

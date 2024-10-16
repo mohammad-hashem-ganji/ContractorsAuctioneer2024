@@ -22,7 +22,7 @@ namespace ContractorsAuctioneer.Services
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<Result<AddRequestStatusDto>> AddAsync(AddRequestStatusDto requestStatusDto, CancellationToken cancellationToken) 
+        public async Task<Result<AddRequestStatusDto>> AddAsync(AddRequestStatusDto requestStatusDto, CancellationToken cancellationToken)
         {
             if (requestStatusDto is null)
             {
@@ -30,11 +30,18 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-             
-                int userId;
-                bool isconverted =int.TryParse( _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
 
-                
+                int userId;
+                if (requestStatusDto.CreatedBy == 100)
+                {
+                    userId = 100;
+                }
+                else
+                {
+                    bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+                }
+
+
                 var requestStatus = new RequestStatus
                 {
                     RequestId = requestStatusDto.RequestId,
@@ -49,7 +56,7 @@ namespace ContractorsAuctioneer.Services
             }
             catch (Exception)
             {
-                return new Result<AddRequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);         
+                return new Result<AddRequestStatusDto>().WithValue(null).Failure(ErrorMessages.ErrorWhileAddingRequestStatus);
             }
         }
         public async Task<Result<RequestStatusDto>> GetByIdAsync(int reqStatusId, CancellationToken cancellationToken)
@@ -79,7 +86,7 @@ namespace ContractorsAuctioneer.Services
                     return new Result<RequestStatusDto>()
                         .WithValue(requestStatusDto)
                         .Success("وضعیت پیدا شد .");
-                }   
+                }
             }
             catch (Exception)
             {
@@ -113,7 +120,7 @@ namespace ContractorsAuctioneer.Services
                     .WithValue(requestStatusDto)
                     .Success($"وضعیت تغییر به {requestStatusDto.Status}تغییر پیدا کرد.");
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return new Result<RequestStatusDto>()
                     .WithValue(null).Failure(ErrorMessages.AnErrorWhileUpdatingStatus);
@@ -125,7 +132,7 @@ namespace ContractorsAuctioneer.Services
             {
                 var result = await _context.RequestStatuses
                     .Where(x =>
-                    x.RequestId == requesId )
+                    x.RequestId == requesId)
                     .Include(s => s.Request)
                     .OrderByDescending(x => x.CreatedAt)
                     .Select(r => new RequestStatusDto

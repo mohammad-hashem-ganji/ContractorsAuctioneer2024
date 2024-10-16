@@ -11,7 +11,7 @@ namespace ContractorsAuctioneer.Entites
     {
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
-        public bool? IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public int? DeletedBy { get; set; }
         public DateTime? DeletedAt { get; set; }
         public int? UpdatedBy { get; set; }

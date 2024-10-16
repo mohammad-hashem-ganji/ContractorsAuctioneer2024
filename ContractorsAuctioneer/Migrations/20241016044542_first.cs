@@ -485,7 +485,7 @@ namespace ContractorsAuctioneer.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { 1, 0, "7a79f38d-f1e7-4cba-b845-f63cf872235b", "admin@gmail.com", false, false, null, "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEJm0aG3S3wLvXjGHduNkWwtGB9zNOgoHlqZsK+ZpDXPd0JKm5emAFYqvq4bH2PdUKQ==", "09179", false, "fe3c0805-ad41-4e70-9ea8-9060b666e255", false, "admin" });
+                values: new object[] { 1, 0, "97efcdbf-c4c1-4c96-8536-5f1db7c120b2", "admin@gmail.com", false, false, null, "ADMIN@GMAIL.COM", "ADMIN", "AQAAAAIAAYagAAAAEH6Q5eOKQIFKdJe26ELDZ6XBDxUskpH9a8Ee2KqEtIPPxcaltQoM+YUplBX/ptcyTg==", "09179", false, "02f903bd-ed72-4380-bb5d-463d3c13ed43", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",

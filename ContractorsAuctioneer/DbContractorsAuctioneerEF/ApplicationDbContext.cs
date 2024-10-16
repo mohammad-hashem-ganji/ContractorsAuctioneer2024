@@ -33,6 +33,15 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<RequestStatus>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Request>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Client>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Region>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<BidOfContractor>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<BidStatus>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Project>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<ProjectStatus>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<FileAttachment>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<LastLoginHistory>().HasQueryFilter(x => x.IsDeleted == false);
 
             List<IdentityRole<int>> roles = new List<IdentityRole<int>>
             {
