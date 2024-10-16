@@ -18,6 +18,7 @@ namespace ContractorsAuctioneer.Entites
         RequestRejectedByClient = 7,
         RequestRejectedByContractor = 8,
         RequestTenderFinished =9,
+        TimeForCheckingBidForClientExpired =10,
 
     }
 }

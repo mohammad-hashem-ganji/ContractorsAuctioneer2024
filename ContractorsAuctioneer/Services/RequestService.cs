@@ -201,7 +201,7 @@ namespace ContractorsAuctioneer.Services
                 return new Result<RequestDto>().WithValue(null).Failure("خطا!");
             }
         }
-        public async Task<Result<RequestDto>> GetRequestOfClientAsync(CancellationToken cancellationToken)
+        public async Task<Result<RequestDto>> CheckRequestOfClientAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -292,6 +292,99 @@ namespace ContractorsAuctioneer.Services
             }
 
         }
+
+        public async Task<Result<RequestDto>> GetRequestOfClientAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+
+                var user = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
+
+                if (!user.IsSuccessful)
+                {
+                    return new Result<RequestDto>().WithValue(null).Failure("خطا");
+                }
+                var clientId = user.Data.UserId;
+
+                var appId = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int appUserId);
+                if (!appId)
+                {
+                    return new Result<RequestDto>().WithValue(null).Failure("خطا");
+                }
+                var requestResult = await _context.Requests
+                   .Where(x =>
+                   x.ClientId == clientId
+                   && x.IsTenderOver == false && x.IsActive == true
+                   )
+                   .Include(x => x.Client)
+                   .Include(x => x.Region)
+                   .Include(x => x.RequestStatuses)
+                   .Include(x => x.FileAttachments)
+                   .Include(x => x.BidOfContractors)
+                   .Select(x => new RequestDto
+                   {
+                       Id = x.Id,
+                       Title = x.Title,
+                       Description = x.Description,
+                       RegistrationDate = x.RegistrationDate,
+                       ConfirmationDate = x.ConfirmationDate,
+                       IsActive = x.IsActive,
+                       ExpireAt = x.ExpireAt,
+                       IsAcceptedByClient = x.IsAcceptedByClient,
+                       IsTenderOver = x.IsTenderOver,
+                       ClientId = x.ClientId,
+                       RegionId = x.RegionId,
+                       RequestNumber = x.RequestNumber,
+
+                       RequestStatuses = x.RequestStatuses.Select(rs => new RequestStatusDto
+                       {
+                           Id = rs.Id,
+                           Status = rs.Status,
+
+                       }).ToList(),
+                       BidOfContractors = x.BidOfContractors.Select(b => new BidOfContractorDto
+                       {
+                           Id = b.Id,
+                           SuggestedFee = b.SuggestedFee,
+                           ContractorId = b.ContractorId,
+                           CreatedAt = b.CreatedAt,
+                       }).ToList(),
+                       FileAttachments = x.FileAttachments.Select(f => new FileAttachmentDto
+                       {
+                           Id = f.Id,
+
+                       }).ToList()
+
+                   }).FirstOrDefaultAsync(cancellationToken);
+                var requestStatusResult = await _context.RequestStatuses.Where(rs => rs.CreatedBy == appUserId).ToListAsync(cancellationToken);
+                if (requestResult is not null)
+                {
+                    if (requestResult.ExpireAt > DateTime.Now)
+                    {
+                        if (requestResult.RequestStatuses.Any(rs => rs.Status != RequestStatusEnum.RequestRejectedByClient))
+                        {
+                            return new Result<RequestDto>().WithValue(requestResult).Success("درخواست پیدا شد.");
+                        }
+                        else
+                        {
+                            return new Result<RequestDto>().WithValue(requestResult).Failure("درخواست پیدا نشد.");
+                        }
+                    }
+                    else
+                    {
+                        return new Result<RequestDto>().WithValue(null).Failure("مهلت تایید درخواست تمام شده است!");
+                    }
+                }
+                return new Result<RequestDto>().WithValue(null).Failure("درخواست  پیدا نشد.");
+            }
+            catch (Exception)
+            {
+                return new Result<RequestDto>().WithValue(null).Failure("خطا");
+            }
+
+        }
+
+
 
         public async Task<Result<List<RequestDto>>> GetRequestsforContractor(CancellationToken cancellationToken)
         {

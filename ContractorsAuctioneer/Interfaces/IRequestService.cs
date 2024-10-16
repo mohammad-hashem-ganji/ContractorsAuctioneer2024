@@ -11,5 +11,6 @@ namespace ContractorsAuctioneer.Interfaces
         Task<Result<RequestDto>> GetRequestOfClientAsync(CancellationToken cancellationToken);
         Task<Result<RequestDto>> UpdateAsync(RequestDto requestDto, CancellationToken cancellationToken);
         Task<Result<List<RequestDto>>> GetRequestsforContractor(CancellationToken cancellationToken);
+        Task<Result<RequestDto>> CheckRequestOfClientAsync(CancellationToken cancellationToken);
     }
 }

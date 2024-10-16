@@ -58,7 +58,17 @@ namespace ContractorsAuctioneer.Services
                         request.IsActive = false;
                         request.IsTenderOver = true;
                         request.ExpireAt = null;
-                        dbContext.Requests.Update(request);
+                        var tenderOver = await requestStatusService
+                         .AddAsync(new Dtos.AddRequestStatusDto
+                         {
+                             RequestId = request.Id,
+                             Status = RequestStatusEnum.TimeForCheckingBidForClientExpired,
+                             CreatedBy = 100
+                         }, stoppingToken);
+                        if (tenderOver.IsSuccessful)
+                        {
+                            dbContext.Requests.Update(request);
+                        }
                     }
                     foreach (var request in requestsAfterTenderExpiered)
                     {
@@ -69,7 +79,7 @@ namespace ContractorsAuctioneer.Services
                             .AddAsync(new Dtos.AddRequestStatusDto
                             {
                                 RequestId = request.Id,
-                                Status = RequestStatusEnum.RequestTenderFinished,
+                                Status = RequestStatusEnum.TimeForCheckingBidForClientExpired,
                                 CreatedBy =100
                             }, stoppingToken);
                         if (tenderOver.IsSuccessful)
@@ -86,7 +96,7 @@ namespace ContractorsAuctioneer.Services
                             .AddAsync(new Dtos.AddRequestStatusDto
                             {
                                 RequestId = request.Id,
-                                Status = RequestStatusEnum.RequestTenderFinished,
+                                Status = RequestStatusEnum.TimeForCheckingBidForClientExpired,
                                 CreatedBy = 100
                             }, stoppingToken);
                         if (tenderOver.IsSuccessful)

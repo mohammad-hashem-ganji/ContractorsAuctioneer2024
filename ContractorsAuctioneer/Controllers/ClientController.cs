@@ -88,9 +88,9 @@ namespace ContractorsAuctioneer.Controllers
                 return BadRequest(ModelState);
             }
             var appId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            
-               
-            
+
+
+
             if (!int.TryParse(appId, out var userId))
             {
                 return Problem(
@@ -98,19 +98,21 @@ namespace ContractorsAuctioneer.Controllers
                     statusCode: 400,
                     title: "Bad Request");
             }
-            var request = await _requestService.GetRequestOfClientAsync( cancellationToken);
+            var request = await _requestService.CheckRequestOfClientAsync(cancellationToken);
             if (!request.IsSuccessful || request.Data == null)
             {
-                return NotFound(request);
+                return Problem(detail: request.ErrorMessage,
+                statusCode: 400,
+                title: "Bad Request");
             }
-            if ( requestDto.RequestId != request.Data.Id && request.Data.IsActive == false) return NotFound(request);
+            if (requestDto.RequestId != request.Data.Id && request.Data.IsActive == false) return NotFound(request);
             if (request.Data.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient))
             {
                 return Problem(detail: "درخواست قبلا تایید شده!",
                 statusCode: 400,
                 title: "Bad Request");
             }
-            if (requestDto.IsAccepted == true )
+            if (requestDto.IsAccepted == true)
             {
                 var newStatus = new AddRequestStatusDto
                 {
@@ -151,8 +153,10 @@ namespace ContractorsAuctioneer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var request = await _requestService.GetRequestOfClientAsync(cancellationToken);
-            if (!request.IsSuccessful || request.Data == null) return NotFound(request);
+            var request = await _requestService.CheckRequestOfClientAsync(cancellationToken);
+            if (!request.IsSuccessful || request.Data == null) return Problem(detail: request.ErrorMessage,
+                statusCode: 400,
+                title: "Bad Request");
             if (requestDto.IsAccepted == false)
             {
                 var newStatus = new AddRequestStatusDto
@@ -161,7 +165,9 @@ namespace ContractorsAuctioneer.Controllers
                     Status = Entites.RequestStatusEnum.RequestRejectedByClient
                 };
                 var newRequestStatus = await _requestStatusService.AddAsync(newStatus, cancellationToken);
-                if (!newRequestStatus.IsSuccessful) return Problem(newRequestStatus.Message);
+                if (!newRequestStatus.IsSuccessful) return Problem(detail: newRequestStatus.ErrorMessage,
+                statusCode: 400,
+                title: "Bad Request");
                 return Ok();
                 //از اینجا به بعد باید به سامانه مهندسی ارجا داده بشه.
             }
