@@ -277,6 +277,7 @@ namespace ContractorsAuctioneer.Services
                             ContractorId = bid.ContractorId,
                             SuggestedFee = bid.SuggestedFee,
                         })
+                        .OrderBy(x=> x.SuggestedFee)
                         .ToListAsync(cancellationToken);
                 if (bidsOfContractor.Any())
                 {
