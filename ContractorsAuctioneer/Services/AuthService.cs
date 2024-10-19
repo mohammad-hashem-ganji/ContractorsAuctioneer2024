@@ -133,7 +133,7 @@ namespace ContractorsAuctioneer.Services
         //        claims: claims,
         //        expires: DateTime.UtcNow.AddHours(1),
         //        signingCredentials: creds
-        
+
 
         //        );
         //    //return new JwtSecurityTokenHandler().WriteToken(token);
@@ -148,13 +148,13 @@ namespace ContractorsAuctioneer.Services
             // Step 1: Create the claims
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime),
-        new Claim(JwtRegisteredClaimNames.Name, user.FirsName),
-        new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-    };
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime),
+                new Claim("FirstName", user.FirsName ?? string.Empty),
+                new Claim("LastName", user.LastName ?? string.Empty)
+            };
 
             foreach (var role in roles)
             {
@@ -166,9 +166,9 @@ namespace ContractorsAuctioneer.Services
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             // Step 3: Create the encrypting credentials
+
             var encryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:EncryptionKey"]));
             var encryptingCredentials = new EncryptingCredentials(encryptionKey, JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
-
             // Step 4: Create the token descriptor
             var tokenDescriptor = new SecurityTokenDescriptor
             {
