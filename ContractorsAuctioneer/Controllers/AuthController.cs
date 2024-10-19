@@ -67,7 +67,7 @@ namespace ContractorsAuctioneer.Controllers
             };
             
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { verification });
+            return Ok(verification);
         }
         [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]
