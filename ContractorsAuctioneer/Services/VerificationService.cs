@@ -7,6 +7,7 @@ using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
+using System.Data;
 
 namespace ContractorsAuctioneer.Services
 {
@@ -49,7 +50,7 @@ namespace ContractorsAuctioneer.Services
                 await _userManager.UpdateAsync(user);
                 var result = new GetVerificationCodeDto
                 {
-                    VerificationCodeCode = token,
+                    VerificationCode = token,
                     PhoneNumber = user.PhoneNumber,
                     Ncode = userName
                 };
@@ -60,28 +61,53 @@ namespace ContractorsAuctioneer.Services
             }
             return new Result<GetVerificationCodeDto>().WithValue(null).Failure("کد ساخته نشد");
         }
-        public async Task<Result<string>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
+        public async Task<Result<UserWithRoleAndTokenDto>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
         {
             
             var result = await _autService.AuthenticateAsync(verificationCodeDto.Ncode, verificationCodeDto.PhoneNumber);
             if (result != null)
             {
-                var isTokenValid = await _userManager
-                    .VerifyTwoFactorTokenAsync(result.Data.User, TokenOptions.DefaultPhoneProvider, verificationCodeDto.VerificationCodeCode);
+                var isCodeValid = await _userManager
+                    .VerifyTwoFactorTokenAsync(result.Data, TokenOptions.DefaultPhoneProvider, verificationCodeDto.VerificationCode);
 
-                if (isTokenValid)
+                if (isCodeValid)
                 {
-                    await _signInManger.SignInAsync(result.Data.User, isPersistent: false);
+                   await _signInManger.SignInAsync(result.Data, isPersistent: false);
+                    var roles = await _userManager.GetRolesAsync(result.Data);
+                    if (roles == null)
+                    {
+                        return new Result<UserWithRoleAndTokenDto>()
+                            .WithValue(null)
+                            .Failure("کاربر نامعتبر است");
+                    }
+                    var token = await _autService.GenerateJwtTokenAsync(result.Data);
+                    var userWithRolesAndTokenDto = new UserWithRoleAndTokenDto
+                    {
+                        Token = token,
+                        Roles = roles
+                    };
+                    if (token is not null)
+                    {
+                        return new Result<UserWithRoleAndTokenDto>()
+                       .WithValue(userWithRolesAndTokenDto)
+                       .Success("کد تایید شد");
+                    }
+                    else
+                    {
+                        return new Result<UserWithRoleAndTokenDto>()
+                       .WithValue(null)
+                       .Failure("خطا!");
+                    }
+
                 }
-                var token = await _autService.GenerateJwtTokenAsync(result.Data.User);
-                if (token is not null)
-                {
-                    return new Result<string>()
-                   .WithValue(token)
-                   .Success("کد تایید شد");
-                }                
+                return new Result<UserWithRoleAndTokenDto>()
+                       .WithValue(null)
+                       .Failure("کد نامعتبر است!");
+
+
+
             }
-            return new Result<string>()
+            return new Result<UserWithRoleAndTokenDto>()
             .WithValue(null)
             .Failure("کاربر یافت نشد");
         }

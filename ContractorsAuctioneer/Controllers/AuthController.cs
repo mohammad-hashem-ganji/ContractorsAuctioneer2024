@@ -46,29 +46,28 @@ namespace ContractorsAuctioneer.Controllers
             }
             //var token = await _authService.GenerateJwtTokenAsync(user.Data);
             //return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
-            if (user.Data.User.PhoneNumber == null)
+            if (user.Data.PhoneNumber == null)
             {
                 return BadRequest("شماره موبال با کد ملی ثبت شده مطابقت ندارد");
             }
             var verification = await _verificationService
-                .GenerateAndSendCodeAsync(user.Data.User.Id, user.Data.User.PhoneNumber, CancellationToken.None);
+                .GenerateAndSendCodeAsync(user.Data.Id, user.Data.PhoneNumber, CancellationToken.None);
             // CHECK THE ROLE
           
             if (!verification.IsSuccessful)
             {
                 return BadRequest(verification.Message);
             }
-            verification.Data.Role = user.Data.Roles.FirstOrDefault();
             AddLastLoginHistoryDto lastLogin = new AddLastLoginHistoryDto
             {
-                ApplicationUserId = user.Data.User.Id,
+                ApplicationUserId = user.Data.Id,
                 CreatedAt = DateTime.Now,
-                CreatedBy = user.Data.User.Id,
+                CreatedBy = user.Data.Id,
                 LastLoginTime = DateTime.Now
             };
             
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { verification , user.Data.User.Id});
+            return Ok(new { verification });
         }
         [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]
@@ -82,8 +81,8 @@ namespace ContractorsAuctioneer.Controllers
             return Ok(token);
         }
         [Authorize(Roles ="Contractor")]
-        [HttpGet("AutherizeAuthenticatedUsers")]
-        public async Task<IActionResult> AutherizeAuthenticatedUsers()
+        [HttpGet("AutherizeAuthenticatedContractorTest")]
+        public async Task<IActionResult> AutherizeAuthenticatedContractorTest()
         {            
             var user = User;         
             var a = 0;

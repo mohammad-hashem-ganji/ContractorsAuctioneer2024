@@ -2,9 +2,9 @@
 
 namespace ContractorsAuctioneer.Dtos
 {
-    public class UserWithRoleDto
+    public class UserWithRoleAndTokenDto
     {
-        public ApplicationUser User { get; set; }
         public IList<string> Roles { get; set; }
+        public string Token { get; set; }
     }
 }

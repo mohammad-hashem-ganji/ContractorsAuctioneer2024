@@ -7,7 +7,7 @@ namespace ContractorsAuctioneer.Interfaces
     {
        
         Task<Result<GetVerificationCodeDto>> GenerateAndSendCodeAsync(int userId, string phoneNumber, CancellationToken cancellationToken);
-        Task<Result<string>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken);
+        Task<Result<UserWithRoleAndTokenDto>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken);
 
     }
 }

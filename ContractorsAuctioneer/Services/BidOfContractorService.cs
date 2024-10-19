@@ -46,13 +46,18 @@ namespace ContractorsAuctioneer.Services
                 }
                 var contractorId = user.Data.UserId;
 
-                var appId = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int appUserId);
-                if (!appId)
+                var isAppUserIdConvert = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int appUserId);
+                if (!isAppUserIdConvert)
                 {
                     return new Result<AddBidOfContractorDto>().WithValue(null).Failure("خطا");
                 }
-
-
+                var isContractorAddedBidForRequest =await _context.BidOfContractors
+                    .AnyAsync(x => x.RequestId == bidOfContractorDto.RequestId
+                    && x.CreatedBy == appUserId);
+                if (isContractorAddedBidForRequest)
+                {
+                    return new Result<AddBidOfContractorDto>().WithValue(null).Failure("قبلا پینهاد قیمت داده اید.");
+                }
                 var bidOfContractor = new BidOfContractor
                 {
                     SuggestedFee = bidOfContractorDto.SuggestedFee,
@@ -194,6 +199,10 @@ namespace ContractorsAuctioneer.Services
                 if (bidOfContractorDto.SuggestedFee.HasValue)
                 {
                     bidOfContractor.SuggestedFee = bidOfContractorDto.SuggestedFee.Value;
+                }
+                if (bidOfContractorDto.ExpireAt.HasValue)
+                {
+                    bidOfContractor.ExpireAt = bidOfContractorDto.ExpireAt.Value;
                 }
                 //_context.BidOfContractors.Update(bidOfContractor);
                 await _context.SaveChangesAsync(cancellationToken);
