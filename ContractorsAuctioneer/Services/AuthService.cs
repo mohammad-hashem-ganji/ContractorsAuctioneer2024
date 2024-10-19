@@ -87,18 +87,30 @@ namespace ContractorsAuctioneer.Services
             }
         }
 
-        public async Task<Result<ApplicationUser>> AuthenticateAsync(string nCode, string phoneNumber)
+        public async Task<Result<UserWithRoleDto>> AuthenticateAsync(string nCode, string phoneNumber)
         {
             const string key = "ParsianContractorAuthenearproject";
             var user = await _userManager.FindByNameAsync(string.Concat(nCode, key));
+            var roles = await _userManager.GetRolesAsync(user);
             if (user == null || user.PhoneNumber != phoneNumber)
             {
-                return new Result<ApplicationUser>()
+                return new Result<UserWithRoleDto>()
                     .WithValue(null)
                     .Failure(ErrorMessages.InvalidUserNameOrPassword);
             }
-            return new Result<ApplicationUser>()
-                .WithValue(user)
+            if (roles == null)
+            {
+                return new Result<UserWithRoleDto>()
+                   .WithValue(null)
+                   .Failure(ErrorMessages.InvalidUserNameOrPassword);
+            }
+            UserWithRoleDto userWithRole = new UserWithRoleDto
+            {
+                Roles = roles,
+                User = user
+            };
+            return new Result<UserWithRoleDto>()
+                .WithValue(userWithRole)
                 .Success("");
         }
 

@@ -359,8 +359,7 @@ namespace ContractorsAuctioneer.Services
                 var requestStatusResult = await _context.RequestStatuses.Where(rs => rs.CreatedBy == appUserId).ToListAsync(cancellationToken);
                 if (requestResult is not null)
                 {
-                    if (requestResult.ExpireAt > DateTime.Now)
-                    {
+
                         if (requestResult.RequestStatuses.Any(rs => rs.Status != RequestStatusEnum.RequestRejectedByClient))
                         {
                             return new Result<RequestDto>().WithValue(requestResult).Success("درخواست پیدا شد.");
@@ -369,11 +368,8 @@ namespace ContractorsAuctioneer.Services
                         {
                             return new Result<RequestDto>().WithValue(requestResult).Failure("درخواست پیدا نشد.");
                         }
-                    }
-                    else
-                    {
-                        return new Result<RequestDto>().WithValue(null).Failure("مهلت تایید درخواست تمام شده است!");
-                    }
+                    
+
                 }
                 return new Result<RequestDto>().WithValue(null).Failure("درخواست  پیدا نشد.");
             }
@@ -398,9 +394,9 @@ namespace ContractorsAuctioneer.Services
 
 
                 var requests = await _context.Requests
-                      .Where(r => r.BidOfContractors.Any(b => b.ContractorId == contractorId) &&
-                                  r.RequestStatuses.All(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient &&
-                                                              rs.Status != RequestStatusEnum.RequestRejectedByContractor))
+                      .Where(r => 
+                      r.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient &&
+                                                  rs.Status != RequestStatusEnum.RequestRejectedByContractor))
                       .Select(r => new RequestDto
                       {
                           Id = r.Id,

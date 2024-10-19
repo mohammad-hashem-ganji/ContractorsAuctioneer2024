@@ -98,7 +98,13 @@ namespace ContractorsAuctioneer.Controllers
             }
             if (bidDto.IsAccepted == true)
             {
-
+                var isAcceptedByClient = await _bidOfContractorService.CheckBidIsAcceptedByClient(bid.Data.Id, cancellationToken);
+                if (!isAcceptedByClient.IsSuccessful)
+                {
+                    return Problem(detail: isAcceptedByClient.ErrorMessage,
+                    statusCode: 400,
+                    title: "Bad Request");
+                }
                 var newStatus = new AddBidStatusDto
                 {
                     BidOfContractorId = bid.Data.Id,

@@ -12,5 +12,6 @@ namespace ContractorsAuctioneer.Interfaces
         Task<Result<List<BidOfContractorDto>>> GetBidsOfContractorAsync(CancellationToken cancellationToken);
         Task<Result<List<BidOfContractorDto>>> GetBidsOfRequestAsync(int requestId, CancellationToken cancellationToken);
         Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(CancellationToken cancellationToken);
+        Task<Result<BidOfContractorDto>> CheckBidIsAcceptedByClient(int bidId, CancellationToken cancellationToken);
     }
 }

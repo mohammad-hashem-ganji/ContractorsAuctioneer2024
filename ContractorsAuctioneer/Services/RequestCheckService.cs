@@ -56,7 +56,7 @@ namespace ContractorsAuctioneer.Services
                     foreach (var request in rejectedRequestByClient)
                     {
                         request.IsActive = false;
-                        request.IsTenderOver = true;
+                        
                         request.ExpireAt = null;
                         var tenderOver = await requestStatusService
                          .AddAsync(new Dtos.AddRequestStatusDto
@@ -73,7 +73,7 @@ namespace ContractorsAuctioneer.Services
                     foreach (var request in requestsAfterTenderExpiered)
                     {
                         request.IsActive = true;
-                        request.IsTenderOver = true;
+                       
                         request.ExpireAt = null;
                         var tenderOver = await requestStatusService
                             .AddAsync(new Dtos.AddRequestStatusDto

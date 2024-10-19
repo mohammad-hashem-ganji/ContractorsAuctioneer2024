@@ -5,6 +5,7 @@ using ContractorsAuctioneer.Interfaces;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ContractorsAuctioneer.Services
 {
@@ -26,27 +27,20 @@ namespace ContractorsAuctioneer.Services
             }
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext is null)
+                int userId;
+                if (bidDto.CreatedBy == 100)
                 {
-                    return new Result<AddBidStatusDto>().WithValue(null).Failure("خطا.");
+                    userId = 100;
                 }
-                var result = await UserManagement.GetRoleBaseUserId(httpContext, _context);
-                if (!result.IsSuccessful)
+                else
                 {
-                    var errorMessage = result.Message ?? "خطا !";
-                    return new Result<AddBidStatusDto>().WithValue(null).Failure(errorMessage);
+                    bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
                 }
 
-                var user = result.Data;
-                if (user is null)
-                {
-                    return new Result<AddBidStatusDto>().WithValue(null).Failure("خطا.");
-                }
                 var bidStatus = new BidStatus
                 {
                     ContractorBidId = bidDto.BidOfContractorId,
-                    CreatedBy = user.UserId,
+                    CreatedBy = userId,
                     Status = bidDto.Status,
                     CreatedAt = DateTime.Now
                 };

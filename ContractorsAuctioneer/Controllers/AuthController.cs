@@ -46,28 +46,29 @@ namespace ContractorsAuctioneer.Controllers
             }
             //var token = await _authService.GenerateJwtTokenAsync(user.Data);
             //return Ok(new { Message = $"Hi {user.Data.UserName}", Token = token });
-            if (user.Data.PhoneNumber == null)
+            if (user.Data.User.PhoneNumber == null)
             {
                 return BadRequest("شماره موبال با کد ملی ثبت شده مطابقت ندارد");
             }
             var verification = await _verificationService
-                .GenerateAndSendCodeAsync(user.Data.Id, user.Data.PhoneNumber, CancellationToken.None);
-
+                .GenerateAndSendCodeAsync(user.Data.User.Id, user.Data.User.PhoneNumber, CancellationToken.None);
+            // CHECK THE ROLE
+          
             if (!verification.IsSuccessful)
             {
                 return BadRequest(verification.Message);
             }
-            
+            verification.Data.Role = user.Data.Roles.FirstOrDefault();
             AddLastLoginHistoryDto lastLogin = new AddLastLoginHistoryDto
             {
-                ApplicationUserId = user.Data.Id,
+                ApplicationUserId = user.Data.User.Id,
                 CreatedAt = DateTime.Now,
-                CreatedBy = user.Data.Id,
+                CreatedBy = user.Data.User.Id,
                 LastLoginTime = DateTime.Now
             };
             
             await _lastLoginHistoryService.AddAsync(lastLogin, cancellationToken);
-            return Ok(new { verification , user.Data.Id});
+            return Ok(new { verification , user.Data.User.Id});
         }
         [AllowAnonymous]
         [HttpPost("VerifyTwoFactorCode")]

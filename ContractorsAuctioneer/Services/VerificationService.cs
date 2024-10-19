@@ -67,13 +67,13 @@ namespace ContractorsAuctioneer.Services
             if (result != null)
             {
                 var isTokenValid = await _userManager
-                    .VerifyTwoFactorTokenAsync(result.Data, TokenOptions.DefaultPhoneProvider, verificationCodeDto.VerificationCodeCode);
+                    .VerifyTwoFactorTokenAsync(result.Data.User, TokenOptions.DefaultPhoneProvider, verificationCodeDto.VerificationCodeCode);
 
                 if (isTokenValid)
                 {
-                    await _signInManger.SignInAsync(result.Data, isPersistent: false);
+                    await _signInManger.SignInAsync(result.Data.User, isPersistent: false);
                 }
-                var token = await _autService.GenerateJwtTokenAsync(result.Data);
+                var token = await _autService.GenerateJwtTokenAsync(result.Data.User);
                 if (token is not null)
                 {
                     return new Result<string>()
