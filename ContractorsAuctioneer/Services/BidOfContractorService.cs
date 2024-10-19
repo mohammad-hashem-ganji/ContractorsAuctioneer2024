@@ -88,7 +88,7 @@ namespace ContractorsAuctioneer.Services
                 }
 
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
-                    .Where(x => x.Id == bidId && x.CreatedBy == userId)
+                    .Where(x => x.Id == bidId )
                     .Include(x => x.BidStatuses)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (bidOfContractor == null)
@@ -311,7 +311,7 @@ namespace ContractorsAuctioneer.Services
                     .WithValue(null)
                     .Failure(ErrorMessages.BidOfContractorNotFound);
             }
-
+            // for b.contractorId I shouldn't set appuserId , I should set contractor Id
             var acceptedBids = await _context.BidOfContractors
                 .Where(b => b.ContractorId == userId &&
                 b.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))

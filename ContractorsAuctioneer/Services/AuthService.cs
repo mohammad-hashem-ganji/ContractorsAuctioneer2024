@@ -145,7 +145,7 @@ namespace ContractorsAuctioneer.Services
         //}
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
-            // Step 1: Create the claims
+            
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
@@ -155,21 +155,14 @@ namespace ContractorsAuctioneer.Services
                 new Claim("FirstName", user.FirsName ?? string.Empty),
                 new Claim("LastName", user.LastName ?? string.Empty)
             };
-
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-
-            // Step 2: Create the signing credentials
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            // Step 3: Create the encrypting credentials
-
             var encryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:EncryptionKey"]));
             var encryptingCredentials = new EncryptingCredentials(encryptionKey, JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
-            // Step 4: Create the token descriptor
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
@@ -179,8 +172,6 @@ namespace ContractorsAuctioneer.Services
                 Issuer = _configuration["Jwt:ValidIssuer"],
                 Audience = _configuration["Jwt:ValidAudience"]
             };
-
-            // Step 5: Create and write the token
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(securityToken);
