@@ -13,5 +13,6 @@ namespace ContractorsAuctioneer.Entites
         BidApprovedByContractor = 2,
         TimeForCheckingBidForContractorExpired = 3,
         BidRejectedByContractor = 4,
+        ReviewBidByClientPhase = 5
     }
 }

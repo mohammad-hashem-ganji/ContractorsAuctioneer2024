@@ -32,6 +32,8 @@ namespace ContractorsAuctioneer.Services
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var requestStatusService = scope.ServiceProvider.GetRequiredService<IRequestStatusService>();
+                var bidStatusService = scope.ServiceProvider.GetRequiredService<IBidStatusService>();
+
 
                 try
                 {
@@ -69,7 +71,17 @@ namespace ContractorsAuctioneer.Services
                         {
                             dbContext.Requests.Update(request);
                             var bids = dbContext.BidOfContractors.Where(x => x.RequestId == request.Id).ToListAsync(stoppingToken);
-                            bids.Result.ForEach(x => x.ExpireAt = DateTime.Now.AddDays(3));
+                            foreach (var bid in bids.Result)
+                            {
+                                bid.ExpireAt = DateTime.Now.AddDays(3);
+                                var newBidStatus = await bidStatusService
+                                    .AddAsync(new Dtos.AddBidStatusDto
+                                    {
+                                        BidOfContractorId = bid.Id,
+                                        Status = BidStatusEnum.ReviewBidByClientPhase,
+                                        CreatedBy = 100
+                                    }, stoppingToken);
+                            }
                             dbContext.BidOfContractors.UpdateRange(bids.Result);
                         }
                     }
@@ -87,9 +99,21 @@ namespace ContractorsAuctioneer.Services
                             }, stoppingToken);
                         if (tenderOver.IsSuccessful)
                         {
+
                             dbContext.Requests.Update(request);
                             var bids = dbContext.BidOfContractors.Where(x => x.RequestId == request.Id).ToListAsync(stoppingToken);
-                            bids.Result.ForEach(x => x.ExpireAt = DateTime.Now.AddDays(3));
+
+                            foreach (var bid in bids.Result)
+                            {
+                                bid.ExpireAt = DateTime.Now.AddDays(3);
+                                var newBidStatus = await bidStatusService
+                                    .AddAsync(new Dtos.AddBidStatusDto
+                                    {
+                                        BidOfContractorId = bid.Id,
+                                        Status = BidStatusEnum.ReviewBidByClientPhase,
+                                        CreatedBy = 100
+                                    }, stoppingToken);
+                            }
                             dbContext.BidOfContractors.UpdateRange(bids.Result);
                         }
                     }
@@ -109,7 +133,17 @@ namespace ContractorsAuctioneer.Services
                         {
                             dbContext.Requests.Update(request);
                             var bids = dbContext.BidOfContractors.Where(x => x.RequestId == request.Id).ToListAsync(stoppingToken);
-                            bids.Result.ForEach(x => x.ExpireAt = DateTime.Now.AddDays(3));
+                            foreach (var bid in bids.Result)
+                            {
+                                bid.ExpireAt = DateTime.Now.AddDays(3);
+                                var newBidStatus = await bidStatusService
+                                    .AddAsync(new Dtos.AddBidStatusDto
+                                    {
+                                        BidOfContractorId = bid.Id,
+                                        Status = BidStatusEnum.ReviewBidByClientPhase,
+                                        CreatedBy = 100
+                                    }, stoppingToken);
+                            }
                             dbContext.BidOfContractors.UpdateRange(bids.Result);
                         }
                     }

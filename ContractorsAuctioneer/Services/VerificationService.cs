@@ -73,18 +73,12 @@ namespace ContractorsAuctioneer.Services
                 if (isCodeValid)
                 {
                    await _signInManger.SignInAsync(result.Data, isPersistent: false);
-                    var roles = await _userManager.GetRolesAsync(result.Data);
-                    if (roles == null)
-                    {
-                        return new Result<UserWithRoleAndTokenDto>()
-                            .WithValue(null)
-                            .Failure("کاربر نامعتبر است");
-                    }
+                
                     var token = await _autService.GenerateJwtTokenAsync(result.Data);
                     var userWithRolesAndTokenDto = new UserWithRoleAndTokenDto
                     {
                         Token = token,
-                        Roles = roles
+                        
                     };
                     if (token is not null)
                     {

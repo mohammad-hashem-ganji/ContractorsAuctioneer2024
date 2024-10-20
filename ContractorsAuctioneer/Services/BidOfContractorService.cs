@@ -206,7 +206,7 @@ namespace ContractorsAuctioneer.Services
                 }
                 //_context.BidOfContractors.Update(bidOfContractor);
                 await _context.SaveChangesAsync(cancellationToken);
-                return new Result<UpdateBidOfContractorDto>().WithValue(bidOfContractorDto).Success("پیشنهاد آپدیت شد");
+                return new Result<UpdateBidOfContractorDto>().WithValue(bidOfContractorDto).Success(" آپدیت انجام شد.");
             }
             catch (Exception)
             {
@@ -262,6 +262,7 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
+                
                 List<BidOfContractorDto> bidsOfContractor = await _context.BidOfContractors
                         .Where(x => (x.RequestId == requestId
 
@@ -269,7 +270,8 @@ namespace ContractorsAuctioneer.Services
                         && x.IsDeleted == false)
                         && (x.BidStatuses
                         .Any(b => b.Status != BidStatusEnum.BidRejectedByContractor
-                        && b.Status != BidStatusEnum.TimeForCheckingBidForClientExpired
+                        && b.Status != BidStatusEnum.TimeForCheckingBidForClientExpired 
+                        && b.Status == BidStatusEnum.ReviewBidByClientPhase
                         && b.ContractorBidId == x.Id)
                         ))
                         .Include(x => x.Request)
@@ -279,6 +281,8 @@ namespace ContractorsAuctioneer.Services
                             RequestId = bid.RequestId,
                             ContractorId = bid.ContractorId,
                             SuggestedFee = bid.SuggestedFee,
+                            CreatedBy = bid.CreatedBy,
+                            BidStatuses = bid.BidStatuses,
                         })
                         .OrderBy(x => x.SuggestedFee)
                         .ToListAsync(cancellationToken);

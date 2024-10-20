@@ -52,7 +52,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             var verification = await _verificationService
                 .GenerateAndSendCodeAsync(user.Data.Id, user.Data.PhoneNumber, CancellationToken.None);
-            // CHECK THE ROLE
+            
           
             if (!verification.IsSuccessful)
             {
@@ -76,8 +76,6 @@ namespace ContractorsAuctioneer.Controllers
 
             var token = await _verificationService.VerifyCodeAsync(verificationCode, cancellationToken);
             if (token is null) return BadRequest("هنگام اجرا مشکلی پیش آمد!");
-
-
             return Ok(token);
         }
         [Authorize(Roles ="Contractor")]

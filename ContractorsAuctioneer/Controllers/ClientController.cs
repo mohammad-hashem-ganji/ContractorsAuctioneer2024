@@ -24,7 +24,9 @@ namespace ContractorsAuctioneer.Controllers
         private readonly IRequestStatusService _requestStatusService;
         private readonly IBidStatusService _bidStatusService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService, IRequestService requestService, IRequestStatusService requestStatusService, IBidStatusService bidStatusService, IHttpContextAccessor httpContextAccessor)
+        public ClientController(IBidOfContractorService bidOfContractorService, IProjectService projectService,
+            IRequestService requestService, IRequestStatusService requestStatusService, IBidStatusService bidStatusService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _bidOfContractorService = bidOfContractorService;
             _projectService = projectService;
