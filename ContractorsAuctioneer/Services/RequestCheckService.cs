@@ -14,7 +14,7 @@ namespace ContractorsAuctioneer.Services
         public RequestCheckService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            
+
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,19 +36,19 @@ namespace ContractorsAuctioneer.Services
                 try
                 {
                     var rejectedRequestByClient = await dbContext.Requests
-                        .Where(r =>  (r.ExpireAt.HasValue && r.ExpireAt<= DateTime.Now)&&                   
+                        .Where(r => (r.ExpireAt.HasValue && r.ExpireAt <= DateTime.Now) &&
                         r.RequestStatuses != null && r.RequestStatuses
                         .Any(x => x.Status == RequestStatusEnum.RequestRejectedByClient))
                         .ToArrayAsync(stoppingToken);
                     var a = " ";
-                    var requestsAfterTenderExpiered = await dbContext.Requests
+                    var requestsAfterTenderExpieredAndAcceptedByClient = await dbContext.Requests
                         .Where(r => r.ExpireAt.HasValue
                         && r.ExpireAt <= DateTime.Now
                         && r.RequestStatuses != null
                         && r.RequestStatuses
                         .Any(x => x.Status == RequestStatusEnum.RequestApprovedByClient))
                         .ToArrayAsync(stoppingToken);
-                    var requestsAfterTenderExpieredAndNOotAcceptedByClient = await dbContext.Requests
+                    var requestsAfterTenderExpieredAndNOotCheckedByClient = await dbContext.Requests
                        .Where(r => r.ExpireAt.HasValue
                        && r.ExpireAt <= DateTime.Now
                        && r.RequestStatuses == null)
@@ -56,7 +56,7 @@ namespace ContractorsAuctioneer.Services
                     foreach (var request in rejectedRequestByClient)
                     {
                         request.IsActive = false;
-                        
+
                         request.ExpireAt = null;
                         var tenderOver = await requestStatusService
                          .AddAsync(new Dtos.AddRequestStatusDto
@@ -68,26 +68,32 @@ namespace ContractorsAuctioneer.Services
                         if (tenderOver.IsSuccessful)
                         {
                             dbContext.Requests.Update(request);
+                            var bids = dbContext.BidOfContractors.Where(x => x.RequestId == request.Id).ToListAsync(stoppingToken);
+                            bids.Result.ForEach(x => x.ExpireAt = DateTime.Now.AddDays(3));
+                            dbContext.BidOfContractors.UpdateRange(bids.Result);
                         }
                     }
-                    foreach (var request in requestsAfterTenderExpiered)
+                    foreach (var request in requestsAfterTenderExpieredAndAcceptedByClient)
                     {
                         request.IsActive = true;
-                       
+
                         request.ExpireAt = null;
                         var tenderOver = await requestStatusService
                             .AddAsync(new Dtos.AddRequestStatusDto
                             {
                                 RequestId = request.Id,
                                 Status = RequestStatusEnum.TimeForCheckingBidForClientExpired,
-                                CreatedBy =100
+                                CreatedBy = 100
                             }, stoppingToken);
                         if (tenderOver.IsSuccessful)
                         {
                             dbContext.Requests.Update(request);
-                        }                
+                            var bids = dbContext.BidOfContractors.Where(x => x.RequestId == request.Id).ToListAsync(stoppingToken);
+                            bids.Result.ForEach(x => x.ExpireAt = DateTime.Now.AddDays(3));
+                            dbContext.BidOfContractors.UpdateRange(bids.Result);
+                        }
                     }
-                    foreach (var request in requestsAfterTenderExpieredAndNOotAcceptedByClient)
+                    foreach (var request in requestsAfterTenderExpieredAndNOotCheckedByClient)
                     {
                         request.IsActive = false;
                         request.IsTenderOver = true;
@@ -102,6 +108,9 @@ namespace ContractorsAuctioneer.Services
                         if (tenderOver.IsSuccessful)
                         {
                             dbContext.Requests.Update(request);
+                            var bids = dbContext.BidOfContractors.Where(x => x.RequestId == request.Id).ToListAsync(stoppingToken);
+                            bids.Result.ForEach(x => x.ExpireAt = DateTime.Now.AddDays(3));
+                            dbContext.BidOfContractors.UpdateRange(bids.Result);
                         }
                     }
                     // Do somthing for rejectedRequestByContractor !! ***

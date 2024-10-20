@@ -51,7 +51,7 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<AddBidOfContractorDto>().WithValue(null).Failure("خطا");
                 }
-                var isContractorAddedBidForRequest =await _context.BidOfContractors
+                var isContractorAddedBidForRequest = await _context.BidOfContractors
                     .AnyAsync(x => x.RequestId == bidOfContractorDto.RequestId
                     && x.CreatedBy == appUserId);
                 if (isContractorAddedBidForRequest)
@@ -88,7 +88,7 @@ namespace ContractorsAuctioneer.Services
                 }
 
                 BidOfContractor? bidOfContractor = await _context.BidOfContractors
-                    .Where(x => x.Id == bidId )
+                    .Where(x => x.Id == bidId)
                     .Include(x => x.BidStatuses)
                     .FirstOrDefaultAsync(cancellationToken);
                 if (bidOfContractor == null)
@@ -267,7 +267,10 @@ namespace ContractorsAuctioneer.Services
 
                         && x.Request.IsActive == true
                         && x.IsDeleted == false)
-                        || (x.BidStatuses.Any(b => b.Status != BidStatusEnum.BidRejectedByContractor && b.ContractorBidId == x.Id)
+                        && (x.BidStatuses
+                        .Any(b => b.Status != BidStatusEnum.BidRejectedByContractor
+                        && b.Status != BidStatusEnum.TimeForCheckingBidForClientExpired
+                        && b.ContractorBidId == x.Id)
                         ))
                         .Include(x => x.Request)
                         .Select(bid => new BidOfContractorDto
@@ -277,7 +280,7 @@ namespace ContractorsAuctioneer.Services
                             ContractorId = bid.ContractorId,
                             SuggestedFee = bid.SuggestedFee,
                         })
-                        .OrderBy(x=> x.SuggestedFee)
+                        .OrderBy(x => x.SuggestedFee)
                         .ToListAsync(cancellationToken);
                 if (bidsOfContractor.Any())
                 {
@@ -309,7 +312,7 @@ namespace ContractorsAuctioneer.Services
                 return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطا");
             }
             var contractorId = user.Data.UserId;
-            
+
             var acceptedBids = await _context.BidOfContractors
                 .Where(b => b.ContractorId == contractorId &&
                 b.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))
@@ -364,7 +367,7 @@ namespace ContractorsAuctioneer.Services
                     if (!bidOfContractor.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))
                     {
                         return new Result<BidOfContractorDto>().WithValue(null).Failure("پیشنهاد توسط متقاضی تایید نشده است.");
-                        
+
                     }
                     var bidOfContractorDto = new BidOfContractorDto
                     {
@@ -385,7 +388,7 @@ namespace ContractorsAuctioneer.Services
                     };
                     return new Result<BidOfContractorDto>().WithValue(bidOfContractorDto).Success(SuccessMessages.BidsOfRequestFound);
                 }
-                }
+            }
             catch (Exception)
             {
 
