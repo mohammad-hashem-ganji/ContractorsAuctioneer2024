@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContractorsAuctioneer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241016044542_first")]
-    partial class first
+    [Migration("20241020113344_solvemigrationProblem")]
+    partial class solvemigrationProblem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,6 +46,12 @@ namespace ContractorsAuctioneer.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirsName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -97,16 +103,16 @@ namespace ContractorsAuctioneer.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "97efcdbf-c4c1-4c96-8536-5f1db7c120b2",
+                            ConcurrencyStamp = "b2994396-612a-4334-9eff-e08b53d6a94b",
                             Email = "admin@gmail.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEH6Q5eOKQIFKdJe26ELDZ6XBDxUskpH9a8Ee2KqEtIPPxcaltQoM+YUplBX/ptcyTg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPGY6CjvZHQXZsghii2JQSmbv1mMMKSTQkKhwoc9MSG4DHkO6s17w3xpTclVRiXAgA==",
                             PhoneNumber = "09179",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "02f903bd-ed72-4380-bb5d-463d3c13ed43",
+                            SecurityStamp = "550b9505-eee4-4284-a9df-ce5d9836be6f",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -191,7 +197,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("Status")
@@ -233,7 +239,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("LicensePlate")
@@ -337,7 +343,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<string>("FilePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("RequestId")
@@ -379,7 +385,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastLoginTime")
@@ -424,7 +430,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("StartedAt")
@@ -464,7 +470,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("ProjectId")
@@ -509,7 +515,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Title")
@@ -564,7 +570,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsFileCheckedByClient")
@@ -620,7 +626,7 @@ namespace ContractorsAuctioneer.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("RequestId")
