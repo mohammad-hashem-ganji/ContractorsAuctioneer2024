@@ -415,7 +415,9 @@ namespace ContractorsAuctioneer.Services
                           {
                               Status = rs.Status,
                               CreatedAt = rs.CreatedAt,
-                              CreatedBy = rs.CreatedBy
+                              CreatedBy = rs.CreatedBy,
+                              Id = rs.Id,
+                              RequestId = rs.RequestId
                           }).ToList(),
                       }).ToListAsync(cancellationToken);
 

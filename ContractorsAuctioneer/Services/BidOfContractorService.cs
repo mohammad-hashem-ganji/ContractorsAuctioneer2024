@@ -303,17 +303,15 @@ namespace ContractorsAuctioneer.Services
 
         public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(CancellationToken cancellationToken)
         {
-            int userId;
-            bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
-            if (!isconverted)
+            var user = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
+            if (!user.IsSuccessful)
             {
-                return new Result<List<BidOfContractorDto>>()
-                    .WithValue(null)
-                    .Failure(ErrorMessages.BidOfContractorNotFound);
+                return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطا");
             }
-            // for b.contractorId I shouldn't set appuserId , I should set contractor Id
+            var contractorId = user.Data.UserId;
+            
             var acceptedBids = await _context.BidOfContractors
-                .Where(b => b.ContractorId == userId &&
+                .Where(b => b.ContractorId == contractorId &&
                 b.BidStatuses.Any(x => x.Status == BidStatusEnum.BidApprovedByClient))
                 .Include(x => x.BidStatuses)
                 .Select(x => new BidOfContractorDto
