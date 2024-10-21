@@ -272,7 +272,7 @@ namespace ContractorsAuctioneer.Services
                         if (requestResult.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient 
                                                                  || rs.Status == RequestStatusEnum.RequestRejectedByClient))
                         {
-                            return new Result<RequestDto>().WithValue(requestResult).Failure("درخواست  قبلا بررسی شده است.");
+                            return new Result<RequestDto>().WithValue(requestResult).Success("درخواست  قبلا بررسی شده است.");
                         }
                         else
                         {
@@ -281,10 +281,10 @@ namespace ContractorsAuctioneer.Services
                     }
                     else
                     {
-                        return new Result<RequestDto>().WithValue(null).Failure("مهلت تایید درخواست تمام شده است!");
+                        return new Result<RequestDto>().WithValue(null).Success("مهلت تایید درخواست تمام شده است!");
                     }
                 }
-                return new Result<RequestDto>().WithValue(null).Failure("درخواست  یافت نشد.");
+                return new Result<RequestDto>().WithValue(null).Success("درخواست  یافت نشد.");
             }
             catch (Exception)
             {
@@ -371,7 +371,7 @@ namespace ContractorsAuctioneer.Services
                     
 
                 }
-                return new Result<RequestDto>().WithValue(null).Failure("درخواست  پیدا نشد.");
+                return new Result<RequestDto>().WithValue(requestResult).Success("درخواست  پیدا نشد.");
             }
             catch (Exception)
             {
@@ -431,8 +431,8 @@ namespace ContractorsAuctioneer.Services
                 {
 
                     return new Result<List<RequestDto>>()
-                        .WithValue(requests)
-                        .Failure("درخواستی وجود ندارد");
+                        .WithValue(null)
+                        .Success("درخواستی وجود ندارد");
                 }
             }
             catch (Exception ex)

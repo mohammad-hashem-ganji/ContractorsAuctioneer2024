@@ -97,21 +97,21 @@ namespace ContractorsAuctioneer.Controllers
             {
                 return Problem(
                     detail: "خطا!",
-                    statusCode: 400,
+                    statusCode: 500,
                     title: "Bad Request");
             }
             var request = await _requestService.CheckRequestOfClientAsync(cancellationToken);
             if (!request.IsSuccessful || request.Data == null)
             {
                 return Problem(detail: request.ErrorMessage,
-                statusCode: 400,
+                statusCode: 500,
                 title: "Bad Request");
             }
             if (requestDto.RequestId != request.Data.Id && request.Data.IsActive == false) return NotFound(request);
             if (request.Data.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient))
             {
                 return Problem(detail: "درخواست قبلا تایید شده!",
-                statusCode: 400,
+                statusCode: 500,
                 title: "Bad Request");
             }
             if (requestDto.IsAccepted == true)

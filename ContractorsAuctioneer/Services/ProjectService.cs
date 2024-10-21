@@ -13,10 +13,12 @@ namespace ContractorsAuctioneer.Services
     public class ProjectService : IProjectService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProjectService(ApplicationDbContext context)
+        public ProjectService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<Result<AddProjectDto>> AddAsync(AddProjectDto addProjectDto, CancellationToken cancellationToken)
         {
@@ -84,10 +86,18 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var bid = await _context.Projects
-                    .Where(x => x.ContractorBidId == bidId )
+                var user = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
+
+                if (!user.IsSuccessful)
+                {
+                    return new Result<GetProjectDto>().WithValue(null).Failure("خطا");
+                }
+                var contractorId = user.Data.UserId;
+                var project = await _context.Projects
+                    .Where(x => x.ContractorBidId == bidId
+                    && x.ContractorBid.ContractorId == contractorId)
                     .FirstOrDefaultAsync(cancellationToken);
-                if (bid == null)
+                if (project == null)
                 {
                     return new Result<GetProjectDto>().WithValue(null).Failure(ErrorMessages.ProjectNotFound);
                 }
@@ -95,20 +105,14 @@ namespace ContractorsAuctioneer.Services
                 {
                     var projectDto = new GetProjectDto
                     {
-                        Id = bid.Id,
-                        ContractorBidId = bid.ContractorBidId,
-                        StartedAt = bid.StartedAt,
-                        CompletedAt = bid.CompletedAt,
-                        ProjectStatuses = bid.ProjectStatuses.Select(p => new ProjectStatus
-                        {
-                            Id = p.Id,
-                            Status = p.Status,
-                            UpdatedAt = p.UpdatedAt,
-                            UpdatedBy = p.UpdatedBy,
-                        }).ToList(),
+                        Id = project.Id,
+                        ContractorBidId = project.ContractorBidId,
+                        StartedAt = project.StartedAt,
+                        CompletedAt = project.CompletedAt,
+                      
 
                     };
-                    return new Result<GetProjectDto>().WithValue(null).Success("پروژه پیدا شد");
+                    return new Result<GetProjectDto>().WithValue(projectDto).Success("پروژه پیدا شد");
                 }
             }
             catch (Exception ex)
@@ -118,7 +122,7 @@ namespace ContractorsAuctioneer.Services
 
         }
 
-        public async Task<Result<GetProjectDto>> UpdateAsync(GetProjectDto projectDto , CancellationToken cancellationToken)
+        public async Task<Result<GetProjectDto>> UpdateAsync(GetProjectDto projectDto, CancellationToken cancellationToken)
         {
             try
             {

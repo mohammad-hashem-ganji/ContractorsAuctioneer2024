@@ -127,7 +127,7 @@ namespace ContractorsAuctioneer.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddMinutes(45),
                 SigningCredentials = creds,
                 //EncryptingCredentials = encryptingCredentials,
                 Issuer = _configuration["Jwt:ValidIssuer"],

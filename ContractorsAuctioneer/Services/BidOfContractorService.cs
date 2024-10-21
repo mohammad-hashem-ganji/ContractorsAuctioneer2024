@@ -56,7 +56,7 @@ namespace ContractorsAuctioneer.Services
                     && x.CreatedBy == appUserId);
                 if (isContractorAddedBidForRequest)
                 {
-                    return new Result<AddBidOfContractorDto>().WithValue(null).Failure("قبلا پینهاد قیمت داده اید.");
+                    return new Result<AddBidOfContractorDto>().WithValue(null).Success("قبلا پینهاد قیمت داده اید.");
                 }
                 var bidOfContractor = new BidOfContractor
                 {
@@ -93,13 +93,13 @@ namespace ContractorsAuctioneer.Services
                     .FirstOrDefaultAsync(cancellationToken);
                 if (bidOfContractor == null)
                 {
-                    return new Result<BidOfContractorDto>().WithValue(null).Failure(ErrorMessages.BidOfContractorNotFound);
+                    return new Result<BidOfContractorDto>().WithValue(null).Success(ErrorMessages.BidOfContractorNotFound);
                 }
                 else
                 {
                     if (bidOfContractor.IsDeleted == true)
                     {
-                        return new Result<BidOfContractorDto>().WithValue(null).Failure(ErrorMessages.BidIsDeleted);
+                        return new Result<BidOfContractorDto>().WithValue(null).Success(ErrorMessages.BidIsDeleted);
                     }
                     var bidOfContractorDto = new BidOfContractorDto
                     {
@@ -159,7 +159,7 @@ namespace ContractorsAuctioneer.Services
                 }
                 else
                 {
-                    return new Result<List<BidOfContractorDto>>().WithValue(bidsOfContractorDto).Failure("پیشنهادی وجود ندارد");
+                    return new Result<List<BidOfContractorDto>>().WithValue(null).Success("پیشنهادی وجود ندارد");
                 }
             }
             catch (Exception ex)
@@ -222,7 +222,7 @@ namespace ContractorsAuctioneer.Services
                 bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
                 if (!isconverted)
                 {
-                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطایی در بازیابی پیشنهادات رخ داده است.");
+                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطایی .");
                 }
                 var bids = await _context
                 .BidOfContractors
@@ -249,7 +249,7 @@ namespace ContractorsAuctioneer.Services
                 }
                 else
                 {
-                    return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("پیشنهادی وجود ندارد");
+                    return new Result<List<BidOfContractorDto>>().WithValue(null).Success("پیشنهادی وجود ندارد");
                 }
             }
             catch (Exception)
@@ -296,7 +296,7 @@ namespace ContractorsAuctioneer.Services
                 {
                     return new Result<List<BidOfContractorDto>>()
                         .WithValue(null)
-                        .Failure(ErrorMessages.BidsOfRequestNotFound);
+                        .Success(ErrorMessages.BidsOfRequestNotFound);
                 }
             }
             catch (Exception)

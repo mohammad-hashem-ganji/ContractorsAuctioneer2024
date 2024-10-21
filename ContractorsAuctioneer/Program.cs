@@ -92,7 +92,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
-    options.TokenLifespan = TimeSpan.FromMinutes(2);
+    options.TokenLifespan = TimeSpan.FromMinutes(45);
 });
 builder.Services.AddAuthorization();
 
