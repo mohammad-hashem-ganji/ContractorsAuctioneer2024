@@ -87,7 +87,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
-        TokenDecryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:EncryptionKey"]))
+        //TokenDecryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:EncryptionKey"]))
     };
 });
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -122,8 +122,8 @@ builder.Services.AddSwaggerGen(optins =>
 
 builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
 {
-    b.WithOrigins("*")
-        //.AllowAnyOrigin() //WithOrigins("http://localhost:8080")
+    //b.WithOrigins("*")
+        b.AllowAnyOrigin() //WithOrigins("http://localhost:8080")
         .AllowAnyMethod()
         .AllowAnyHeader();
     //.AllowCredentials();
