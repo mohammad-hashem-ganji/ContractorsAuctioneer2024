@@ -78,7 +78,7 @@ namespace ContractorsAuctioneer.Controllers
             if (token is null) return BadRequest("هنگام اجرا مشکلی پیش آمد!");
             return Ok(token);
         }
-        [Authorize(Roles ="Contractor")]
+        [Authorize(Roles = "Client")]
         [HttpGet("AutherizeAuthenticatedContractorTest")]
         public async Task<IActionResult> AutherizeAuthenticatedContractorTest()
         {            
