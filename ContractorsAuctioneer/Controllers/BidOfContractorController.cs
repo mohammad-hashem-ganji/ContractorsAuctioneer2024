@@ -9,29 +9,39 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ContractorsAuctioneer.Controllers
 {
+    /// <summary>
+    /// کنترلر مربوط به مدیریت پیشنهادات پیمانکاران.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class BidOfContractorController : ControllerBase
     {
         private readonly IBidOfContractorService _bidOfContractorService;
-        private readonly IContractorService _contractorService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BidOfContractorController(IBidOfContractorService bidOfContractorService, IContractorService contractorService, IHttpContextAccessor httpContextAccessor)
+        public BidOfContractorController(IBidOfContractorService bidOfContractorService)
         {
             _bidOfContractorService = bidOfContractorService;
-            _contractorService = contractorService;
-            _httpContextAccessor = httpContextAccessor;
         }
-        [Authorize(Roles= "Contractor")]
+
+        /// <summary>
+        /// افزودن پیشنهاد جدید توسط پیمانکار.
+        /// </summary>
+        /// <param name="bidOfContractorDto">اطلاعات پیشنهاد پیمانکار. <see cref="AddBidOfContractorDto"/>.</param>
+        /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
+        /// <returns>در صورت موفقیت‌آمیز بودن، نتیجه موفقیت بازگردانده می‌شود، در غیر این صورت خطا برگردانده می‌شود.</returns>
+        [Authorize(Roles = "Contractor")]
         [HttpPost]
         [Route(nameof(AddBid))]
+        [ProducesResponseType(typeof(Result<AddBidOfContractorDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddBid([FromBody] AddBidOfContractorDto bidOfContractorDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
             var addResult = await _bidOfContractorService.AddAsync(bidOfContractorDto, cancellationToken);
             if (addResult.IsSuccessful)
             {
@@ -39,14 +49,25 @@ namespace ContractorsAuctioneer.Controllers
             }
             return StatusCode(500, addResult);
         }
+
+        /// <summary>
+        /// دریافت پیشنهاد پیمانکار بر اساس شناسه.
+        /// </summary>
+        /// <param name="bidId">شناسه پیشنهاد.</param>
+        /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
+        /// <returns>در صورت پیدا شدن پیشنهاد، آن را باز می‌گرداند، در غیر این صورت خطا برگردانده می‌شود.</returns>
         [HttpGet]
-        [Route(nameof(GetbidById))]
-        public async Task<IActionResult> GetbidById(int bidId, CancellationToken cancellationToken)
+        [Route(nameof(GetBidById))]
+        [ProducesResponseType(typeof(BidOfContractorDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetBidById(int bidId, CancellationToken cancellationToken)
         {
             if (bidId <= 0)
             {
                 return BadRequest("ورودی نامعتبر");
             }
+
             var result = await _bidOfContractorService.GetByIdAsync(bidId, cancellationToken);
             if (result.IsSuccessful)
             {
@@ -54,18 +75,29 @@ namespace ContractorsAuctioneer.Controllers
             }
             return NotFound(result);
         }
+
+        /// <summary>
+        /// به‌روزرسانی پیشنهاد پیمانکار.
+        /// </summary>
+        /// <param name="bidDto">اطلاعات به‌روزرسانی پیشنهاد پیمانکار. <see cref="UpdateBidOfContractorDto"/>.</param>
+        /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
+        /// <returns>در صورت موفقیت، پیشنهاد به‌روزرسانی شده و نتیجه بازگشتی ارسال می‌شود.</returns>
         [Authorize(Roles = "Contractor")]
         [HttpPost]
         [Route(nameof(UpdateBid))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateBid([FromBody] UpdateBidOfContractorDto bidDto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
             try
             {
-             
                 var result = await _bidOfContractorService.UpdateAsync(bidDto, cancellationToken);
                 if (result.IsSuccessful)
                 {
@@ -82,21 +114,31 @@ namespace ContractorsAuctioneer.Controllers
                     });
             }
         }
+
+        /// <summary>
+        /// حذف پیشنهاد پیمانکار.
+        /// </summary>
+        /// <param name="bidId">شناسه پیشنهاد پیمانکار.</param>
+        /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
+        /// <returns>در صورت موفقیت، پیشنهاد حذف می‌شود و نتیجه ارسال می‌گردد.</returns>
         [Authorize(Roles = "Contractor")]
         [HttpPost]
         [Route(nameof(DeleteBid))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteBid(int bidId, CancellationToken cancellationToken)
         {
             try
             {
                 var entity = await _bidOfContractorService.GetByIdAsync(bidId, cancellationToken);
-                if (entity.IsSuccessful && entity.Data != null)
+                if (entity is { IsSuccessful: true, Data: not null })
                 {
                     entity.Data.IsDeleted = true;
                     var updatecontract = new UpdateBidOfContractorDto
                     {
                         Id = entity.Data.Id,
-                        IsDeleted = true,                      
+                        IsDeleted = true,
                         UpdatedAt = DateTime.Now,
                     };
                     var result = await _bidOfContractorService.UpdateAsync(updatecontract, cancellationToken);
@@ -112,30 +154,32 @@ namespace ContractorsAuctioneer.Controllers
                         Message = "خطایی در بازیابی پیشنهادات رخ داده است.",
                     });
             }
-
         }
+
+        /// <summary>
+        /// دریافت لیست پیشنهادات پیمانکار.
+        /// </summary>
+        /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
+        /// <returns>لیست پیشنهادات پیمانکار را بازمی‌گرداند، در غیر این صورت پیام خطا برمی‌گرداند.</returns>
         [Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(GetBidsOfContractor))]
+        [ProducesResponseType(typeof(IEnumerable<BidOfContractorDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBidsOfContractor(CancellationToken cancellationToken)
         {
             var bidsOfContractor = await _bidOfContractorService.GetBidsOfContractorAsync(cancellationToken);
             if (bidsOfContractor.IsSuccessful)
             {
-                //var bids = bidsOfContractor.Data;
-                if (bidsOfContractor.Data.Any())
+                if (bidsOfContractor.Data != null && bidsOfContractor.Data.Any())
                 {
                     return Ok(bidsOfContractor);
                 }
                 return NotFound(bidsOfContractor);
             }
             return NotFound(bidsOfContractor);
-
-
-
         }
-
-
-
     }
+
+
 }

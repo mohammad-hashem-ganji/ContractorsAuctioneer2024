@@ -2,6 +2,7 @@
 {
     public static class ErrorMessages
     {
+        public const string InternalServerError = "مشکلی در انجام عملیات رخ داد";
         public const string ClientNotFound = "کاربر پیدا نشد";
         public const string ContractorNotFound = "پیمان کار پیدا نشد!";
         public const string RegionNotFound = "امور مورد نظر یافت نشد";
@@ -29,5 +30,7 @@
         public const string ErrorWhileRetrievingStatus = "خطا در بازیابی وضعیت. لطفاً دوباره تلاش کنید";
         public const string ErrorWhileRetrievingBidsOfContracotrs = "خطا در بازیابی پیشنهادات پیمانکاران";
         public const string ErrorWhileAcceptingBid = "خطا هنگام تایید پیشنهاد.";
+        public const string NationalCodeAndPhoneNumberDoesMatch = "شماره موبایل با کد ملی ثبت شده مطابقت ندارد";
+        public const string NationalCodeOrPhoneNumberAreWrong = "کد ملی یا شماره همراه اشتباه است";
     }
 }

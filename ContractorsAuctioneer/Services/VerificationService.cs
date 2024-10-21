@@ -63,43 +63,39 @@ namespace ContractorsAuctioneer.Services
         }
         public async Task<Result<UserWithRoleAndTokenDto>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
         {
-            
+
             var result = await _autService.AuthenticateAsync(verificationCodeDto.Ncode, verificationCodeDto.PhoneNumber);
-            if (result != null)
+            if (result.Data != null)
             {
                 var isCodeValid = await _userManager
                     .VerifyTwoFactorTokenAsync(result.Data, TokenOptions.DefaultPhoneProvider, verificationCodeDto.VerificationCode);
 
                 if (isCodeValid)
                 {
-                   await _signInManger.SignInAsync(result.Data, isPersistent: false);
-                
+                    await _signInManger.SignInAsync(result.Data, isPersistent: false);
+
                     var token = await _autService.GenerateJwtTokenAsync(result.Data);
                     var userWithRolesAndTokenDto = new UserWithRoleAndTokenDto
                     {
                         Token = token,
-                        
                     };
-                    if (token is not null)
+
+                    if (!string.IsNullOrEmpty(token))
                     {
                         return new Result<UserWithRoleAndTokenDto>()
                        .WithValue(userWithRolesAndTokenDto)
                        .Success("کد تایید شد");
                     }
-                    else
-                    {
-                        return new Result<UserWithRoleAndTokenDto>()
-                       .WithValue(null)
-                       .Failure("خطا!");
-                    }
+
+                    return new Result<UserWithRoleAndTokenDto>()
+                        .WithValue(null)
+                        .Failure("خطا!");
 
                 }
+
                 return new Result<UserWithRoleAndTokenDto>()
                        .WithValue(null)
                        .Failure("کد نامعتبر است!");
-
-
-
             }
             return new Result<UserWithRoleAndTokenDto>()
             .WithValue(null)
