@@ -66,7 +66,7 @@ namespace ContractorsAuctioneer.Services
                             Status = p.Status,
                             UpdatedAt = p.UpdatedAt,
                             UpdatedBy = p.UpdatedBy,
-                        }).FirstOrDefault(),
+                        }).ToList(),
 
                     };
                     return new Result<GetProjectDto>().WithValue(projectDto).Success("پروژه پیدا شد");
@@ -84,9 +84,8 @@ namespace ContractorsAuctioneer.Services
         {
             try
             {
-                var bid = await _context.BidOfContractors
-                    .Where(x => x.RequestId == bidId )
-                    .Include(b => b.Project)
+                var bid = await _context.Projects
+                    .Where(x => x.ContractorBidId == bidId )
                     .FirstOrDefaultAsync(cancellationToken);
                 if (bid == null)
                 {
@@ -96,17 +95,17 @@ namespace ContractorsAuctioneer.Services
                 {
                     var projectDto = new GetProjectDto
                     {
-                        Id = bid.Project.Id,
-                        ContractorBidId = bid.Project.ContractorBidId,
-                        StartedAt = bid.Project.StartedAt,
-                        CompletedAt = bid.Project.CompletedAt,
-                        ProjectStatuses = bid.Project.ProjectStatuses.Select(p => new ProjectStatus
+                        Id = bid.Id,
+                        ContractorBidId = bid.ContractorBidId,
+                        StartedAt = bid.StartedAt,
+                        CompletedAt = bid.CompletedAt,
+                        ProjectStatuses = bid.ProjectStatuses.Select(p => new ProjectStatus
                         {
                             Id = p.Id,
                             Status = p.Status,
                             UpdatedAt = p.UpdatedAt,
                             UpdatedBy = p.UpdatedBy,
-                        }).FirstOrDefault(),
+                        }).ToList(),
 
                     };
                     return new Result<GetProjectDto>().WithValue(null).Success("پروژه پیدا شد");

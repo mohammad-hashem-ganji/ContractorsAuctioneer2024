@@ -396,7 +396,7 @@ namespace ContractorsAuctioneer.Services
                 var requests = await _context.Requests
                       .Where(r => 
                       r.RequestStatuses.Any(rs => rs.Status == RequestStatusEnum.RequestApprovedByClient &&
-                                                  rs.Status != RequestStatusEnum.RequestRejectedByContractor))
+                                                  rs.Status != RequestStatusEnum.RequestRejectedByContractor ))
                       .Select(r => new RequestDto
                       {
                           Id = r.Id,

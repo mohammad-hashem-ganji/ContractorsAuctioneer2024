@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 //builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddTransient<IAuthService,AuthService>();
+builder.Services.AddTransient<IAuthService, AuthService>();
 // Request
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IRequestStatusService, RequestStatusService>();
@@ -65,7 +65,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
-    
+
 })
 .AddRoles<IdentityRole<int>>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -103,7 +103,8 @@ builder.Services.AddAuthorization();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(optins => {
+builder.Services.AddSwaggerGen(optins =>
+{
     optins.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Please enter token",
@@ -121,7 +122,8 @@ builder.Services.AddSwaggerGen(optins => {
 
 builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
 {
-    b.WithOrigins("*") //.AllowAnyOrigin() //WithOrigins("http://localhost:8080")
+    b.WithOrigins("*")
+        //.AllowAnyOrigin() //WithOrigins("http://localhost:8080")
         .AllowAnyMethod()
         .AllowAnyHeader();
     //.AllowCredentials();
@@ -137,13 +139,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseRouting();
+app.UseCors(policyName: "MyPolicy");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseCors(policyName: "MyPolicy");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.Run();
 

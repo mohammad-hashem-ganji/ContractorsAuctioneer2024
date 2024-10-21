@@ -9,6 +9,6 @@ namespace ContractorsAuctioneer.Dtos
         public BidOfContractor? ContractorBid { get; set; }
         public DateTime? StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
-        public ProjectStatus? ProjectStatuses { get; set; }
+        public List<ProjectStatus>? ProjectStatuses { get; set; }
     }
 }

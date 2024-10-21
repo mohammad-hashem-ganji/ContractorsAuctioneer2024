@@ -104,45 +104,6 @@ namespace ContractorsAuctioneer.Services
                 .WithValue(user)
                 .Success("");
         }
-
-        //public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
-        //{
-        //    var roles = await _userManager.GetRolesAsync(user);
-        //    var claims = new List<Claim>
-        //    {
-        //       new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-        //       new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        //       new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime),
-        //       new Claim(JwtRegisteredClaimNames.Name, user.FirsName),
-        //       new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-
-
-        //    };
-        //    foreach (var role in roles)
-        //    {
-        //        claims.Add(new Claim(ClaimTypes.Role, role));
-        //    }
-        //    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
-        //    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        //    var encryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:EncryptionKey"]));
-        //    var encryptingCredentials = new EncryptingCredentials(encryptionKey, JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
-        //    var tokenDescriptor = new JwtSecurityToken(
-        //        issuer: _configuration["Jwt:ValidIssuer"],
-        //        audience: _configuration["Jwt:ValidAudience"],
-        //        claims: claims,
-        //        expires: DateTime.UtcNow.AddHours(1),
-        //        signingCredentials: creds
-
-
-        //        );
-        //    //return new JwtSecurityTokenHandler().WriteToken(token);
-        //    // encrypt
-
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-        //    return tokenHandler.WriteToken(securityToken);
-        //}
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
             
