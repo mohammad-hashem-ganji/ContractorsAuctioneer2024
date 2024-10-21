@@ -58,7 +58,7 @@ namespace ContractorsAuctioneer.Controllers
             else return BadRequest("مقادیر ورودی نا معتبر است");
         }
 
-        [Authorize(Roles = "Contractor")]
+        //[Authorize(Roles = "Contractor")]
         [HttpGet]
         [Route(nameof(ShowRequestsToContractor))]
         public async Task<IActionResult> ShowRequestsToContractor( CancellationToken cancellationToken)
