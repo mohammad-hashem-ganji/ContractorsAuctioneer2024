@@ -143,27 +143,7 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseDeveloperExceptionPage();
-//    app.UseSwagger();
-//    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1"));
-//}
-//else
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    app.UseHsts();
-//}
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI(c =>
-//    {
-//        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API V1");
-//        c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
-//    });
-//}
+
 app.UseRouting();
 app.UseCors(policyName: "MyPolicy");
 //app.UseHttpsRedirection();

@@ -45,7 +45,7 @@ namespace ContractorsAuctioneer.Controllers
             }
         }
         [Authorize(Roles = "Contractor")]
-        [HttpPost]
+        [HttpGet]
         [Route(nameof(GetProjectOfBid))]
         public async Task<IActionResult> GetProjectOfBid(int bidId, CancellationToken cancellationToken)
         {

@@ -83,7 +83,7 @@ namespace ContractorsAuctioneer.Controllers
             return Ok(acceptedBids);
         }
         [Authorize(Roles = "Contractor")]
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(AcceptBidByContractor))]
         public async Task<IActionResult> AcceptBidByContractor(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
@@ -133,7 +133,7 @@ namespace ContractorsAuctioneer.Controllers
             return Problem(ErrorMessages.ErrorWhileAcceptingBid);
         }
         [Authorize(Roles = "Contractor")]
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(RejectBidByContractor))]
         public async Task<IActionResult> RejectBidByContractor(UpdateBidAcceptanceDto bidDto, CancellationToken cancellationToken)
         {
@@ -176,7 +176,7 @@ namespace ContractorsAuctioneer.Controllers
             return BadRequest(ErrorMessages.AnErrorWhileUpdatingStatus);
         }
         
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(AddContractor))]
         public async Task<IActionResult> AddContractor(AddContractorDto contractorDto, CancellationToken cancellationToken)
         {

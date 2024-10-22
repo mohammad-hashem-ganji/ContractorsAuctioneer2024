@@ -56,7 +56,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، اطلاعات پیشنهاد تایید شده.</returns>
         [Authorize(Roles = "Client")]
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(AcceptBidByClient))]
         [ProducesResponseType(typeof(UpdateBidOfContractorDto), StatusCodes.Status200OK)] // Successful update response
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -111,7 +111,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، هیچ محتوایی بازگشت نمی‌دهد.</returns>
         [Authorize(Roles = "Client")]
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(AcceptRequestByClient))]
         [ProducesResponseType(StatusCodes.Status204NoContent)] // No content on successful acceptance
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -170,7 +170,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، هیچ محتوایی بازگشت نمی‌دهد.</returns>
         [Authorize(Roles = "Client")]
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(RejectingRequestByClient))]
         [ProducesResponseType(StatusCodes.Status204NoContent)] // No content on successful rejection
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -207,7 +207,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، لیستی از پیشنهادات مرتبط با درخواست.</returns>
         [Authorize(Roles = "Client")]
-        [HttpPost]
+        [HttpGet]
         [Route(nameof(GetBidsOfRequestByClient))]
         [ProducesResponseType(typeof(Result<List<BidOfContractorDto>>), StatusCodes.Status200OK)] // Successful response with bid list
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -232,7 +232,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، اطلاعات درخواست مشتری.</returns>
         [Authorize(Roles = "Client")]
-        [HttpPost]
+        [HttpGet]
         [Route(nameof(ShowRequestOfClient))]
         [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)] // Successful response with request details
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

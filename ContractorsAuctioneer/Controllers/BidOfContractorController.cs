@@ -83,7 +83,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، پیشنهاد به‌روزرسانی شده و نتیجه بازگشتی ارسال می‌شود.</returns>
         [Authorize(Roles = "Contractor")]
-        [HttpPost]
+        [HttpPut]
         [Route(nameof(UpdateBid))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -122,7 +122,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت، پیشنهاد حذف می‌شود و نتیجه ارسال می‌گردد.</returns>
         [Authorize(Roles = "Contractor")]
-        [HttpPost]
+        [HttpDelete]
         [Route(nameof(DeleteBid))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
