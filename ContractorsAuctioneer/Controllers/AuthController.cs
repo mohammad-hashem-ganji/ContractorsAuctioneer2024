@@ -36,7 +36,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت کد تأیید ارسال می‌شود، در غیر این صورت پیام خطا برگردانده می‌شود.</returns>
         [AllowAnonymous]
-        [HttpGet("login")]
+        [HttpPost("login")]
         [ProducesResponseType(typeof(Result<GetVerificationCodeDto>), StatusCodes.Status200OK)] 
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -84,7 +84,7 @@ namespace ContractorsAuctioneer.Controllers
         /// <param name="cancellationToken">توکن برای لغو درخواست در صورت نیاز.</param>
         /// <returns>در صورت موفقیت توکن بازگردانده می‌شود، در غیر این صورت پیام خطا ارسال می‌شود.</returns>
         [AllowAnonymous]
-        [HttpGet("VerifyTwoFactorCode")]
+        [HttpPost("VerifyTwoFactorCode")]
         [ProducesResponseType(typeof(Result<UserWithRoleAndTokenDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

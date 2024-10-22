@@ -27,6 +27,7 @@ namespace ContractorsAuctioneer.Entites
         public ICollection<FileAttachment>? FileAttachments { get; set; }
         public ICollection<RequestStatus>? RequestStatuses { get; set; }
         public ICollection<BidOfContractor>? BidOfContractors { get; set; }
+        public ICollection<Reject> Rejects { get; set; }
 
     }
 }

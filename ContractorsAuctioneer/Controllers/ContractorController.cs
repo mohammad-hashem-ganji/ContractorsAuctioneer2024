@@ -7,6 +7,7 @@ using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace ContractorsAuctioneer.Controllers
 {
@@ -75,12 +76,25 @@ namespace ContractorsAuctioneer.Controllers
         [Route(nameof(ShowBidsAcceptedByClient))]
         public async Task<IActionResult> ShowBidsAcceptedByClient(CancellationToken cancellationToken)
         {
-            var acceptedBids = await _bidOfContractorService.GetBidsAcceptedByClient(cancellationToken);
+            var acceptedBids = await _bidOfContractorService.GetBidsAcceptedByClientAsync(cancellationToken);
             if (!acceptedBids.IsSuccessful)
             {
                 return NotFound(acceptedBids);
             }
             return Ok(acceptedBids);
+        }
+
+        [Authorize(Roles = "Contractor")]
+        [HttpPut]
+        [Route(nameof(ShowBidsOfContractor))]
+        public async Task<IActionResult> ShowBidsOfContractor(CancellationToken cancellationToken)
+        {
+            var Bids = await _bidOfContractorService.GetBidsOfContractorAsync(cancellationToken);
+            if (!Bids.IsSuccessful)
+            {
+                return NotFound(Bids);
+            }
+            return Ok(Bids);
         }
         [Authorize(Roles = "Contractor")]
         [HttpPut]
@@ -98,7 +112,7 @@ namespace ContractorsAuctioneer.Controllers
             }
             if (bidDto.IsAccepted == true)
             {
-                var isAcceptedByClient = await _bidOfContractorService.CheckBidIsAcceptedByClient(bid.Data.Id, cancellationToken);
+                var isAcceptedByClient = await _bidOfContractorService.CheckBidIsAcceptedByClientAsync(bid.Data.Id, cancellationToken);
                 if (!isAcceptedByClient.IsSuccessful)
                 {
                     return Problem(detail: isAcceptedByClient.ErrorMessage,

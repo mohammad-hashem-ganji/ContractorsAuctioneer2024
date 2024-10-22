@@ -242,7 +242,9 @@ namespace ContractorsAuctioneer.Services
                         CreatedAt = b.CreatedAt,
                         CreatedBy = b.CreatedBy
                     }).ToList()
-                }).ToListAsync(cancellationToken);
+                })
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync(cancellationToken);
                 if (bids.Any())
                 {
                     return new Result<List<BidOfContractorDto>>().WithValue(bids).Success("پیشنهاد ها یافت شدند .");
@@ -308,7 +310,7 @@ namespace ContractorsAuctioneer.Services
 
         }
 
-        public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClient(CancellationToken cancellationToken)
+        public async Task<Result<List<BidOfContractorDto>>> GetBidsAcceptedByClientAsync(CancellationToken cancellationToken)
         {
             var user = await UserManagement.GetRoleBaseUserId(_httpContextAccessor.HttpContext, _context);
             if (!user.IsSuccessful)
@@ -343,7 +345,9 @@ namespace ContractorsAuctioneer.Services
             }
         }
 
-        public async Task<Result<BidOfContractorDto>> CheckBidIsAcceptedByClient(int bidId, CancellationToken cancellationToken)
+
+
+        public async Task<Result<BidOfContractorDto>> CheckBidIsAcceptedByClientAsync(int bidId, CancellationToken cancellationToken)
         {
             try
             {

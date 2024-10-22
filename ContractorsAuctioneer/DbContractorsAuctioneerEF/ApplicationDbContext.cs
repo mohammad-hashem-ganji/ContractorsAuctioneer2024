@@ -78,6 +78,8 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
         public DbSet<ProjectStatus> ProjectStatuses { get; set; }
         public DbSet<FileAttachment> FileAttachments { get; set; }
         public DbSet<LastLoginHistory> LastLoginHistories{ get; set; }
+        public DbSet<Reject> Rejects{ get; set; }
+
         
     }
 
