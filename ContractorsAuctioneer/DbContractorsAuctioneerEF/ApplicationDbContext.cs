@@ -28,6 +28,7 @@ namespace App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF
             modelBuilder.ApplyConfiguration(new ClientConfiguration());
             modelBuilder.ApplyConfiguration(new FileAttachmentConfiguration());
             modelBuilder.ApplyConfiguration(new LastLoginHistoryConfiguration());
+            modelBuilder.ApplyConfiguration(new RejectConfiguration());
             ApplicationUserConfiguration.SeedUsers(modelBuilder); ;
             
             base.OnModelCreating(modelBuilder);

@@ -84,18 +84,7 @@ namespace ContractorsAuctioneer.Controllers
             return Ok(acceptedBids);
         }
 
-        [Authorize(Roles = "Contractor")]
-        [HttpPut]
-        [Route(nameof(ShowBidsOfContractor))]
-        public async Task<IActionResult> ShowBidsOfContractor(CancellationToken cancellationToken)
-        {
-            var Bids = await _bidOfContractorService.GetBidsOfContractorAsync(cancellationToken);
-            if (!Bids.IsSuccessful)
-            {
-                return NotFound(Bids);
-            }
-            return Ok(Bids);
-        }
+ 
         [Authorize(Roles = "Contractor")]
         [HttpPut]
         [Route(nameof(AcceptBidByContractor))]

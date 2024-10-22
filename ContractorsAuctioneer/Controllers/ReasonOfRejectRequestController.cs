@@ -37,7 +37,9 @@ namespace ContractorsAuctioneer.Controllers
                 return StatusCode(500, addReason);
             }
         }
-
+        [Authorize(Roles = "Client")]
+        [HttpGet]
+        [Route(nameof(GetReasonsOfRejectingRequestByRequestId))]
         public async Task<IActionResult> GetReasonsOfRejectingRequestByRequestId(int requestId, CancellationToken cancellationToken)
         {
             if (requestId <= 0)
@@ -55,7 +57,9 @@ namespace ContractorsAuctioneer.Controllers
 
             return Ok(reasons);
         }
-
+        [Authorize(Roles = "Client")]
+        [HttpGet]
+        [Route(nameof(GetReasonsOfRejectingRequestByClient))]
         public async Task<IActionResult> GetReasonsOfRejectingRequestByClient(CancellationToken cancellationToken)
         {
             var reasons = await _rejectService.GetReasonsOfRejectingRequestByClientAsycn(cancellationToken);
