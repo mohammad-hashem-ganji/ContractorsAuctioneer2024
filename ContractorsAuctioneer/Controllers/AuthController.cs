@@ -96,7 +96,7 @@ namespace ContractorsAuctioneer.Controllers
                 return BadRequest("هنگام اجرا مشکلی پیش آمد!");
             }
 
-            return Ok(token);
+            return Ok(new {Token = token});
         }
     }
 
