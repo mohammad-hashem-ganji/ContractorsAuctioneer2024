@@ -92,7 +92,7 @@ namespace ContractorsAuctioneer.Services
                     RegionId = regionId,
                     ClientId = clientId,
                     CreatedAt = DateTime.Now,
-                    //CreatedBy = user.UserId,
+                    CreatedBy = applicationUserResult.Data.RegisteredUserId,
                     RequestNumber = requestDto.RequestNumber,
                     IsTenderOver = false,
                     IsDeleted = false
@@ -306,8 +306,8 @@ namespace ContractorsAuctioneer.Services
                 }
                 var clientId = user.Data.UserId;
 
-                var appId = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int appUserId);
-                if (!appId)
+                var isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int appUserId);
+                if (!isconverted)
                 {
                     return new Result<RequestDto>().WithValue(null).Failure("خطا");
                 }

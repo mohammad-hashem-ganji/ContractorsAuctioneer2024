@@ -8,7 +8,7 @@ namespace ContractorsAuctioneer.Entites
         public Contractor? Contractor { get; set; }
         public Client? Client { get; set; }
         public List<LastLoginHistory>? LastLoginHistories{ get; set; }
-        public string? FirsName { get; set; }
+        public string? FirstName { get; set; }
         public string? LastName { get; set; }
     }
 }

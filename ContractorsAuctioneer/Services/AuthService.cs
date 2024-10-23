@@ -106,36 +106,36 @@ namespace ContractorsAuctioneer.Services
         }
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
-            
+
+            var expiryMinutes = int.Parse(_configuration["JwtSettings:ExpiryMinutes"]);
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.DateTime),
-                new Claim("FirstName", user.FirsName ?? string.Empty),
+                new Claim("FirstName", user.FirstName ?? string.Empty),
                 new Claim("LastName", user.LastName ?? string.Empty)
             };
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             //var encryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:EncryptionKey"]));
             //var encryptingCredentials = new EncryptingCredentials(encryptionKey, JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(45),
-                SigningCredentials = creds,
-                //EncryptingCredentials = encryptingCredentials,
-                Issuer = _configuration["Jwt:ValidIssuer"],
-                Audience = _configuration["Jwt:ValidAudience"]
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(securityToken);
+  
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(expiryMinutes),
+                signingCredentials: creds
+            );
+
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
     }

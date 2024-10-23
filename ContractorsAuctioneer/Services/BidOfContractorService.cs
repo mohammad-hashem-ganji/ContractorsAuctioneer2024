@@ -218,15 +218,15 @@ namespace ContractorsAuctioneer.Services
             try
             {
 
-                int userId;
-                bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+                int appUserId;
+                bool isconverted = int.TryParse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out appUserId);
                 if (!isconverted)
                 {
                     return new Result<List<BidOfContractorDto>>().WithValue(null).Failure("خطایی .");
                 }
                 var bids = await _context
                 .BidOfContractors
-                .Where(x => x.CreatedBy == userId && x.IsDeleted == false)
+                .Where(x => x.CreatedBy == appUserId && x.IsDeleted == false)
                 .Select(x => new BidOfContractorDto
                 {
                     ContractorId = x.ContractorId,
