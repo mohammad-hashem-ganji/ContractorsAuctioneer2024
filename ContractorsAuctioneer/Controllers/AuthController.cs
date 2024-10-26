@@ -93,7 +93,7 @@ namespace ContractorsAuctioneer.Controllers
             var token = await _verificationService.VerifyCodeAsync(verificationCode, cancellationToken);
             if (token.Data is null)
             {
-                return BadRequest("هنگام اجرا مشکلی پیش آمد!");
+                return Unauthorized();
             }
 
             return Ok(new {Token = token});

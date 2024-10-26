@@ -1,6 +1,7 @@
 ﻿using App.Infra.Db.SqlServer.EF.DbContractorsAuctioneerEF;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Models;
 using ContractorsAuctioneer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,7 @@ using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 
@@ -49,78 +51,56 @@ builder.Services.AddTransient<ILastLoginHistoryService, LastLoginHistoryService>
 // Reject
 builder.Services.AddTransient<IRejectService, RejectService>();
 
-
-
-
-//_____________________________________________________________________________
-
+//------------------------------------------------------------------------
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-#region IdentityConfiguration
+// Add DbContext and Identity
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
-
-
+// Add JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-    };
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            Console.WriteLine("Authentication failed: " + context.Exception.Message);
-            return Task.CompletedTask;
-        },
-        OnTokenValidated = context =>
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+        };
+        options.Events = new JwtBearerEvents
         {
-            //Console.WriteLine("Token validated for user: " + context.Principal.Identity.Name);
-            //return Task.CompletedTask;
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine("Authentication failed: " + context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token validated for user: " + context.Principal.Identity.Name);
+                return Task.CompletedTask;
+            }
+        };
+    });
 
-            //----------------------------
-            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-            var roleClaims = claimsIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value);
-            Console.WriteLine($"Token validated for user: {context.Principal.Identity.Name} with roles: {string.Join(", ", roleClaims)}");
-            return Task.CompletedTask;
-        }
-    };
-});
-
-#endregion
-
-builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
-{
-    b.AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader();
-}));
-
-builder.Services.AddHttpContextAccessor();
-
+// Add this configuration in the ConfigureServices method
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -150,12 +130,17 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+// Seed the database with users and roles
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+
 }
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -167,13 +152,144 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseRouting();
-app.UseCors(policyName: "MyPolicy");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
+
+
+//_____________________________________________________________________________
+
+
+// Add services to the container.
+//builder.Services.AddControllers();
+//builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddSwaggerGen();
+
+
+//#region IdentityConfiguration
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+//builder.Services.AddSingleton(jwtSettings);
+
+//builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>()
+//    .AddEntityFrameworkStores<ApplicationDbContext>()
+//    .AddDefaultTokenProviders();
+
+
+
+
+
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//.AddJwtBearer(options =>
+//{
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        ValidIssuer = jwtSettings.Issuer,
+//        ValidAudience = jwtSettings.Audience,
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+//    };
+//    options.Events = new JwtBearerEvents
+//    {
+//        OnAuthenticationFailed = context =>
+//        {
+//            Console.WriteLine("Authentication failed: " + context.Exception.Message);
+//            Console.WriteLine("Token Log : " + context.Request.Headers["Authorization"].ToString());
+//            return Task.CompletedTask;
+//        },
+//        OnTokenValidated = context =>
+
+//        {
+//            //Console.WriteLine("Token validated for user: " + context.Principal.Identity.Name);
+//            //return Task.CompletedTask;
+
+//            //----------------------------
+//            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+//            var roleClaims = claimsIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value);
+//            Console.WriteLine($"Token validated for user: {context.Principal.Identity.Name} with roles: {string.Join(", ", roleClaims)}");
+//            return Task.CompletedTask;
+//        }
+//    };
+
+//});
+
+//#endregion
+
+//builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
+//{
+//    b.AllowAnyOrigin()
+//     .AllowAnyMethod()
+//     .AllowAnyHeader();
+//}));
+
+//builder.Services.AddHttpContextAccessor();
+
+//builder.Services.AddSwaggerGen(options =>
+//{
+//    options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+//    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+//    {
+//        In = ParameterLocation.Header,
+//        Description = "Please enter JWT with Bearer into field",
+//        Name = "Authorization",
+//        Type = SecuritySchemeType.Http,
+//        BearerFormat = "JWT",
+//        Scheme = "Bearer"
+//    });
+//    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+//    {
+//        {
+//            new OpenApiSecurityScheme
+//            {
+//                Reference = new OpenApiReference
+//                {
+//                    Type = ReferenceType.SecurityScheme,
+//                    Id = "Bearer"
+//                }
+//            },
+//            new string[] { }
+//        }
+//    });
+//});
+
+//var app = builder.Build();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+//    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+//}
+
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI(options =>
+//    {
+//        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+//        options.OAuthClientId("swagger");
+//        options.OAuthAppName("Swagger UI");
+//    });
+//}
+
+////app.UseRouting();
+//app.UseCors(policyName: "MyPolicy");
+//app.UseHttpsRedirection();
+//app.UseAuthentication();
+//app.UseAuthorization();
+//app.MapControllers();
+//app.Run();
 
 
 

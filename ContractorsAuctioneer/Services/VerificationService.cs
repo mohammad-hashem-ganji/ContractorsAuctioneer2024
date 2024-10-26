@@ -61,7 +61,7 @@ namespace ContractorsAuctioneer.Services
             }
             return new Result<GetVerificationCodeDto>().WithValue(null).Failure("کد ساخته نشد");
         }
-        public async Task<Result<UserWithRoleAndTokenDto>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
+        public async Task<Result<string>> VerifyCodeAsync(GetVerificationCodeDto verificationCodeDto, CancellationToken cancellationToken)
         {
 
             var result = await _autService.AuthenticateAsync(verificationCodeDto.Ncode, verificationCodeDto.PhoneNumber);
@@ -75,31 +75,28 @@ namespace ContractorsAuctioneer.Services
                     await _signInManger.SignInAsync(result.Data, isPersistent: false);
 
                     var token = await _autService.GenerateJwtTokenAsync(result.Data);
-                    var userWithRolesAndTokenDto = new UserWithRoleAndTokenDto
-                    {
-                        Token = token,
-                    };
+               
 
                     if (!string.IsNullOrEmpty(token))
                     {
-                        return new Result<UserWithRoleAndTokenDto>()
-                       .WithValue(userWithRolesAndTokenDto)
+                        return new Result<string>()
+                       .WithValue(token)
                        .Success("کد تایید شد");
                     }
 
-                    return new Result<UserWithRoleAndTokenDto>()
+                    return new Result<string>()
                         .WithValue(null)
                         .Failure("خطا!");
 
                 }
 
-                return new Result<UserWithRoleAndTokenDto>()
+                return new Result<string>()
                        .WithValue(null)
-                       .Failure("کد نامعتبر است!");
+                       .Success("کد نامعتبر است!");
             }
-            return new Result<UserWithRoleAndTokenDto>()
+            return new Result<string>()
             .WithValue(null)
-            .Failure("کاربر یافت نشد");
+            .Success("کاربر یافت نشد");
         }
         private async Task SendSmsAsync(string phoneNumber, string message, CancellationToken cancellationToken)
         {

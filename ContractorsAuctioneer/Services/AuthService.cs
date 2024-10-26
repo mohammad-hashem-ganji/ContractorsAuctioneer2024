@@ -2,6 +2,7 @@
 using ContractorsAuctioneer.Dtos;
 using ContractorsAuctioneer.Entites;
 using ContractorsAuctioneer.Interfaces;
+using ContractorsAuctioneer.Models;
 using ContractorsAuctioneer.Results;
 using ContractorsAuctioneer.Utilities.Constants;
 using Microsoft.AspNetCore.Authentication;
@@ -21,17 +22,21 @@ namespace ContractorsAuctioneer.Services
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManger;
         private readonly IConfiguration _configuration;
+        private readonly JwtSettings _jwtSettings;
+
         public AuthService(UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<ApplicationUser> signInManger,
             ApplicationDbContext context,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            JwtSettings jwtSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManger = signInManger;
             _context = context;
             _configuration = configuration;
+            _jwtSettings = jwtSettings;
         }
 
 
@@ -107,7 +112,7 @@ namespace ContractorsAuctioneer.Services
         public async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
         {
 
-            var expiryMinutes = int.Parse(_configuration["JwtSettings:ExpiryMinutes"]);
+            
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
@@ -121,22 +126,23 @@ namespace ContractorsAuctioneer.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            //var encryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:EncryptionKey"]));
-            //var encryptingCredentials = new EncryptingCredentials(encryptionKey, JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
-  
+
             var token = new JwtSecurityToken(
-                issuer: _configuration["JwtSettings:Issuer"],
-                audience: _configuration["JwtSettings:Audience"],
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(expiryMinutes),
+                expires: DateTime.Now.AddMinutes(_jwtSettings.ExpiryMinutes),
                 signingCredentials: creds
             );
 
-            var generatedToken = new JwtSecurityTokenHandler().WriteToken(token);
-            Console.WriteLine($"Generated Token: {generatedToken}");
-            return generatedToken;
+            return new JwtSecurityTokenHandler().WriteToken(token);
+
+ 
+
+
         }
 
     }
