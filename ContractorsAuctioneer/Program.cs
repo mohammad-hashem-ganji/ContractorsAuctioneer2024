@@ -58,6 +58,69 @@ builder.Services.AddTransient<IRejectService, RejectService>();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
+#region IdentityConfiguration
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("Authentication failed: " + context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            //Console.WriteLine("Token validated for user: " + context.Principal.Identity.Name);
+            //return Task.CompletedTask;
+
+            //----------------------------
+            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+            var roleClaims = claimsIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value);
+            Console.WriteLine($"Token validated for user: {context.Principal.Identity.Name} with roles: {string.Join(", ", roleClaims)}");
+            return Task.CompletedTask;
+        }
+    };
+});
+
+#endregion
+
+builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
+{
+    b.AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader();
+}));
+
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -86,68 +149,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-#region IdentityConfiguration
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-})
-.AddRoles<IdentityRole<int>>()
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-    };
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {
-            Console.WriteLine("Authentication failed: " + context.Exception.Message);
-            return Task.CompletedTask;
-        },
-        OnTokenValidated = context =>
-        {
-            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-            var roleClaims = claimsIdentity?.FindAll(ClaimTypes.Role).Select(c => c.Value);
-            Console.WriteLine($"Token validated for user: {context.Principal.Identity.Name} with roles: {string.Join(", ", roleClaims)}");
-            return Task.CompletedTask;
-        }
-    };
-});
-#endregion
-
-builder.Services.AddCors(o => o.AddPolicy(name: "MyPolicy", b =>
-{
-    b.AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader();
-}));
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddAuthorization();
-
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
@@ -165,8 +166,7 @@ if (app.Environment.IsDevelopment())
         options.OAuthAppName("Swagger UI");
     });
 }
-app.UseSwagger();
-app.UseSwaggerUI();
+
 app.UseRouting();
 app.UseCors(policyName: "MyPolicy");
 app.UseHttpsRedirection();

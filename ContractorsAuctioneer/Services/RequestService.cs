@@ -366,7 +366,7 @@ namespace ContractorsAuctioneer.Services
                         }
                         else
                         {
-                            return new Result<RequestDto>().WithValue(requestResult).Failure("درخواست پیدا نشد.");
+                            return new Result<RequestDto>().WithValue(null).Success("درخواست پیدا نشد.");
                         }
                     
 

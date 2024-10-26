@@ -134,8 +134,9 @@ namespace ContractorsAuctioneer.Services
                 signingCredentials: creds
             );
 
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var generatedToken = new JwtSecurityTokenHandler().WriteToken(token);
+            Console.WriteLine($"Generated Token: {generatedToken}");
+            return generatedToken;
         }
 
     }

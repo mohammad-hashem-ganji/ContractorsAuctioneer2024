@@ -47,7 +47,7 @@ namespace ContractorsAuctioneer.Services
                     userName = userName.Substring(0, userName.Length - key.Length);
                 }
                 var token = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultPhoneProvider);
-                await _userManager.UpdateAsync(user);
+                //await _userManager.UpdateAsync(user);
                 var result = new GetVerificationCodeDto
                 {
                     VerificationCode = token,
